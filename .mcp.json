@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "zero-to-receipt": {
+      "command": "go",
+      "args": ["run", "./cmd/z2r-mcp"]
+    }
+  }
+}

@@ -62,14 +62,15 @@ type Client struct {
 
 // CallRecord is the audit trail entry for one API call.
 type CallRecord struct {
-	At             time.Time
-	Method         string
-	Path           string
-	IdempotencyKey string
-	Status         int
-	TraceID        string
-	RequestBody    json.RawMessage
-	ResponseBody   json.RawMessage
+	At             time.Time       `json:"at"`
+	Host           string          `json:"host"`
+	Method         string          `json:"method"`
+	Path           string          `json:"path"`
+	IdempotencyKey string          `json:"idempotency_key,omitempty"`
+	Status         int             `json:"status"`
+	TraceID        string          `json:"trace_id,omitempty"`
+	RequestBody    json.RawMessage `json:"request_body,omitempty"`
+	ResponseBody   json.RawMessage `json:"response_body,omitempty"`
 }
 
 func NewClient(baseURL, key, secret string) *Client {
@@ -166,6 +167,7 @@ func (c *Client) do(ctx context.Context, method, path, scope string, in, out any
 	if c.OnCall != nil {
 		c.OnCall(CallRecord{
 			At:             time.Now(),
+			Host:           c.BaseURL,
 			Method:         method,
 			Path:           path,
 			IdempotencyKey: idem,
