@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +16,9 @@ import (
 )
 
 func main() {
+	baseURL := flag.String("base-url", fiskaly.TestBaseURL, "fiskaly API base URL (TEST or simulator)")
+	flag.Parse()
+
 	envfile.Load(".env")
 	key, secret := os.Getenv("FISKALY_API_KEY"), os.Getenv("FISKALY_API_SECRET")
 	if key == "" || secret == "" {
@@ -24,7 +28,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
-	root := fiskaly.NewClient(fiskaly.TestBaseURL, key, secret)
+	root := fiskaly.NewClient(*baseURL, key, secret)
 	root.OnCall = func(c fiskaly.CallRecord) {
 		fmt.Printf("  %-5s %-42s %d  trace=%s\n", c.Method, c.Path, c.Status, c.TraceID)
 	}
