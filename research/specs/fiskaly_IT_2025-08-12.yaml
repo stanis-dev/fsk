@@ -1,0 +1,1885 @@
+oas_servers_live_url: "live.api.fiskaly.com"
+oas_servers_live_description:  |
+  Live Environment
+
+oas_servers_test_url: "test.api.fiskaly.com"
+oas_servers_test_description: |
+  Test Environment
+
+# oas_servers_development_live_url: ""
+# oas_servers_development_live_description: ""
+# oas_servers_development_test_url: ""
+# oas_servers_development_test_description: ""
+oas_info_x-logo_altText: "fiskaly Logo"
+
+oas_info_title: "fiskaly SIGN IT"
+oas_info_contact_name: "info"
+oas_info_description: |
+  Imprint: [fiskaly.com/impressum](https://fiskaly.com/impressum)
+  <br>
+  Privacy Policy: [fiskaly.com/datenschutz](https://www.fiskaly.com/privacy-policy)
+  <br>
+  Service Details: [fiskaly.com/signit](https://www.fiskaly.com/signit)
+  <br>
+  Developer Guide: [developer.fiskaly.com/sign-it](https://developer.fiskaly.com/sign-it/introduction)
+
+  # Introduction
+  The fiskaly API is a RESTful, cross-country solution designed to support compliance with the relevant legislation. 
+  
+  The fiskaly API is a platform-independent and software-only solution.
+  Since this is a cloud-based API, the only requirement to integrate and use this fiskaly API is a stable Internet connection. The API ...
+
+  - has resource-oriented URLs,
+
+  - accepts [JSON](https://wikipedia.org/wiki/JSON)-encoded request bodies,
+
+  - returns [JSON](https://wikipedia.org/wiki/JSON)-encoded responses,
+
+  - uses standard HTTP status codes and verbs, and
+
+  - is designed to be easily integrated into any system.
+
+  ## Italy specifications
+
+  This API documentation specifically covers the Italian module, SIGN IT, that ensures compliance with Italian legislation for the telematic transmission of daily transactions. Compliance can be achieved through two different options: **SIGN IT** in its *lite* version or in its *full* version:
+
+  - **SIGN IT** in its *lite* version connects your PoS with the Revenue Agencys web portal for the issuance of Online Commercial Documents, a [legally valid alternative](https://www.agenziaentrate.gov.it/portale/gli-strumenti-a-disposizione) to the telematic registers to issue compliant receipts.
+  - **SIGN IT** in its *full* version will comply with the new generation of software fiscalization as described in article 24 of D lgs 1 - 2024.
+
+  **SIGN IT** provides a test environment for integration and testing purposes as well as a dedicated live environment for performing the real-time sending of official transactions (commercial documents) to the Italian "Online commercial document" web procedure, present in the "Invoices and Fees" portal of the Revenue Agency. In order to access the live environment, please contact our [sales team](mailto:sales@fiskaly.com).  
+
+  # Background
+
+  **SIGN IT** implements legal requirements and technical guidelines for fiscalization compliance of PoS softwares in Italy.
+
+  **SIGN IT** in its *lite* version is based on the following Italian regulation:
+  - Legislative Decree no. 127/2015 for the "Telematic transmission of VAT operations and control of sales of goods carried out through automatic dispensers" for the technological tools that guarantee the inalterability and security of the data, mandatory since 2021 for all taxpayers issuing commercial documents.
+
+  **SIGN IT** in its *full* version is based on the following Italian regulation:
+  - [Article 24 of the Legislative Decree published on January 8, 2024](https://www.gazzettaufficiale.it/eli/id/2024/01/12/24G00007/SG). The electronic storage of the total amount and telematic transmission of daily fees may be performed by means of software solutions that guarantee the security and inalterability of the data. These solutions must be able to enable the full integration and interaction with electronic payment processes, in order to simplify and reduce the administrative operations for taxpayers.
+
+  # Service
+
+  Our fiskaly API service offers a compliance-as-a-service solution implementation that records business transaction, technical events, and taxpayer interactions in an inalterable and cryptographically secure way.
+
+  ## Italy specifications
+
+  The fiskaly SIGN IT [service](https://www.fiskaly.com/signit) provides a 100% legally compliant implementation in order to transmit the information from each transaction to the Revenue Agency in real time.
+
+  ## Guides
+
+  To ensure a smooth implementation of our fiskaly API, we highly recommend that you first have a look at our [integration guides](https://developer.fiskaly.com/) where you will find an explanation of how to create your organizational structure and API keys, as well as a first overview of our fiskaly API endpoints.
+
+  ## Changes
+
+  The up-to-date information below is organized in a change log format.
+
+  ### <a name="2026-01-26"></a>[2026-01-26](#2026-01-26) Record transmission
+
+  * More explicit error returned when submitting `entries` with mixed or wrong `number` for a `TRANSACTION::RECEIPT`
+  * Improved description of `fiscalization.tax_id_number` and `fiscalization.credentials.tax_id_number`
+  * Allow correction of receipt belonging to a different system
+  * Record submission general latency and reliability improvements
+  * Improved error message reported under the record `logs` property
+  * Support authentication for more `tax_id` types ending with `-000` suffix
+  * Reject receipts with negative amounts in test environment
+
+  ### <a name="2025-12-30"></a>[2025-12-30](#2025-12-30) Improved Resource Checks
+
+  * provided improved resource constraint checks for all update and retrieve endpoint operations
+  * provided new `X-Trace-Identifier` in the OAS schema
+
+  ### <a name="2025-12-23"></a>[2025-12-23](#2025-12-23) Entity, System, and Records
+
+  * provided new `X-Trace-Identifier` for all HTTP service responses to support customer success communication
+  * provided `entity` property to `updateSystem` to alter the entity connection of `System::FISCAL_DEVICE` resources in mode `SUSPENDED`
+  * refined `ComplianceData` string length to maximum 128 characters
+  * provided a new `TRANSACTION::ABORT` record schema to the `createRecord` endpoint to gracefully abort started sale (`INTENTION::TRANSACTION` records) operations
+
+  ### <a name="2025-12-15"></a>[2025-12-15](#2025-12-15) File Streaming
+
+  * refined `GET /files/<path>` (`streamFile`) functionality to download an arbitrary path
+  * enabled downloading of signed integrity check JWS file from a dedicated automatic exported and archived ZIP file
+
+  ### <a name="2025-12-12"></a>[2025-12-12](#2025-12-12) Archiving and Files
+
+  * enabled automatic archiving support for French `System::FISCAL_DEVICE` resources based on `CLOSING::DAILY` computations
+  * enabled `GET /files` (`listFiles`) endpoint to search for automatic exported and archived ZIP files
+  * added pagination query parameters to `listFiles` endpoint
+  * enabled `GET /files/<id>.zip` (`streamFile`) endpoint to download a dedicated automatic exported and archived ZIP file
+  * improved `createToken` endpoint rate limit behavior
+
+  ### <a name="2025-12-08"></a>[2025-12-08](#2025-12-08) Offline Record Replay
+
+  * enabled `INTENTION::REPLAY` record functionality for offline-based recording support for France
+  * updated `createToken` endpoint rate limit behavior
+  * added support for new role selection flows in the AdE portal for Italian `FISCONLINE` credentials
+
+  ### <a name="2025-12-01"></a>[2025-12-01](#2025-12-01) Record Export and Files 
+
+  * enabled `INTENTION::EXPORT` record creation support to generate dedicated system-based exports of records produced in a given time range with optional filter mechanism
+  * added `INTENTION::REPLAY` record OAS schema design for offline-based recording support
+  * added `streamFile` endpoint to download ZIP archive files from generated exports
+  * added `listFiles` endpoint OAS design for listing and searching of file resources
+  * added `data-artifact` query to fetch on demand data artifact information of a record
+  * added `data-integrity` query to fetch on demand data integrity information of a record
+  * provided `data` property for all `RecordResource` to provide data artifact and data integrity information of given record export ZIP archive and its current location `SERVICE` or `ARCHIVE`
+
+  ### <a name="2025-11-27"></a>[2025-11-27](#2025-11-27) Record Integrity and Closing
+
+  * enabled lower case characters for Italian tax identification number (codice fiscale)
+  * enabled record file signed integrity check based on JSON Web Signature (JWS) information
+  * enabled automatic closing functionality for French `System::FISCAL_DEVICE` resources
+  * refined `RecordFileIntegrity` schema to provide dedicated `application/jose` MIME type
+  * added `INTENTION::CLOSING`, `CLOSING::DAILY`, `CLOSING::MONTHLY`, and `CLOSING::YEARLY` system types
+  * added `INFOCERT` as new French `fiscalization.credentials.provider`
+  * added `429` error response for too many requests to all endpoints
+  * added `used_in` connection on intention record to retrieve outcome records
+  
+  ### <a name="2025-09-29"></a>[2025-09-29](#2025-09-29) Entities and Records
+
+  * added `fiscalization.fiscal_year_date` property in `POST /entities` and `PATCH /entities` for `FR` entities
+  * provided journaling support for record creation of `INTENTION` type `EVENT` and , `DUPLICATE`
+  * provided journaling support for record creation of `TRANSACTION` type `DOWN_PAYMENT`, `PROOF_OF_PAYMENT`, `DRAFT_RECEIPT`, `PRO_FORMA_INVOICE`, `INVOICE`, and `ENRICHMENT`
+
+  ### <a name="2025-09-08"></a>[2025-09-08](#2025-09-08) Entity Fiscalization
+
+  * enabled configuration of `fiscalization.credentials.tax_id_number` in `POST /entities` and `PATCH /entities`
+
+  ### <a name="2025-09-01"></a>[2025-09-01](#2025-09-01) Record Compliance Artifact
+
+  * added record query `compliance-artifact` to obtain an existing compliance artifact
+  * enabled production `LIVE` endpoint
+
+  ### <a name="2025-08-12"></a>[2025-08-12](#2025-08-12) Entities & Records
+
+  * enabled `FR`-based entity `fiscalization` configuration support
+  * added record `TRANSACTION` type `DRAFT_RECEIPT` API schema
+  * added record `TRANSACTION` type `INVOICE` API schema
+  * added record `TRANSACTION` type `PRO_FORMA_INVOICE` API schema
+  * added record `TRANSACTION` type `ENRICHMENT` API schema
+  * added record `TRANSACTION` type `PROOF_OF_PAYMENT` API schema
+  * added record `TRANSACTION` type `DOWN_PAYMENT` API schema
+  * added record `INTENTION` type `EVENT` API schema
+  * added record `INTENTION` type `EXPORT` API schema
+  * added record `INTENTION` type `DUPLICATE` API schema
+  * added record query `file-artifact` to obtain the signed record of the journal
+  * added record query `operation` to obtain the raw record `operation` information
+
+  ## Versioning
+
+  <!-- {{VERSION_DEBUG}} -->
+
+  Our fiskaly API follows [Calendar (Date-based) Versioning](https://calver.org/).
+  The version number has a pattern of `YYYY-MM-DD` whereas the `YYYY` stands for the year, `MM` stands for the month, and `DD` stands for the day.
+
+  The latest version is: `X-Api-Version: 2025-08-12`.
+
+  | Version | Supported Country |
+  | --- | --- |
+  | `X-Api-Version: 2025-08-12` | SIGN IT 🇮🇹, SIGN FR 🇫🇷 |
+  | `X-Api-Version: 2024-10-31` | SIGN IT 🇮🇹 |
+
+  ## Idempotency
+
+  Idempotency ensures that repeated identical requests produce the same result, even if they are retried due to network issues, timeouts, or other transient problems.
+  This [idempotency](https://en.wikipedia.org/wiki/Idempotence) behavior prevents duplicate resource creation or unintended side effects in APIs that accept `POST` (creation) or `PATCH` (alteration) requests.
+
+  The `X-Idempotency-Key` HTTP header in this API follows the principles of the Internet Engineering Task Force (IETF) [idempotency specification](https://www.ietf.org/archive/id/draft-ietf-httpapi-idempotency-key-header-05.txt) and plays a vital role in implementing idempotent requests.
+  API clients use this header to uniquely identify requests, enabling the API to track and manage their outcomes across retries.
+
+  The value of the HTTP header is a [Universally Unique Identifier (UUID)](https://en.wikipedia.org/wiki/Universally_unique_identifier) -- version 3 or version 4 -- key provided by the client for each idempotent request.
+  This key ensures that retries of the same request are recognized by the server.
+
+  This key is **required for** all `POST` and `PATCH` requests.
+  This key is **ignored for** all other HTTP request methods like `GET`, `PUT`, `DELETE` etc. since these are inherently idempotent by HTTP standards.
+
+  Exception: The `POST /tokens` endpoint currently does not react on the provided `X-Idempotency-Key` HTTP header.
+  This exception will be resolved by upcoming improvements to the API.
+
+  The HTTP header format is defined as: `X-Idempotency-Key: <key>`.
+  The `<key>` value shall be a valid and randomized `UUIDv4` string.
+  Furthermore, this key shall be unique for each logically distinct request.
+
+  The API service keeps track of the `X-Idempotency-Key` (key) and the associated request status, payload, and response (value) in a persistence cache.
+  By default the stored idempotency key-value pairs expire after 24 hours (1 day) after their creation timestamp.
+  If another request reaches the API service and there is already the same `X-Idempotency-Key` available, where the request method and payload are also equal to the cached value, the API service returns the cached response.
+
+  If the API service returns:
+  - `422 Unprocessable Entity`: Verify that the request headers and payload match exactly between retries. Ensure the idempotency key is not reused for unrelated operations.
+  - `409 Conflict`: The request is already being processed. Wait before retrying and ensure there are no concurrent retries with the same idempotency key.
+
+  # Quick Start
+
+  For a quick first demo, you may use Postman.  
+  We prepared a Postman collection that allows you to step through the most important functions of this API.
+
+  1. Download the [Postman](https://www.getpostman.com/downloads/) application.
+
+  2. Create an **API Key** and **API Secret** via the [fiskaly dashboard](https://dashboard.fiskaly.com).
+
+  3. Download your **fiskaly SIGN IT** Postman environment JSON-based configuration file: <a href="/static/postman/fiskaly_sign_it_2025-08-12_postman_environment.json" download>Download Postman Environment</a>
+
+  4. Download the **fiskaly SIGN IT** Postman collection JSON-based configuration file: <a href="/static/postman/fiskaly_sign_it_2025-08-12_postman_collection.json" download>Download Postman Collection</a>
+
+  5. Start Postman and import the downloaded Postman environment and collection files.
+
+  6. Update the **API Key** and **API Secret** values in the Postman environment to match your credentials.
+
+  7. Select the **fiskaly SIGN IT** Postman environment and run the collection.
+
+
+  # FAQs
+
+  We have a dedicated FAQ page for each country the fiskaly API service solution can be used and integrated:
+  [SIGN IT 🇮🇹](https://support.fiskaly.com/hc/en-001/categories/14274771396636)
+  and
+  [SIGN FR 🇫🇷](https://support.fiskaly.com/)
+
+oas_tags_management_name: "Management"
+
+oas_tags_operation_name: "Operation"
+
+#
+#
+# Token
+#
+
+oas_tags_tokens_name: "Tokens"
+oas_tags_tokens_description: |
+  In order to access the fiskaly API, a valid **JSON Web Token (JWT)** is required.
+  The information carried inside the **JWT** is used for authentication and authorization of every request towards the fiskaly API.
+  API requests without a **JWT** present will fail with an unauthorized access HTTP error `401`.xf
+
+  A `Token` resource can be created by using the `key` and `secret` credentials information of an already existing `Subject::API_KEY`.
+  The API key `secret` will be generated from the fiskaly API and provided only in the response of the `POST /tokens` request.
+
+  Each `Token` resource has its own unique `id` in form of a [UUIDv4](https://datatracker.ietf.org/doc/html/rfc4122), the **JWT** `bearer` string, an `issued_at` timestamp, and an `expires_at` timestamp.
+  Additionally, the `token` resource provides the information to which `Asset` and which `Subject` the token belongs to.
+
+  The **JWT** `bearer` string must be sent with every following request in the HTTP `Authorization` header field using the `Bearer` [authentication scheme](https://datatracker.ietf.org/doc/html/rfc6750#section-2.1).
+
+  The fiskaly API processes only `https` based requests.
+  Plain `http` based requests are redirected to `https` by the fiskaly service.
+
+oas_paths_tokens_create_summary: "Create a token"
+oas_paths_tokens_create_description: |
+  This endpoint is used to create a `Token` resource.
+  Currently, the fiskaly API supports an `Subject::API_KEY` based `Token` creation which returns the [JWT](#tag/Tokens) `bearer` HTTP authentication string that is valid until a given `expires_at` timestamp.
+
+  Recreations of the new `Token` resource is required only then if the received [JWT](#tag/Tokens) `bearer` string has expired.
+
+#
+#
+# Subjects
+#
+
+oas_tags_subjects_name: "Subjects"
+oas_tags_subjects_description: |
+  A `Subject` represents an authenticated identity with defined access rights.
+
+  Currently, the fiskaly API supports `Subject` resources of type `API_KEY` (`Subject::API_KEY`).
+  The support for handling `Subject` resources of type `USER` (`Subject::USER`) is available soon.
+
+  The `X-Scope-Identifier` HTTP header establishes the link between the `Subject` and the corresponding `Asset` resource.
+
+oas_paths_subjects_list_summary: "List subjects"
+oas_paths_subjects_list_description: |
+  A `Subject` represents an authenticated identity with defined access rights.
+
+  Currently, the fiskaly API supports `Subject` resources of type `API_KEY` (`Subject::API_KEY`).
+  The support for handling `Subject` resources of type `USER` (`Subject::USER`) is available soon.
+
+  The `X-Scope-Identifier` HTTP header establishes the link between the `Subject` and the corresponding `Asset` resource.
+
+oas_paths_subjects_create_summary: "Create a subject"
+oas_paths_subjects_create_description: |
+  A `Subject` represents an authenticated identity with defined access rights.
+
+  Currently, the fiskaly API supports `Subject` resources of type `API_KEY` (`Subject::API_KEY`).
+  The support for handling `Subject` resources of type `USER` (`Subject::USER`) is available soon.
+
+  The `X-Scope-Identifier` HTTP header establishes the link between the `Subject` and the corresponding `Asset` resource.
+
+oas_paths_subjects_update_summary: |
+  Update a subject
+
+oas_paths_subjects_update_description: |
+  This endpoint is used to update a `Subject` resource.
+
+oas_paths_subjects_retrieve_summary: |
+  Retrieve a subject
+
+oas_paths_subjects_retrieve_description: |
+  This endpoint is used to retrieve a `Subject` resource.
+
+#
+#
+# Assets
+#
+
+oas_tags_assets_name: |
+  Assets
+
+oas_tags_assets_description: |
+  `Asset` resources are used to represent a management structure (organizational hierarchy):
+
+  - `TENANT` represents the PoS provider or a retailer that operates its own PoS system. It is the top-level organization in the structure. This type represents the first created organization via the fiskaly Dashboard and cannot be created via the API.
+  - `GROUP` an optional intermediate layer used to group multiple `Asset` resources of type UNIT.
+  - `UNIT` represents a merchant.
+
+oas_paths_assets_list_summary: |
+  List assets
+
+oas_paths_assets_list_description: |
+  This endpoint is used to create `Asset` resources to represent and manage organizational structures.
+
+oas_paths_assets_create_summary: "Create an asset"
+oas_paths_assets_create_description: |
+  This endpoint is used to create `Asset` resources to represent and manage organizational structures.
+
+oas_paths_assets_update_summary: "Update an asset"
+oas_paths_assets_update_description: |
+    This endpoint is used to update a `Asset` resource.
+
+oas_paths_assets_retrieve_summary: "Retrieve an asset"
+oas_paths_assets_retrieve_description: |
+    This endpoint is used to retrieve a `Asset` resource.
+
+#
+#
+# Entities
+#
+
+oas_tags_entities_name: "Entities"
+oas_tags_entities_description: |
+  An `Entity` resource represents a particular `Asset::UNIT` with the relevant legal entity (taxpayer) data.
+  A legal entity consists of two main parts: taxpayer information and country-specific fiscalization details.
+
+  The lifecycle of an `Entity` resource is depicted in the following `state` and `mode` transitions:
+
+  ![](/static/docs/entity_system_state_mode_en_it.png)
+
+oas_paths_entities_list_summary: "List entities"
+oas_paths_entities_list_description:  |
+  This endpoint is used to list `Entity` resources.
+
+oas_paths_entities_create_summary: "Create an entity"
+oas_paths_entities_create_description: |
+  This endpoint is used create `Entity` resources.
+  Currently the fiskaly API supports the following creation use cases:
+  - legal entities (taxpayer) as a `COMPANY` (for business entities) or as an `INDIVIDUAL` (for self-employed) which require the details of the entity legal name, legal address, and fiscalization-related data such as the VAT number, tax identification number, and credentials for accessing the Revenue Agency portal.
+  - `LOCATION` entities represent the physical address of the business premises or establishment of a given legal entity -- `COMPANY` or `INDIVIDUAL`
+
+  When an `Entity` is created, its initial `state` is automatically set to `ACQUIRED`.
+  In order to make it fully operational, the `state` must be updated to `COMMISSIONED` using the [updateEntity](#tag/Entities/operation/updateEntity) endpoint.
+
+oas_paths_entities_update_summary: "Update an entity"
+oas_paths_entities_update_description: |
+  This endpoint is used to update an `Entity` resource.
+
+  Please note that, for certain use cases, particular state and mode transitions are required.
+  Please refer to our [Guide](https://developer.fiskaly.com/sign-it/entity_system_states_and_modes) for examples.
+
+oas_paths_entities_retrieve_summary: "Retrieve an entity"
+oas_paths_entities_retrieve_description: |
+  This endpoint is used to retrieve an `Entity` resource.
+
+#
+#
+# Systems
+#
+
+oas_tags_systems_name: "Systems"
+oas_tags_systems_description: |
+  A `System` represents an Electronic Recording System (ERS), such as a Point of Sale (PoS) or any other system capable of performing business operations.
+
+  The lifecycle of a `System` resource is depicted in the following `state` and `mode` transitions:
+
+  ![](/static/docs/entity_system_state_mode_en_it.png)
+
+oas_paths_systems_list_summary: "List systems"
+oas_paths_systems_list_description: |
+  This endpoint is used to list `System` resources.
+
+oas_paths_systems_create_summary: "Create a system"
+oas_paths_systems_create_description: |
+  This endpoint is used to create `System` resources.
+
+oas_paths_systems_update_summary: "Update a system"
+oas_paths_systems_update_description: |
+  This endpoint is used to update `System` resources.
+
+  Please note that, for certain use cases, particular state and mode transitions are required.
+  Please refer to our [Guide](https://developer.fiskaly.com/sign-it/entity_system_states_and_modes) for examples.
+
+oas_paths_systems_retrieve_summary: "Retrieve a system"
+oas_paths_systems_retrieve_description: |
+  This endpoint is used to retrieve `System` resources.
+
+#
+#
+# Records
+#
+
+oas_tags_records_name: "Records"
+oas_tags_records_description: |
+  A `Record` represents a persisted and signed artifact of any kind interaction with a given `System` resource that is carried out through the fiskaly API.
+
+  ![](https://developer.fiskaly.com/static/docs/record_state_mode_en.png)
+
+oas_paths_records_list_summary: "List records"
+oas_paths_records_list_description: |
+  This endpoint is used to list `Record` resources.
+
+oas_paths_records_create_summary: "Create a record"
+oas_paths_records_create_description: |
+  This endpoint is used to create `Record` resources.
+
+  Every interaction with a `System` resource requires an initial `Record` creation of type `INTENTION` (`Record::INTENTION`).
+
+  Currently the fiskaly API supports only an `INTENTION` of a `TRANSACTION` which reflects the interaction with a `System` resource right at the beginning of a purchase process.
+  Directly after the payment process, the transaction can be concluded with a subsequent `Record` creation call providing the `TRANSACTION` information, containing details of a given business activity which links to the previous `Record::INTENTION::TRANSACTION`.
+
+oas_paths_records_update_summary: "Update a record"
+oas_paths_records_update_description: |
+  This endpoint is used to update `Record` resources.
+
+  Please note that currently all state and mode transitions are carried out by the fiskaly API service itself internally for `Record` resources.
+  Please refer to our [Guide](https://developer.fiskaly.com/sign-it/record_states_and_modes).
+
+oas_paths_records_retrieve_summary: "Retrieve a record"
+oas_paths_records_retrieve_description: |
+  This endpoint is used to retrieve `Record` resources.
+
+#
+#
+# Files
+#
+
+oas_tags_files_name: "Files"
+oas_tags_files_description: |
+  A `File` represents a save file resource.
+
+oas_paths_files_list_summary: "List files"
+oas_paths_files_list_description: |
+  This endpoint is used to list `File` resources.
+
+oas_paths_files_stream_summary: "Stream a file"
+oas_paths_files_stream_description: |
+  This endpoint is used to stream a `File` content.
+
+
+#
+#
+# Parameters
+#
+
+oas_components_parameters_api_version_description: |
+  The API version, see [versioning](#section/Service/Versioning).
+
+oas_components_parameters_idempotency_key_description: |
+  The idempotency key, see [idempotency](#section/Service/Idempotency).
+
+oas_components_parameters_replay_remaining_description: |
+  Not supported in 🇮🇹 Italy - Current number of records left (only relevant for offline scenario)
+
+oas_components_parameters_replay_hash_description: |
+  Not supported in 🇮🇹 Italy - The hash stored during offline phase in base64 format (only relevant for offline scenario)
+
+oas_components_parameters_scope_identifier_description: |
+  The `X-Scope-Identifier` header specifies the asset scope in which the request is executed. This ensures that the operation is linked to the correct asset within the asset hierarchy.
+
+oas_components_parameters_subject_identifier_description: |
+  Subject identifier
+
+oas_components_parameters_asset_identifier_description: |
+  Asset identifier
+
+oas_components_parameters_entity_identifier_description: |
+  Entity identifier
+
+oas_components_parameters_system_identifier_description: |
+  System identifier
+
+oas_components_parameters_record_identifier_description: |
+  Record identifier
+
+oas_components_parameters_pagination_limit_query_description: |
+  Represents the pagination limit of the results set of a listing endpoint.
+
+oas_components_parameters_pagination_token_query_description: |
+  Represents the pagination token, which is used as an index pointer to the next page relative to the current page in Base64 encoding.  
+
+oas_components_parameters_entity_identifier_query_description: |
+  Entity identifier
+
+oas_components_parameters_system_identifier_query_description: |
+  System identifier
+
+# oas_components_parameters_data_record_query_description: ""
+# oas_components_parameters_data_artifact_query_description: ""
+
+#
+#
+# Responses
+#
+
+oas_components_responses_token_response_description: |
+  Token Response
+
+oas_components_responses_subjects_response_description: |
+  Subjects Response
+
+oas_components_responses_subject_response_description: |
+  Subject Response
+
+oas_components_responses_assets_response_description: |
+  Assets Response
+
+oas_components_responses_asset_response_description: |
+  Asset Response
+
+oas_components_responses_entities_response_description: |
+  Entities Response
+
+oas_components_responses_entity_response_description: |
+  Entity Response
+
+oas_components_responses_systems_response_description: |
+  Systems Response
+
+oas_components_responses_system_response_description: |
+  System Response
+
+oas_components_responses_records_response_description: |
+  Records Response
+
+oas_components_responses_record_response_description: |
+  Record Response
+
+oas_components_responses_bad_request_response_description: |
+  Bad Request
+
+oas_components_responses_unauthorized_access_response_description: |
+  Unauthorized Access
+
+oas_components_responses_resource_not_found_response_description: |
+  Resource Not Found
+
+oas_components_responses_resource_conflict_response_description: |
+  Resource Conflict
+
+oas_components_responses_unprocessable_content_response_description: |
+  Unprocessable Content
+
+oas_components_responses_method_not_allowed_response_description: |
+  Method Not Allowed
+
+oas_components_responses_too_many_requests_response_description: |
+  Too Many Requests
+
+oas_components_responses_internal_server_error_response_description: |
+  Internal Server Error
+
+oas_components_responses_not_implemented_response_description: |
+  Not Implemented
+
+
+#
+#
+# Schemas
+#
+
+# oas_components_schemas_token_create_request_description: ""
+# oas_components_schemas_token_resource_description: ""
+
+oas_components_schemas_token_createContent_description: |
+  Defines the structure required to create the token.
+
+oas_components_schemas_token_description: |
+  Defines the structure returned in the response when creating the token.
+
+oas_components_schemas_token_authentication_description: |
+  Token authentication
+
+# oas_components_schemas_json_web_token_authentication_description: ""
+
+oas_components_schemas_token_bearer_description: |
+  Token bearer
+
+oas_components_schemas_token_expiration_timestamp_description: |
+  Token expiration timestamp
+
+oas_components_schemas_token_issuing_timestamp_description: |
+  Token issuing timestamp
+
+
+# oas_components_schemas_api_key_token_description: ""
+# oas_components_schemas_subject_create_request_description: ""
+# oas_components_schemas_subject_update_request_description: ""
+# oas_components_schemas_subject_resource_description: ""
+# oas_components_schemas_subject_resources_description: ""
+
+oas_components_schemas_subject_create_content_description: |
+  Defines the structure required to create the token.
+
+oas_components_schemas_subject_update_content_description: |
+  Defines the structure required to update the token.
+
+oas_components_schemas_subject_description: |
+  Defines the structure returned in the response when creating the Subject
+
+oas_components_schemas_subject_state_description: |
+  Subject state
+
+# oas_components_schemas_subject_groups_description: ""
+# oas_components_schemas_subject_group_description: ""
+
+oas_components_schemas_subject_connection_description: |
+  Connection to an already created subject
+
+oas_components_schemas_subject_credentials_description: |
+  Subject credentials
+
+oas_components_schemas_subject_name_description: |
+  API Key name
+
+oas_components_schemas_subject_email_description: |
+  Email address
+
+oas_components_schemas_subject_key_description: |
+  Subject key
+
+oas_components_schemas_subject_secret_description: |
+  Subject secret
+
+# oas_components_schemas_user_subject_description: ""
+# oas_components_schemas_group_subject_description: ""
+# oas_components_schemas_api_key_subject_description: ""
+
+oas_components_schemas_api_key_subject_name_description: |
+  API Key name
+
+# oas_components_schemas_asset_create_request_description: ""
+# oas_components_schemas_asset_update_request_description: ""
+# oas_components_schemas_asset_resource_description: ""
+# oas_components_schemas_asset_resources_description: ""
+
+oas_components_schemas_asset_create_content_description: |
+  Defines the structure required to create an Asset.
+
+oas_components_schemas_asset_update_content_description: |
+  Defines the structure required to update an Asset.
+
+oas_components_schemas_asset_description: |
+  Defines the structure of an asset returned in the response.
+
+oas_components_schemas_asset_name_description: |
+  Asset name
+
+oas_components_schemas_asset_state_description: |
+  Asset state
+
+oas_components_schemas_asset_connection_description: |
+  Connection to an already created asset.
+
+oas_components_schemas_tenant_asset_description: |
+  Asset of type TENANT representing the top level organization.
+
+oas_components_schemas_group_asset_description: |
+  Asset of type GROUP representing an optional grouping layer.
+
+oas_components_schemas_unit_asset_description: |
+  Asset of type UNIT representing a merchant
+
+oas_components_schemas_entity_create_request_description: |
+  Request body schema to create an Entity
+
+oas_components_schemas_entity_update_request_description: |
+  Request body schema to update an Entity
+
+oas_components_schemas_entity_resource_description: |
+  Schema of a single Entity resource.
+
+oas_components_schemas_entity_resources_description: |
+  Collection of Entity resources returned by list endpoints.
+
+oas_components_schemas_entity_create_content_description: |
+  Defines the structure required to create an Entity.
+
+oas_components_schemas_entity_update_content_description: |
+  Defines the structure required to update an Entity.
+
+oas_components_schemas_entity_description: |
+  Entity
+
+oas_components_schemas_entity_state_description: |
+  Entity state
+
+oas_components_schemas_entity_mode_description: |
+  Entity mode
+
+oas_components_schemas_entity_country_description: |
+  Country where the entity is registered
+
+oas_components_schemas_entity_vat_number_description: |
+  VAT Identification Number of the entity
+
+oas_components_schemas_entity_systems_description: |
+  Systems linked to this Entity.
+
+oas_components_schemas_entity_system_description: |
+  A System linked to the Entity.
+
+oas_components_schemas_entity_system_type_description: |
+  Type of the linked System
+
+oas_components_schemas_entity_system_description_description: |
+  Description of the linked System
+
+# oas_components_schemas_company_entity_description: ""
+
+oas_components_schemas_company_name_description: |
+  Company name
+
+oas_components_schemas_legal_name_description: |
+  Legal name of the company
+
+oas_components_schemas_trade_name_description: |
+  Trade name of the company
+
+oas_components_schemas_company_address_description: |
+  Legal address of the company
+
+oas_components_schemas_legal_address_description: |
+  Recipient address data
+
+# oas_components_schemas_individual_entity_description: ""
+
+oas_components_schemas_individual_name_description: |
+  Individual entity name
+
+oas_components_schemas_individual_address_description: |
+  Legal address of an individual entity
+
+# oas_components_schemas_natural_entity_description: ""
+
+oas_components_schemas_natural_name_description: |
+  Natural name or legal name
+
+oas_components_schemas_natural_address_description: |
+  Recipient address data
+
+oas_components_schemas_date_of_birth_description: |
+  Date of birth
+
+# oas_components_schemas_location_entity_description: ""
+
+oas_components_schemas_entity_connection_description: |
+  Connection to an already created entity.
+
+oas_components_schemas_company_fiscalization_description: |
+  Country-specific fiscalization information for a company. <br>
+  🇮🇹 Use the type `IT` for Italy.
+
+oas_components_schemas_individual_fiscalization_description: |
+  Country-specific fiscalization information for an individual. <br>
+  🇮🇹 Use the type `IT` for Italy.
+
+# oas_components_schemas_german_company_fiscalization_description: ""
+# oas_components_schemas_german_individual_fiscalization_description: ""
+# oas_components_schemas_german_tax_identification_number_description: ""
+# oas_components_schemas_german_vat_identification_number_description: ""
+# oas_components_schemas_german_credentials_description: ""
+# oas_components_schemas_german_elster_credentials_description: ""
+# oas_components_schemas_german_elster_tax_number_description: ""
+# oas_components_schemas_spanish_fiscalization_description: ""
+# oas_components_schemas_spanish_tax_identification_number_description: ""
+# oas_components_schemas_spanish_territory_description: ""
+# oas_components_schemas_italian_fiscalization_description: ""
+
+oas_components_schemas_italian_tax_identification_number_description: |
+  Italian Tax code (“Codice fiscale”) of the business registered with the Italian Revenue Agency (Agenzia delle Entrate).
+
+  For COMPANY entities, it consists of 11 numeric digits. <br>
+  For INDIVIDUAL entities, it consists of 16 alphanumeric characters.
+
+oas_components_schemas_italian_vat_identification_number_description: |
+  Italian VAT identification number (VATIN). Partita IVA. 11-digit code that uniquely identifies all operators who carry out economic activities in Italy.
+
+oas_components_schemas_italian_credentials_description: |
+  Italian fiscalization credentials
+
+oas_components_schemas_italian_fisconline_credentials_description: |
+  FISCONLINE Credential
+
+oas_components_schemas_italian_fisconline_personal_identification_number_description: |
+  Italian Fisconline personal identification number
+
+oas_components_schemas_italian_fisconline_password_description: |
+  Italian Fisconline password
+
+oas_components_schemas_italian_personal_tax_identification_number_description: |
+  Italian Tax code (“Codice fiscale”) of the natural person authorised to access the Agenzia delle Entrate (AdE) portal using Fisconline credentials and to operate on behalf of the business. It consists of 16 alphanumeric characters. 
+
+  **Recommended**: Provide this field explicitly. If omitted, it will be automatically populated from `fiscalization.tax_id_number`. However, this fallback value may not always match the specific requirements of this field and can cause issues during Entity commissioning and/or Record submission. 
+
+oas_components_schemas_austrian_fiscalization_description: |
+  Country-specific fiscalization information for Austria.
+
+oas_components_schemas_austrian_tax_identification_number_description: |
+  Austrian Tax Identification Number (TIN).
+
+oas_components_schemas_austrian_vat_identification_number_description: |
+  Austrian VAT Identification Number (UID).
+
+oas_components_schemas_austrian_financeonline_credentials_description: |
+  Credentials for [Austria’s FinanzOnline (FON) portal](https://finanzonline.bmf.gv.at/fon/), used for the Cash Register Web Service User ("Registrierkassen-Webservice-Benutzer"). Consist of participant identification (Teilnehmer-ID), user identification (Benutzer-ID), and PIN, provided by the taxpayer.
+
+# oas_components_schemas_austrian_financeonline_credentials_description: ""
+
+oas_components_schemas_austrian_financeonline_participant_identification_description: |
+  The "Teilnehmer-Identifikation" part of the [FinanzOnline](https://finanzonline.bmf.gv.at/fon/) Cash Register Web Service User ("Registrierkassen-Webservice-Benutzer") credential triplet to be provided by the taxpayer.
+
+oas_components_schemas_austrian_financeonline_user_identification_description: |
+  The "Benutzer-Identifikation" part of the [FinanzOnline](https://finanzonline.bmf.gv.at/fon/) Cash Register Web Service User ("Registrierkassen-Webservice-Benutzer") credential triplet to be provided by the taxpayer.
+
+oas_components_schemas_austrian_financeonline_personal_identification_number_description: |
+  The "PIN" part of the [FinanzOnline](https://finanzonline.bmf.gv.at/fon/) Cash Register Web Service User ("Registrierkassen-Webservice-Benutzer") credential triplet to be provided by the taxpayer.
+
+# oas_components_schemas_french_fiscalization_description: ""
+
+oas_components_schemas_fiscalization_fiscal_year_date: |
+  Defines the start of the fiscal year date. By default the calender year start date `01-01` is used.
+
+oas_components_schemas_french_tax_identification_number_description: |
+  French company identification number (SIREN number) issued by INSEE and consisting of 9 characters
+
+# oas_components_schemas_french_vat_identification_number_description: ""
+oas_components_schemas_french_credentials_description: |
+  French fiscalization credentials
+
+# oas_components_schemas_french_infocert_credentials_description: ""
+# oas_components_schemas_system_create_request_description: ""
+# oas_components_schemas_system_update_request_description: ""
+# oas_components_schemas_system_resource_description: ""
+# oas_components_schemas_system_resources_description: ""
+
+oas_components_schemas_system_create_content_description: |
+  Defines the structure required to create a System.
+
+oas_components_schemas_system_update_content_description: |
+  Defines the structure required to update a System.
+
+oas_components_schemas_system_description: |
+  Defines the structure returned in the response when creating the Subject.
+
+oas_components_schemas_system_state_description: |
+  System state
+
+oas_components_schemas_system_mode_description: |
+  System mode
+
+oas_components_schemas_system_entity_description: |
+  Connection to the Entity that the System belongs to.
+
+oas_components_schemas_system_connection_description: |
+  Connection to the Entity that the System belongs to.
+
+oas_components_schemas_system_cryptography_description: |
+  System cryptography
+
+oas_components_schemas_system_records_description: |
+  System records
+
+oas_components_schemas_system_record_description: |
+  System record
+
+oas_components_schemas_system_record_type_description: |
+  System record type
+
+oas_components_schemas_system_record_description_description: |
+  System record description
+
+oas_components_schemas_system_vat_rates_description: |
+  VAT rates supported by the System
+
+oas_components_schemas_system_vat_rate_description: |
+  System VAT rate
+
+oas_components_schemas_system_vat_rate_code_description: |
+  Encoding for the VAT rates supported by the System. <br>
+  Refer to our [FAQ](https://support.fiskaly.com/hc/articles/18076728098332) for more details.
+
+oas_components_schemas_system_vat_rate_percentage_description: |
+  Percentage corresponding to the VAT rate
+
+oas_components_schemas_system_vat_rate_description_description: |
+  Description of the System VAT rate
+
+# oas_components_schemas_system_vat_rate_validity_description: ""
+
+oas_components_schemas_system_vat_rate_historic_description: |
+  Indication if the VAT rate corresponds to a historic value.
+
+oas_components_schemas_system_vat_exemptions_description: |
+  System VAT exemptions
+
+oas_components_schemas_system_vat_exemption_description: |
+  VAT exemptions supported by the System
+
+oas_components_schemas_system_vat_exemption_code_description: |
+  Encoding for the VAT exemptions supported by the System. <br>
+  Refer to our [FAQ](https://support.fiskaly.com/hc/articles/18076728098332) for more details.
+
+oas_components_schemas_system_vat_exemption_description_description: |
+  Description of the System VAT exemptions
+
+oas_components_schemas_system_fiscal_device_description: |
+  Fiscal device system
+
+
+# oas_components_schemas_signer_device_system_description: ""
+# oas_components_schemas_cash_register_system_description: ""
+# oas_components_schemas_venting_machine_system_description: ""
+# oas_components_schemas_point_of_sale_system_description: ""
+# oas_components_schemas_enterprise_resource_panning_system_description: ""
+# oas_components_schemas_record_create_request_description: ""
+# oas_components_schemas_record_update_request_description: ""
+# oas_components_schemas_record_resource_description: ""
+# oas_components_schemas_record_resources_description: ""
+
+oas_components_schemas_record_create_content_description: |
+  Defines the structure required to create a Record.
+
+oas_components_schemas_record_update_content_description: |
+  Defines the structure required to update a Record.
+
+oas_components_schemas_record_description: |
+  Record
+
+# oas_components_schemas_record_artifact_description: ""
+
+oas_components_schemas_record_transmission_description: |
+  Contains information regarding the transmission of the record to the tax authorities.
+
+oas_components_schemas_record_transmission_request_description: |
+  Base64-encoded raw payload that was submitted to the tax authorities.
+
+oas_components_schemas_record_transmission_response_description: |
+  Base64-encoded raw response from the tax authorities after the record was transmitted.
+  Note: If this field is not populated, an error occurred during the transmission process. The error can be retrieved inside `content.logs`.
+
+# oas_components_schemas_record_data_description: ""
+
+oas_components_schemas_record_logs_description: |
+  Collection of log entries for the Record. Includes timestamp, severity, and message details. Used for diagnostics and error analysis.
+
+# oas_components_schemas_record_log_description: ""
+
+oas_components_schemas_record_log_severity_description: |
+  Severity level of a log entry
+
+oas_components_schemas_record_log_message_description: |
+  Log message
+
+oas_components_schemas_record_state_description: |
+  Enum: "ACCEPTED" "REJECTED" "COMPLETED" "FAILED"
+  The state property reflects the current status of the Record resource.
+  ACCEPTED: The Record request has been received, the Record resource has been created, and processing has started.
+  REJECTED: The Record request has been received, the Record resource has been created, but validation errors during creation caused the request to be rejected. Details are available in the logs of the Record response.
+  COMPLETED: The Record request has been successfully processed.
+  FAILED: The Record request failed and one or more errors occurred during processing. Details are available in the logs of the Record response.
+
+oas_components_schemas_record_mode_description: |
+  Enum: "PROCESSING" "FINISHED"
+  The mode property reflects the current activity of the Record resource.
+  PROCESSING: The Record resource still has ongoing processing activity.
+  FINISHED: The Record resource finished all processing activity. The state determines the resulting outcome of the requested operation.
+
+oas_components_schemas_record_system_description: |
+  Connection to an already created System
+
+oas_components_schemas_record_connection_description: |
+  Connection to an already created record
+
+oas_components_schemas_record_details_description: |
+  Details of the Record
+
+oas_components_schemas_record_creators_description: |
+  Record creators
+
+# oas_components_schemas_record_creator_description: ""
+# oas_components_schemas_person_record_creator_description: ""
+
+oas_components_schemas_record_training_option_description: |
+  Indicates whether a record is being issued for training purposes.
+
+# oas_components_schemas_intention_record_description: ""
+
+oas_components_schemas_intention_operation_description: |
+  Every interaction with a `System` starts with an `IntentionRecord`.<br>
+  🇮🇹 In Italy, the supported intention operation is:
+  `TRANSACTION`
+
+# oas_components_schemas_transaction_intention_description: ""
+# oas_components_schemas_raw_intention_description: ""
+# oas_components_schemas_record_blob_description: ""
+# oas_components_schemas_transaction_record_description: ""
+
+oas_components_schemas_record_reference_description: |
+  Connection to an already created record
+
+oas_components_schemas_transaction_operation_description: |
+  An initial `IntentionRecord` of type `TRANSACTION` is required to proceed a given transaction operations. <br>
+  
+  🇮🇹 In Italy, the supported transaction operations are: 
+  - `RECEIPT` to certify the sale of goods or services
+  - `CORRECTION` to represent a return process
+  - `CANCELLATION` to void an existing receipt
+
+# oas_components_schemas_receipt_transaction_description: ""
+# oas_components_schemas_invoice_transaction_description: ""
+# oas_components_schemas_enrichment_transaction_description: ""
+# oas_components_schemas_enrichment_record_description: ""
+# oas_components_schemas_correction_transaction_description: ""
+
+oas_components_schemas_correction_record_description: |
+  Used to represent any return process carried out for an existing receipt. Establish a reference to the transaction being corrected via the `record` field.
+
+oas_components_schemas_correction_data_description: |
+  Correction transaction data
+
+# oas_components_schemas_correction_method_description: ""
+# oas_components_schemas_cancellation_transaction_description: ""
+
+oas_components_schemas_cancellation_record_description: |
+  Used to invalidate an existing transaction. Establish a reference to the transaction to be cancelled via the `record` field.
+
+oas_components_schemas_document_description: |
+  General information of the document being issued
+
+oas_components_schemas_document_number_description: |
+  Unique and correlative document number. This number refers to the taxpayer’s own internal document numbering system. This value must be generated by the taxpayer.
+
+oas_components_schemas_document_series_description: |
+  Document series number
+
+# oas_components_schemas_document_identifier_description: ""
+
+oas_components_schemas_document_activity_code_description: |
+  Business activity code to which the document belongs, if applicable. Activity codes are predefined.
+
+oas_components_schemas_document_issuing_timestamp_description: |
+  Timestamp of document issuance
+
+oas_components_schemas_document_operation_date_description: |
+  Operation date of the business activity, if different from the document issuing date.
+
+oas_components_schemas_document_total_vat_description: |
+  Total VAT amounts for the transaction
+
+oas_components_schemas_entries_description: |
+  Array of entries describing items sold or services provided in the business transaction.
+
+oas_components_schemas_sale_entry_description: |
+  Entry of type SALE for the sale of goods or services
+
+oas_components_schemas_return_entry_description: |
+  Entry of type RETURN for returned goods or refunds
+
+oas_components_schemas_voucher_entry_description: |
+  Entry of type VOUCHER for vouchers
+
+oas_components_schemas_entry_details_description: |
+  Details specific to the entry type
+
+oas_components_schemas_entry_concept_description: |
+  Indicates the economic concept of the entry: `GOOD` or `SERVICE`.
+
+oas_components_schemas_entry_purpose_description: |
+  Reflects the intention of the entry.
+
+oas_components_schemas_entry_description_description: |
+  Additional entry description
+
+oas_components_schemas_entry_regulatory_description: |
+  Additional regulatory text applicable to the entry
+
+oas_components_schemas_entry_label_description: |
+  Human-readable entry label or description
+
+oas_components_schemas_entry_number_description: |
+  This optional field specifies the print order of entries[] on a document. Each entry using this field must have a unique number to establish print order. If this field is not used, the print order defaults to the sequence of the array index, starting at one (1). 
+  **Note**: In case of a correction record, this number is required as it indicates the original entry number being corrected.
+
+oas_components_schemas_entry_text_description: |
+  Text describing the entry item e.g. text to be printed on the document of that entry.
+
+
+oas_components_schemas_entry_data_description: |
+  Contains the data of the entry which can be either a singular `ITEM`
+  or a `GROUP` of one or multiple items.
+
+# oas_components_schemas_item_entry_description: ""
+# oas_components_schemas_group_entry_description: ""
+
+
+oas_components_schemas_group_entry_value_description: |
+  Total amounts for the group of items in the entry
+
+oas_components_schemas_group_entry_vat_description: |
+  Defines the VAT information of the particular group of items
+
+oas_components_schemas_group_entry_items_description: |
+  Items included in the group entry
+
+# oas_components_schemas_group_entry_item_description: ""
+# oas_components_schemas_compliance_description: ""
+# oas_components_schemas_compliance_data_description: ""
+# oas_components_schemas_compliance_url_description: ""
+# oas_components_schemas_journal_description: ""
+# oas_components_schemas_journal_signature_description: ""
+
+oas_components_schemas_journal_signing_description: |
+  Defines the start/end date and time
+
+# oas_components_schemas_journal_previous_record_description: ""
+
+oas_components_schemas_entry_value_description: |
+  Value amounts of the entry
+
+oas_components_schemas_base_value_description: |
+  Base amount of the entry in EUR (€) excluding VAT
+
+oas_components_schemas_discount_value_description: |
+  Discount amount of the entry in EUR (€) including VAT
+
+oas_components_schemas_surcharge_value_description: |
+  Surcharge amount of the entry in EUR (€) including VAT
+
+# oas_components_schemas_invoice_text_description: ""
+# oas_components_schemas_invoice_data_description: ""
+
+oas_components_schemas_unit_description: |
+  Unit details
+
+oas_components_schemas_unit_quantity_description: |
+  Quantity or amount
+
+oas_components_schemas_unit_measure_description: |
+  Unit of measurement of the quantity
+
+oas_components_schemas_unit_factor_description: |
+  Reference amount of the price of the unit
+
+oas_components_schemas_unit_price_description: |
+  Price per unit in EUR (€) including VAT, if applicable
+
+
+oas_components_schemas_entry_vat_description: |
+  Defines the VAT information of the particular item
+
+# oas_components_schemas_vat_rate_category_description: ""
+# oas_components_schemas_vat_exemption_category_description: ""
+
+oas_components_schemas_vat_amount_description: |
+  Total VAT amount in EUR (€)
+
+oas_components_schemas_vat_exclusive_description: |
+  Total amount excluding VAT in EUR (€)
+
+oas_components_schemas_vat_inclusive_description: |
+  Total amount including VAT in EUR (€)
+
+# oas_components_schemas_export_record_description: ""
+# oas_components_schemas_event_record_description: ""
+
+oas_components_schemas_customer_description: |
+  Information about the consumer of the business transaction: 
+  - `INTERNAL`: employee makes a purchase in the store. Not applicable in Italy 🇮🇹
+  - `EXTERNAL`: regular (non-employee) customer.
+
+# oas_components_schemas_external_customer_description: ""
+# oas_components_schemas_internal_customer_description: ""
+
+oas_components_schemas_customer_code_description: |
+  Identifier provided by the consumer (e.g. lottery code in Italy 🇮🇹). Currently enabled for `EXTERNAL` customers only.
+
+oas_components_schemas_recipients_description: |
+  Recipient data
+
+# oas_components_schemas_recipient_description: ""
+
+oas_components_schemas_recipient_origin_description: |
+  Indicates whether the recipient is national or international
+
+# oas_components_schemas_customer_recipient_description: ""
+# oas_components_schemas_business_recipient_description: ""
+# oas_components_schemas_enrichment_document_description: ""
+
+oas_components_schemas_identification_description: |
+  VAT number of the recipient
+
+# oas_components_schemas_vat_identification_description: ""
+# oas_components_schemas_tax_identification_description: ""
+# oas_components_schemas_passport_identification_description: ""
+# oas_components_schemas_document_identification_description: ""
+# oas_components_schemas_certificate_identification_description: ""
+# oas_components_schemas_other_identification_description: ""
+# oas_components_schemas_identification_number_description: ""
+
+oas_components_schemas_shipping_description: |
+  Shipping details
+
+oas_components_schemas_shipping_address_description: |
+  Shipping address data
+
+oas_components_schemas_shipping_date_description: |
+  Shipping date
+
+oas_components_schemas_payments_description: |
+  Collection of payment entries for the transaction<br>
+  
+  🇮🇹 In Italy, the supported payment types are:
+  - `CASH`: cash payment
+  - `CARD`: card or ticket restaurant payment, depending on `kind`
+  - `ONLINE`: online or other electronic payment
+  - `OUTSTANDING`: uncollected payment
+
+  Note: `CARD > DEBIT`, `CARD > CREDIT` and `ONLINE` are all mapped to "Pagamento con strumenti elettronici" in the Documento Commerciale Online procedure.
+
+oas_components_schemas_cash_payment_description: |
+  Cash payment
+
+oas_components_schemas_card_payment_description: |
+  Card payment
+
+oas_components_schemas_online_payment_description: |
+  Online or electronic payment
+
+oas_components_schemas_other_payment_description: |
+  Payment by a method not covered by other types
+
+oas_components_schemas_outstanding_payment_description: |
+  Amount that remains unpaid
+
+oas_components_schemas_voucher_payment_description: |
+  Voucher issuance or redemption as a payment
+
+oas_components_schemas_voucher_payment_kind_description: |
+  Represents the voucher type.
+
+oas_components_schemas_payment_details_description: |
+  Payment details
+
+oas_components_schemas_payment_amount_description: |
+  Payment amount
+
+oas_components_schemas_payment_discount_description: |
+  Discount amount applied to this payment, if any
+
+oas_components_schemas_payment_currency_description: |
+  Currency of the payment in ISO 4217 format
+
+oas_components_schemas_payment_date_description: |
+  Payment date
+
+oas_components_schemas_payment_card_kind_description: |
+  Represents the card type
+
+oas_components_schemas_payment_card_number_description: |
+  Card number
+
+oas_components_schemas_payment_name_description: |
+  Payment name
+
+# oas_components_schemas_cryptography_description: ""
+# oas_components_schemas_cryptography_pem_description: ""
+# oas_components_schemas_cryptography_p12_description: ""
+# oas_components_schemas_cryptography_private_key_pem_description: ""
+# oas_components_schemas_cryptography_certificate_pem_description: ""
+# oas_components_schemas_cryptography_archive_file_description: ""
+# oas_components_schemas_cryptography_archive_password_description: ""
+# oas_components_schemas_privacy_enhanced_main_format_description: ""
+# oas_components_schemas_content_description: ""
+# oas_components_schemas_content_type_description: ""
+# oas_components_schemas_content_data_description: ""
+# oas_components_schemas_cryptography_signature_description: ""
+# oas_components_schemas_cryptography_signature_ecdsa_description: ""
+# oas_components_schemas_cryptography_hash_ecdsa_description: ""
+# oas_components_schemas_cryptography_format_ecdsa_description: ""
+# oas_components_schemas_cryptography_signature_rsa_description: ""
+# oas_components_schemas_cryptography_hash_rsa_description: ""
+# oas_components_schemas_cryptography_certificate_description: ""
+# oas_components_schemas_cryptography_serial_number_description: ""
+# oas_components_schemas_cryptography_expiration_timestamp_description: ""
+
+oas_components_schemas_software_description: |
+  Software information of the system
+
+oas_components_schemas_software_name_description: |
+  Software name
+
+oas_components_schemas_software_version_description: |
+  Software version
+
+oas_components_schemas_product_description: |
+  Product details
+
+# oas_components_schemas_code_128_product_description: ""
+
+oas_components_schemas_global_trade_item_number_8_product_description: |
+  Global Trade Item Number 8
+
+oas_components_schemas_global_trade_item_number_12_product_description: |
+  Global Trade Item Number 12
+
+oas_components_schemas_global_trade_item_number_13_product_description: |
+  Global Trade Item Number 13
+
+oas_components_schemas_global_trade_item_number_14_product_description: |
+  Global Trade Item Number 14
+
+oas_components_schemas_manufacturer_part_number_product_description: |
+  Manufacturer Part Number
+
+oas_components_schemas_stock_keeping_unit_product_description: |
+  Stock Keeping Unit
+
+# oas_components_schemas_other_product_description: ""
+
+oas_components_schemas_product_details_description: |
+  Additional product information such as production and entry dates.
+
+oas_components_schemas_product_manufacturer_part_number_description: |
+  Manufacturer Part Number assigned by the producer
+
+oas_components_schemas_product_name_description: |
+  Product name
+
+oas_components_schemas_product_model_description: |
+  Product model
+
+oas_components_schemas_product_brand_description: |
+  Product brand
+
+oas_components_schemas_product_serial_description: |
+  Unique serial number of the individual unit
+
+oas_components_schemas_product_label_description: |
+  Human-readable product label or description
+
+oas_components_schemas_product_number_description: |
+  Product identifier matching the selected code type (e.g., SKU, MPN, GTIN)
+
+oas_components_schemas_product_batch_description: |
+  Batch or lot identifier
+
+oas_components_schemas_product_date_of_entry_description: |
+  Date the product was first put into operation
+
+oas_components_schemas_product_date_of_production_description: |
+  Date the product was produced
+
+oas_components_schemas_product_code_description: |
+  General product code used when the identifier is not a SKU, MPN, or GTIN
+
+oas_components_schemas_product_global_trade_item_number_8_description: |
+  8-digit Global Trade Item Number (GTIN-8)
+
+oas_components_schemas_product_global_trade_item_number_12_description: |
+  12-digit Global Trade Item Number (GTIN-12)
+
+oas_components_schemas_product_global_trade_item_number_13_description: |
+  13-digit Global Trade Item Number (GTIN-13)
+
+oas_components_schemas_product_global_trade_item_number_14_description: |
+  14-digit Global Trade Item Number (GTIN-14)
+
+oas_components_schemas_product_stock_keeping_unit_number_description: |
+  Stock Keeping Unit number used by the seller
+
+oas_components_schemas_location_name_description: |
+  Location name
+
+oas_components_schemas_location_address_description: |
+  Address of the business location or establishment; may differ from the legal address
+
+oas_components_schemas_location_coordinates_description: |
+  Location coordinates
+
+oas_components_schemas_location_latitude_description: |
+  Latitude (ranges from -90 to +90 degrees)
+
+oas_components_schemas_location_longitude_description: |
+  Longitude (ranges from -180 to +180 degrees)
+
+oas_components_schemas_location_label_description: |
+  Location label
+
+oas_components_schemas_location_siret_number_description: |
+  French company location identification number (SIRET number) issued by INSEE and consisting of 14 characters
+
+# oas_components_schemas_siret_number_description: ""
+
+oas_components_schemas_address_description: |
+  Address
+
+oas_components_schemas_address_line_description: |
+  Address line
+
+oas_components_schemas_street_number_address_line_description: |
+  Street number
+
+oas_components_schemas_address_prefix_description: |
+  Address prefix
+
+oas_components_schemas_address_street_description: |
+  Street name
+
+oas_components_schemas_address_infix_description: |
+  Address infix
+
+oas_components_schemas_address_number_description: |
+  Street number
+
+oas_components_schemas_address_suffix_description: |
+  Address suffix
+
+oas_components_schemas_address_code_description: |
+  Postal code
+
+oas_components_schemas_address_city_description: |
+  City
+
+oas_components_schemas_address_country_description: |
+  Country
+
+oas_components_schemas_person_name_description: |
+  Name of a natural person
+
+oas_components_schemas_person_gender_description: |
+  Gender
+
+oas_components_schemas_person_name_prefix_description: |
+  Name prefix
+
+oas_components_schemas_person_forename_description: |
+  Forename
+
+oas_components_schemas_person_name_infix_description: |
+  Name infix
+
+oas_components_schemas_person_surname_description: |
+  Surname
+
+oas_components_schemas_person_name_suffix_description: |
+  Name suffix
+
+oas_components_schemas_person_label_description: |
+  Additional information about the person, e.g. an internal company identifier
+
+# oas_components_schemas_numerical_8_description: ""
+# oas_components_schemas_numerical_12_description: ""
+# oas_components_schemas_numerical_13_description: ""
+# oas_components_schemas_numerical_14_description: ""
+# oas_components_schemas_unsigned_integer_4_description: ""
+
+oas_components_schemas_decimal_12p8_description: |
+  Decimal number as string, up to 12 digits before 
+  and 8 digits after the decimal point.
+
+# oas_components_schemas_alpha_numerical_20_description: ""
+# oas_components_schemas_alpha_numerical_32_description: ""
+# oas_components_schemas_unsigned_decimal_3p2_description: ""
+
+oas_components_schemas_universally_unique_identifier_v3_description: |
+  A Universally Unique Identifier Version 3 (UUIDv3) is a string-based label used to uniquely identify objects in a computer system based on MD5 hashed textual information of a namespace and name.
+  The representation of UUIDs is defined in the [RFC 4122](https://www.rfc-editor.org/rfc/rfc4122).
+
+oas_components_schemas_universally_unique_identifier_v4_description: |
+  A Universally Unique Identifier Version 4 (UUIDv4) is a string-based label used to uniquely identify objects in a computer system.
+  The representation of UUIDs is defined in the [RFC 4122](https://www.rfc-editor.org/rfc/rfc4122).
+
+oas_components_schemas_universally_unique_identifier_v7_description: |
+  A Universally Unique Identifier Version 7 (UUIDv7) is a string-based label used to uniquely identify objects in a computer system based on a millisecond Unix timestamp and a (pseudo) randomized number to avoid collisions. 
+  The representation of UUIDs is defined in the [RFC 4122](https://www.rfc-editor.org/rfc/rfc4122).
+
+oas_components_schemas_plain_string_32_description: |
+  A plain string with a maximum length of 32 characters
+
+oas_components_schemas_plain_string_64_description: |
+  A plain string with a maximum length of 64 characters
+
+oas_components_schemas_plain_string_128_description: |
+  A plain string with a maximum length of 128 characters
+
+oas_components_schemas_plain_string_256_description: |
+  A plain string with a maximum length of 256 characters
+
+oas_components_schemas_error_response_description: |
+  Representation of error responses
+
+oas_components_schemas_error_status_description: |
+  Integer-based HTTP error status code
+
+oas_components_schemas_error_code_description: |
+  Representation of a unique error name of the HTTP error status code
+
+oas_components_schemas_error_text_description: |
+  Representation of short description of the HTTP error status code
+
+oas_components_schemas_error_message_description: |
+  Representation of long description of the HTTP error status code
+
+# oas_components_schemas_license_description: ""
+# oas_components_schemas_license_data_description: ""
+# oas_components_schemas_offline_description: ""
+# oas_components_schemas_offline_signature_description: ""
+
+oas_components_schemas_metadata_description: |
+  Attach custom key value data to a resource. Useful for storing additional, structured information.
+  If `metadata` appears in a response, it reflects the current metadata of the object.
+  You can update metadata via the resource’s update endpoint. If a key is sent with an empty string value in an update, that key–value pair is removed.
+
+  **Note**: Up to 20 keys. Key names up to 40 characters. Values up to 500 characters.
+
+oas_components_schemas_api_key_string_description: |
+  Key string of the API key pair
+
+oas_components_schemas_api_secret_string_description: |
+  Secret string of the API key pair. Keep this value confidential.
+
+# oas_components_schemas_bearer_description: ""
+
+oas_components_schemas_pagination_description: |
+  Represents the pagination information of a list endpoint `results` set. If not provided, the current elements in the `results` set are the last elements.
+
+oas_components_schemas_pagination_next_description: |
+  Represents the pagination request to the next results set, which is composed of the requested resources, pagination token, and the pagination limit.
+
+oas_components_schemas_pagination_token_description: |
+  Represents the pagination token, which is used as an index pointer to the next page relative to the current page in Base64 encoding.
+
+oas_components_schemas_pagination_limit_description: |
+  Represents the pagination limit of the results set of a listing endpoint.
+
+# oas_components_schemas_uniform_resource_identifier_description: ""
+# oas_components_schemas_json_data_description: ""
+
+oas_components_schemas_country_iso3166-1_alpha2_description: |
+  [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country codes
+
+oas_components_schemas_date_format_iso8601_description: |
+  API version used in your implementation
+
+# oas_components_schemas_date_format_rfc3339_description: ""
+# oas_components_schemas_masked_card_number_format_iso7812_description: ""
+
+oas_components_schemas_currency_format_iso4217_description: |
+  ISO 4217 currency format
+
+oas_components_schemas_json_web_token_description: |
+  A JSON Web Token (JWT) used for access control and authorization. Provided as a Bearer token in the HTTP `Authorization` header.
+
+
+
+#
+#
+#
+# New Fields 
+#
+
+# oas_components_parameters_record_file_artifact_query_description: ""
+
+oas_components_parameters_record_operation_query_description: |
+  Defines the operation.
+
+# oas_components_schemas_credit_note_transaction_description: ""
+# oas_components_schemas_document_text_description: ""
+# oas_components_schemas_down_payment_transaction_description: ""
+# oas_components_schemas_draft_receipt_transaction_description: ""
+# oas_components_schemas_duplicate_intention_description: ""
+
+oas_components_schemas_duplicate_number_description: |
+  Reprint number
+
+oas_components_schemas_duplicate_reason_description: |
+  Reason for issuing the duplicate
+
+oas_components_schemas_entity_name_description: |
+  Entity name
+
+oas_components_schemas_entity_properties_description: |
+  Additional company or individual properties<br>
+  Not applicable in 🇮🇹 Italy
+
+oas_components_schemas_entity_type_description: |
+  Details specific to the entity type
+
+oas_components_schemas_entry_properties_description: |
+  Additional entry properties<br>
+  Not applicable in 🇮🇹 Italy
+
+oas_components_schemas_event_code_description: |
+  Code identifying the Event
+
+oas_components_schemas_event_description_description: |
+  Additional Event description
+
+# oas_components_schemas_event_intention_description: ""
+
+oas_components_schemas_event_timestamp_description: |
+  Timestamp of Event
+
+# oas_components_schemas_export_filter_description: ""
+
+oas_components_schemas_export_filters_description: |
+  Defines export filtering options.
+
+# oas_components_schemas_export_intention_description: ""
+
+oas_components_schemas_export_range_description: |
+  Defines start and end timestamp.
+
+oas_components_schemas_export_system_record_filter_description: |
+  Defines export filtering options.
+
+# oas_components_schemas_french_lne_credentials_description: ""
+
+oas_components_schemas_payment_properties_description: |
+  Additional payment properties<br>
+  Not applicable in 🇮🇹 Italy
+
+# oas_components_schemas_pro_forma_invoice_transaction_description: ""
+# oas_components_schemas_proof_of_payment_record_description: ""
+# oas_components_schemas_proof_of_payment_transaction_description: ""
+# oas_components_schemas_record_file_artifact_description: ""
+# oas_components_schemas_record_file_description: ""
+# oas_components_schemas_record_file_integrity_description: ""
+# oas_components_schemas_record_file_location_description: ""
+
+oas_components_schemas_record_operation_description: |
+  Record
+
+oas_components_schemas_vat_breakdown_description: |
+  Provides the breakdown of the VAT into VAT rate and amounts per VAT rate.
+
+# oas_components_schemas_vat_category_description: ""
+
+#
+#
+# INTENTION::TRANSACTION
+#
+
+oas_components_schemas_transaction_details_description: |
+  Record details of intended `TRANSACTION`. <br>
+  Not applicable in 🇮🇹 Italy
+
+oas_components_schemas_transaction_properties_description: |
+  Record properties of intended `TRANSACTION`.
+  
+#
+#
+# INTENTION::EVENT
+#
+
+oas_components_schemas_event_details_description: |
+  Record details of intended `EVENT`.
+
+oas_components_schemas_event_properties_description: |
+  Record properties of intended `EVENT`.<br>
+  Not applicable in 🇮🇹 Italy
+  
+#
+#
+# INTENTION::EXPORT
+#
+
+oas_components_schemas_export_details_description: |
+  Record details of intended `EXPORT`.
+
+oas_components_schemas_export_properties_description: |
+  Record properties of intended `EXPORT`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# INTENTION::DUPLICATE
+#
+
+oas_components_schemas_duplicate_details_description: |
+  Record details of intended `DUPLICATE`.
+
+oas_components_schemas_duplicate_properties_description: |
+  Record properties of intended `DUPLICATE`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# TRANSACTION::RECEIPT
+#
+
+oas_components_schemas_receipt_details_description: |
+  Record details of transaction `RECEIPT`. <br>
+  Not applicable in 🇮🇹 Italy
+
+oas_components_schemas_receipt_properties_description: |
+  Record properties of transaction `RECEIPT`.
+
+#
+#
+# TRANSACTION::DRAFT_RECEIPT
+#
+
+oas_components_schemas_draft_receipt_details_description: |
+  Record details of transaction `DRAFT_RECEIPT`.
+
+oas_components_schemas_draft_receipt_properties_description: |
+  Record properties of transaction `DRAFT_RECEIPT`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# TRANSACTION::INVOICE
+#
+
+oas_components_schemas_invoice_details_description: |
+  Record details of transaction `INVOICE`.
+
+oas_components_schemas_invoice_properties_description: |
+  Record properties of transaction `INVOICE`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# TRANSACTION::PRO_FORMA_INVOICE
+#
+
+oas_components_schemas_pro_forma_invoice_details_description: |
+  Record details of transaction `PRO_FORMA_INVOICE`.
+
+oas_components_schemas_pro_forma_invoice_properties_description: |
+  Record properties of transaction `PRO_FORMA_INVOICE`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# TRANSACTION::ENRICHMENT
+#
+
+oas_components_schemas_enrichment_details_description: |
+  Record details of transaction `ENRICHMENT`.
+
+oas_components_schemas_enrichment_properties_description: |
+  Record properties of transaction `ENRICHMENT`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# TRANSACTION::CORRECTION
+#
+
+oas_components_schemas_correction_details_description: |
+  Record details of transaction `CORRECTION`. <br>
+  Not applicable in 🇮🇹 Italy
+
+oas_components_schemas_correction_properties_description: |
+  Record properties of transaction `CORRECTION`.
+
+#
+#
+# TRANSACTION::CANCELLATION
+#
+
+oas_components_schemas_cancellation_details_description: |
+  Record details of transaction `CANCELLATION`. <br>
+  Not applicable in 🇮🇹 Italy
+
+oas_components_schemas_cancellation_properties_description: |
+  Record properties of transaction `CANCELLATION`.
+
+#
+#
+# TRANSACTION::PROOF_OF_PAYMENT
+#
+
+oas_components_schemas_proof_of_payment_details_description: |
+  Record details of transaction `PROOF_OF_PAYMENT`.
+
+oas_components_schemas_proof_of_payment_properties_description: |
+  Record properties of transaction `PROOF_OF_PAYMENT`.<br>
+  Not applicable in 🇮🇹 Italy
+
+#
+#
+# TRANSACTION::DOWN_PAYMENT
+#
+
+oas_components_schemas_down_payment_details_description: |
+  Record details of transaction `DOWN_PAYMENT`.
+
+oas_components_schemas_down_payment_properties_description: |
+  Record properties of transaction `DOWN_PAYMENT`.<br>
+  Not applicable in 🇮🇹 Italy
+
+# #
+# #
+# # TRANSACTION::CREDIT_NOTE (disabled for now since 2025-09-29)
+# #
+# 
+# oas_components_schemas_credit_note_details_description: |
+#   Record details of transaction `CREDIT_NOTE`.
+# 
+# oas_components_schemas_credit_note_properties_description: |
+#   Record properties of transaction `CREDIT_NOTE`.
+
+####
+
+# List files
+
+oas_components_parameters_file_created_start_query_description: |
+  Defines the start date and time
+
+oas_components_parameters_file_created_end_query_description: |
+  Defines the end date and time
+
+# Response
+
+oas_components_responses_files_response_description: |
+  Files Response
+
+oas_components_schemas_file_creation_timestamp_description: |
+  File creation time (format RFC3339)
+
+oas_components_schemas_file_location_description: |
+  Defines where file is derived from - `SERVICE`: retrieved from UAPI storage.
+  `ARCHIVE`: retrieved from archive.
+
+oas_components_schemas_file_artifact_description: |
+  Information about the downloadable file
+
+oas_components_schemas_file_type_description: |
+  Defines the file content type
+
+oas_components_schemas_data_url_description: |
+  Returns the path where to download the file<br>
+  e.g. /files/0189f7ea-ae2c-7809-8aeb-b819cf5e9e7f.zip
+
+oas_components_schemas_file_integrity_description: |
+  Includes the integrity information of the file
+
+oas_components_schemas_integrity_content_type_description: |
+  Defines the integrity file content type
+
+# Stream a file
+
+oas_components_parameters_File_identifier_description: |
+  Identifies the file to be downloaded
+
+# Response
+
+oas_components_responses_file_response_description: |
+  Returns the attachment of the file

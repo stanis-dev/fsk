@@ -1,0 +1,6209 @@
+openapi: 3.0.3
+servers:
+  - url: 'https://((<oas_servers_live_url))'
+    description: |
+      ((<oas_servers_live_description))
+  - url: 'https://((<oas_servers_test_url))'
+    description: |
+      ((<oas_servers_test_description))
+info:
+  version: '2025-08-12'
+  title: '((<oas_info_title))'
+  contact:
+    email: info@fiskaly.com
+    name: '((<oas_info_contact_name))'
+    url: 'https://fiskaly.com'
+  description: |
+    ((<oas_info_description))
+  x-logo:
+    url: 'https://fiskaly.com/fiskaly_logo.svg'
+    altText: '((<oas_info_x-logo_altText))'
+tags:
+  - name: '((<oas_tags_tokens_name))'
+    description: |
+      ((<oas_tags_tokens_description))
+  - name: '((<oas_tags_assets_name))'
+    description: |
+      ((<oas_tags_assets_description))
+  - name: '((<oas_tags_subjects_name))'
+    description: |
+      ((<oas_tags_subjects_description))
+  - name: '((<oas_tags_entities_name))'
+    description: |
+      ((<oas_tags_entities_description))
+  - name: '((<oas_tags_systems_name))'
+    description: |
+      ((<oas_tags_systems_description))
+  - name: '((<oas_tags_records_name))'
+    description: |
+      ((<oas_tags_records_description))
+  - name: '((<oas_tags_files_name))'
+    description: |
+      ((<oas_tags_files_description))
+x-tagGroups:
+  - name: '((<oas_tags_management_name))'
+    tags:
+      - '((<oas_tags_tokens_name))'
+      - '((<oas_tags_assets_name))'
+      - '((<oas_tags_subjects_name))'
+  - name: '((<oas_tags_operation_name))'
+    tags:
+      - '((<oas_tags_entities_name))'
+      - '((<oas_tags_systems_name))'
+      - '((<oas_tags_records_name))'
+      - '((<oas_tags_files_name))'
+paths:
+  /tokens:
+    post:
+      summary: '((<oas_paths_tokens_create_summary))'
+      description: |
+        ((<oas_paths_tokens_create_description))
+      tags:
+        - '((<oas_tags_tokens_name))'
+      security: []
+      operationId: createToken
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/TokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /subjects:
+    get:
+      summary: '((<oas_paths_subjects_list_summary))'
+      description: |
+        ((<oas_paths_subjects_list_description))
+      tags:
+        - '((<oas_tags_subjects_name))'
+      security:
+        - JWT: []
+      operationId: listSubjects
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/ScopeIdentifier'
+        - $ref: '#/components/parameters/PaginationLimitQuery'
+        - $ref: '#/components/parameters/PaginationTokenQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubjectsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    post:
+      summary: '((<oas_paths_subjects_create_summary))'
+      description: |
+        ((<oas_paths_subjects_create_description))
+      tags:
+        - '((<oas_tags_subjects_name))'
+      security:
+        - JWT: []
+      operationId: createSubject
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ScopeIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubjectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  '/subjects/{subject_id}':
+    patch:
+      summary: '((<oas_paths_subjects_update_summary))'
+      description: |
+        ((<oas_paths_subjects_update_description))
+      tags:
+        - '((<oas_tags_subjects_name))'
+      security:
+        - JWT: []
+      operationId: updateSubject
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/SubjectIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubjectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    get:
+      summary: '((<oas_paths_subjects_retrieve_summary))'
+      description: |
+        ((<oas_paths_subjects_retrieve_description))
+      tags:
+        - '((<oas_tags_subjects_name))'
+      security:
+        - JWT: []
+      operationId: retrieveSubject
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/SubjectIdentifier'
+      responses:
+        '200':
+          $ref: '#/components/responses/SubjectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /assets:
+    get:
+      summary: '((<oas_paths_assets_list_summary))'
+      description: |
+        ((<oas_paths_assets_list_description))
+      tags:
+        - '((<oas_tags_assets_name))'
+      security:
+        - JWT: []
+      operationId: listAssets
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/ScopeIdentifier'
+        - $ref: '#/components/parameters/PaginationLimitQuery'
+        - $ref: '#/components/parameters/PaginationTokenQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/AssetsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    post:
+      summary: '((<oas_paths_assets_create_summary))'
+      description: |
+        ((<oas_paths_assets_create_description))
+      tags:
+        - '((<oas_tags_assets_name))'
+      security:
+        - JWT: []
+      operationId: createAsset
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ScopeIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AssetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  '/assets/{asset_id}':
+    patch:
+      summary: '((<oas_paths_assets_update_summary))'
+      description: |
+        ((<oas_paths_assets_update_description))
+      tags:
+        - '((<oas_tags_assets_name))'
+      security:
+        - JWT: []
+      operationId: updateAsset
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/AssetIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssetUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/AssetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    get:
+      summary: '((<oas_paths_assets_retrieve_summary))'
+      description: |
+        ((<oas_paths_assets_retrieve_description))
+      tags:
+        - '((<oas_tags_assets_name))'
+      security:
+        - JWT: []
+      operationId: retrieveAsset
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/AssetIdentifier'
+      responses:
+        '200':
+          $ref: '#/components/responses/AssetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /entities:
+    get:
+      summary: '((<oas_paths_entities_list_summary))'
+      description: |
+        ((<oas_paths_entities_list_description))
+      tags:
+        - '((<oas_tags_entities_name))'
+      security:
+        - JWT: []
+      operationId: listEntities
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/PaginationLimitQuery'
+        - $ref: '#/components/parameters/PaginationTokenQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/EntitiesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    post:
+      summary: '((<oas_paths_entities_create_summary))'
+      description: |
+        ((<oas_paths_entities_create_description))
+      tags:
+        - '((<oas_tags_entities_name))'
+      security:
+        - JWT: []
+      operationId: createEntity
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EntityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  '/entities/{entity_id}':
+    patch:
+      summary: '((<oas_paths_entities_update_summary))'
+      description: |
+        ((<oas_paths_entities_update_description))
+      tags:
+        - '((<oas_tags_entities_name))'
+      security:
+        - JWT: []
+      operationId: updateEntity
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/EntityIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EntityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    get:
+      summary: '((<oas_paths_entities_retrieve_summary))'
+      description: |
+        ((<oas_paths_entities_retrieve_description))
+      tags:
+        - '((<oas_tags_entities_name))'
+      security:
+        - JWT: []
+      operationId: retrieveEntity
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/EntityIdentifier'
+      responses:
+        '200':
+          $ref: '#/components/responses/EntityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /systems:
+    get:
+      summary: '((<oas_paths_systems_list_summary))'
+      description: |
+        ((<oas_paths_systems_list_description))
+      tags:
+        - '((<oas_tags_systems_name))'
+      security:
+        - JWT: []
+      operationId: listSystems
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/PaginationLimitQuery'
+        - $ref: '#/components/parameters/PaginationTokenQuery'
+        - $ref: '#/components/parameters/EntityIdentifierQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    post:
+      summary: '((<oas_paths_systems_create_summary))'
+      description: |
+        ((<oas_paths_systems_create_description))
+      tags:
+        - '((<oas_tags_systems_name))'
+      security:
+        - JWT: []
+      operationId: createSystem
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  '/systems/{system_id}':
+    patch:
+      summary: '((<oas_paths_systems_update_summary))'
+      description: |
+        ((<oas_paths_systems_update_description))
+      tags:
+        - '((<oas_tags_systems_name))'
+      security:
+        - JWT: []
+      operationId: updateSystem
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/SystemIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    get:
+      summary: '((<oas_paths_systems_retrieve_summary))'
+      description: |
+        ((<oas_paths_systems_retrieve_description))
+      tags:
+        - '((<oas_tags_systems_name))'
+      security:
+        - JWT: []
+      operationId: retrieveSystem
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/SystemIdentifier'
+      responses:
+        '200':
+          $ref: '#/components/responses/SystemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /records:
+    get:
+      summary: '((<oas_paths_records_list_summary))'
+      description: |
+        ((<oas_paths_records_list_description))
+      tags:
+        - '((<oas_tags_records_name))'
+      security:
+        - JWT: []
+      operationId: listRecords
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/PaginationLimitQuery'
+        - $ref: '#/components/parameters/PaginationTokenQuery'
+        - $ref: '#/components/parameters/SystemIdentifierQuery'
+        - $ref: '#/components/parameters/EntityIdentifierQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/RecordsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    post:
+      summary: '((<oas_paths_records_create_summary))'
+      description: |
+        ((<oas_paths_records_create_description))
+      tags:
+        - '((<oas_tags_records_name))'
+      security:
+        - JWT: []
+      operationId: createRecord
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/ReplayRemaining'
+        - $ref: '#/components/parameters/ReplayHash'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCreateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  '/records/{record_id}':
+    patch:
+      summary: '((<oas_paths_records_update_summary))'
+      description: |
+        ((<oas_paths_records_update_description))
+      tags:
+        - '((<oas_tags_records_name))'
+      security:
+        - JWT: []
+      operationId: updateRecord
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/RecordIdentifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '409':
+          $ref: '#/components/responses/ResourceConflictResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableContentResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '501':
+          $ref: '#/components/responses/NotImplementedErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+    get:
+      summary: '((<oas_paths_records_retrieve_summary))'
+      description: |
+        ((<oas_paths_records_retrieve_description))
+      tags:
+        - '((<oas_tags_records_name))'
+      security:
+        - JWT: []
+      operationId: retrieveRecord
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/RecordIdentifier'
+        - $ref: '#/components/parameters/RecordOperationQuery'
+        - $ref: '#/components/parameters/RecordFileArtifactQuery'
+        - $ref: '#/components/parameters/RecordFileIntegrityQuery'
+        - $ref: '#/components/parameters/RecordComplianceArtifactQuery'
+        - $ref: '#/components/parameters/RecordDataArtifactQuery'
+        - $ref: '#/components/parameters/RecordDataIntegrityQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/RecordResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /files:
+    get:
+      summary: '((<oas_paths_files_list_summary))'
+      description: |
+        ((<oas_paths_files_list_description))
+      tags:
+        - '((<oas_tags_files_name))'
+      security:
+        - JWT: []
+      operationId: listFiles
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/SystemIdentifierQuery'
+        - $ref: '#/components/parameters/FileCreatedStartQuery'
+        - $ref: '#/components/parameters/FileCreatedEndQuery'
+        - $ref: '#/components/parameters/PaginationLimitQuery'
+        - $ref: '#/components/parameters/PaginationTokenQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/FilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  '/files/{path}':
+    get:
+      summary: '((<oas_paths_files_stream_summary))'
+      description: |
+        ((<oas_paths_files_stream_description))
+      tags:
+        - '((<oas_tags_files_name))'
+      security:
+        - JWT: []
+      operationId: streamFile
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+        - $ref: '#/components/parameters/FilePath'
+      responses:
+        '200':
+          $ref: '#/components/responses/FileStream'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAccessResponse'
+        '404':
+          $ref: '#/components/responses/ResourceNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+components:
+  parameters:
+    ApiVersion:
+      description: |
+        ((<oas_components_parameters_api_version_description))
+      in: header
+      name: X-Api-Version
+      required: true
+      schema:
+        $ref: '#/components/schemas/ApiVersion'
+    IdempotencyKey:
+      description: |
+        ((<oas_components_parameters_idempotency_key_description))
+      in: header
+      name: X-Idempotency-Key
+      required: true
+      schema:
+        $ref: '#/components/schemas/IdempotencyKey'
+    ScopeIdentifier:
+      description: |
+        ((<oas_components_parameters_scope_identifier_description))
+      in: header
+      name: X-Scope-Identifier
+      required: false
+      schema:
+        $ref: '#/components/schemas/ScopeIdentifier'
+    ReplayRemaining:
+      description: |
+        ((<oas_components_parameters_replay_remaining_description))
+      in: header
+      name: X-Replay-Remaining
+      schema:
+        $ref: '#/components/schemas/ReplayRemaining'
+    ReplayHash:
+      description: |
+        ((<oas_components_parameters_replay_hash_description))
+      in: header
+      name: X-Replay-Hash
+      schema:
+        $ref: '#/components/schemas/ReplayHash'
+    SubjectIdentifier:
+      description: |
+        ((<oas_components_parameters_subject_identifier_description))
+      in: path
+      name: subject_id
+      required: true
+      schema:
+        $ref: '#/components/schemas/SubjectIdentifier'
+    AssetIdentifier:
+      description: |
+        ((<oas_components_parameters_asset_identifier_description))
+      in: path
+      name: asset_id
+      required: true
+      schema:
+        $ref: '#/components/schemas/AssetIdentifier'
+    EntityIdentifier:
+      description: |
+        ((<oas_components_parameters_entity_identifier_description))
+      in: path
+      name: entity_id
+      required: true
+      schema:
+        $ref: '#/components/schemas/EntityIdentifier'
+    SystemIdentifier:
+      description: |
+        ((<oas_components_parameters_system_identifier_description))
+      in: path
+      name: system_id
+      required: true
+      schema:
+        $ref: '#/components/schemas/SystemIdentifier'
+    RecordIdentifier:
+      description: |
+        ((<oas_components_parameters_record_identifier_description))
+      in: path
+      name: record_id
+      required: true
+      schema:
+        $ref: '#/components/schemas/RecordIdentifier'
+    FilePath:
+      description: |
+        ((<oas_components_parameters_file_path_description))
+      in: path
+      name: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Path'
+    FileCreatedStartQuery:
+      description: |
+        ((<oas_components_parameters_file_created_start_query_description))
+      in: query
+      name: start
+      required: false
+      schema:
+        $ref: '#/components/schemas/FileCreationTimestamp'
+    FileCreatedEndQuery:
+      description: |
+        ((<oas_components_parameters_file_created_end_query_description))
+      in: query
+      name: end
+      required: false
+      schema:
+        $ref: '#/components/schemas/FileCreationTimestamp'
+    PaginationLimitQuery:
+      description: |
+        ((<oas_components_parameters_pagination_limit_query_description))
+      in: query
+      name: limit
+      required: false
+      schema:
+        $ref: '#/components/schemas/PaginationLimit'
+    PaginationTokenQuery:
+      description: |
+        ((<oas_components_parameters_pagination_token_query_description))
+      in: query
+      name: token
+      required: false
+      schema:
+        $ref: '#/components/schemas/PaginationToken'
+    EntityIdentifierQuery:
+      description: |
+        ((<oas_components_parameters_entity_identifier_query_description))
+      in: query
+      name: entity_id
+      required: false
+      schema:
+        $ref: '#/components/schemas/EntityIdentifier'
+    SystemIdentifierQuery:
+      description: |
+        ((<oas_components_parameters_system_identifier_query_description))
+      in: query
+      name: system_id
+      required: false
+      schema:
+        $ref: '#/components/schemas/SystemIdentifier'
+    RecordOperationQuery:
+      description: |
+        ((<oas_components_parameters_record_operation_query_description))
+      in: query
+      name: operation
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: string
+        enum:
+          - ''
+    RecordFileArtifactQuery:
+      description: |
+        ((<oas_components_parameters_record_file_artifact_query_description))
+      in: query
+      name: file-artifact
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: string
+        enum:
+          - ''
+    RecordFileIntegrityQuery:
+      description: |
+        ((<oas_components_parameters_record_file_integrity_query_description))
+      in: query
+      name: file-integrity
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: string
+        enum:
+          - ''
+    RecordDataArtifactQuery:
+      description: |
+        ((<oas_components_parameters_record_data_artifact_query_description))
+      in: query
+      name: data-artifact
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: string
+        enum:
+          - ''
+    RecordDataIntegrityQuery:
+      description: |
+        ((<oas_components_parameters_record_data_integrity_query_description))
+      in: query
+      name: data-integrity
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: string
+        enum:
+          - ''
+    RecordComplianceArtifactQuery:
+      description: |
+        ((<oas_components_parameters_record_compliance_artifact_query_description))
+      in: query
+      name: compliance-artifact
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: string
+        enum:
+          - ''
+    TraceIdentifier:
+      description: |
+        ((<oas_components_parameters_trace_identifier_description))
+      in: header
+      name: X-Trace-Identifier
+      required: true
+      schema:
+        $ref: '#/components/schemas/TraceIdentifier'
+  responses:
+    TokenResponse:
+      description: |
+        ((<oas_components_responses_token_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TokenResource'
+    SubjectsResponse:
+      description: |
+        ((<oas_components_responses_subjects_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectResources'
+    SubjectResponse:
+      description: |
+        ((<oas_components_responses_subject_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Idempotency-Replayed:
+          required: false
+          schema:
+            $ref: '#/components/schemas/IdempotencyReplayed'
+        X-Scope-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ScopeIdentifier'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectResource'
+    AssetsResponse:
+      description: |
+        ((<oas_components_responses_assets_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AssetResources'
+    AssetResponse:
+      description: |
+        ((<oas_components_responses_asset_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Idempotency-Replayed:
+          required: false
+          schema:
+            $ref: '#/components/schemas/IdempotencyReplayed'
+        X-Scope-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ScopeIdentifier'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AssetResource'
+    EntitiesResponse:
+      description: |
+        ((<oas_components_responses_entities_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EntityResources'
+    EntityResponse:
+      description: |
+        ((<oas_components_responses_entity_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Idempotency-Replayed:
+          required: false
+          schema:
+            $ref: '#/components/schemas/IdempotencyReplayed'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EntityResource'
+    SystemsResponse:
+      description: |
+        ((<oas_components_responses_systems_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SystemResources'
+    SystemResponse:
+      description: |
+        ((<oas_components_responses_system_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Idempotency-Replayed:
+          required: false
+          schema:
+            $ref: '#/components/schemas/IdempotencyReplayed'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SystemResource'
+    RecordsResponse:
+      description: |
+        ((<oas_components_responses_records_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RecordResources'
+    FilesResponse:
+      description: |
+        ((<oas_components_responses_files_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileResources'
+    FileStream:
+      description: |
+        ((<oas_components_responses_file_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+        Content-Disposition:
+          schema:
+            type: string
+          description: |
+            ((<oas_components_responses_file_response_description))
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    RecordResponse:
+      description: |
+        ((<oas_components_responses_record_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Idempotency-Replayed:
+          required: false
+          schema:
+            $ref: '#/components/schemas/IdempotencyReplayed'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RecordResource'
+    BadRequestResponse:
+      description: |
+        ((<oas_components_responses_bad_request_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    UnauthorizedAccessResponse:
+      description: |
+        ((<oas_components_responses_unauthorized_access_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    ResourceNotFoundResponse:
+      description: |
+        ((<oas_components_responses_resource_not_found_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    ResourceConflictResponse:
+      description: |
+        ((<oas_components_responses_resource_conflict_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    UnprocessableContentResponse:
+      description: |
+        ((<oas_components_responses_unprocessable_content_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    MethodNotAllowedResponse:
+      description: |
+        ((<oas_components_responses_method_not_allowed_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    TooManyRequestsResponse:
+      description: |
+        ((<oas_components_responses_too_many_requests_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    InternalServerErrorResponse:
+      description: |
+        ((<oas_components_responses_internal_server_error_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    ServiceUnavailableResponse:
+      description: |
+        ((<oas_components_responses_service_unavailable_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+    NotImplementedErrorResponse:
+      description: |
+        ((<oas_components_responses_not_implemented_response_description))
+      headers:
+        X-Api-Version:
+          required: true
+          schema:
+            $ref: '#/components/schemas/ApiVersion'
+        X-Trace-Identifier:
+          required: true
+          schema:
+            $ref: '#/components/schemas/TraceIdentifier'
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                $ref: '#/components/schemas/ErrorResponse'
+            additionalProperties: false
+  schemas:
+    ApiVersion:
+      allOf:
+        - $ref: '#/components/schemas/DateFormatISO8601'
+    IdempotencyKey:
+      oneOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV4'
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV3'
+    IdempotencyReplayed:
+      description: |
+        ((<oas_components_schemas_idempotency_replayed_description))
+      type: boolean
+    ReplayRemaining:
+      allOf:
+        - $ref: '#/components/schemas/UnsignedInteger4'
+    ReplayHash:
+      allOf:
+        - $ref: '#/components/schemas/PlainString64'
+    ScopeIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV4'
+    TokenIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV4'
+    SubjectIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV4'
+    AssetIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV4'
+    EntityIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV7'
+    SystemIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV7'
+    RecordIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV7'
+    FileIdentifier:
+      allOf:
+        - $ref: '#/components/schemas/UniversallyUniqueIdentifierV7'
+    Path:
+      type: string
+      minLength: 1
+      maxLength: 44
+      example: 0189f7ea-ae2c-7809-8aeb-b819cf5e9e7f.zip
+      pattern: '^[0-9a-f]{8}-?[0-9a-f]{4}-?7[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}\.zip(\.jws)?$'
+    TraceIdentifier:
+      type: string
+    TokenCreateRequest:
+      description: |
+        ((<oas_components_schemas_token_create_request_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/TokenCreateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    TokenResource:
+      description: |
+        ((<oas_components_schemas_token_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/TokenContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    TokenCreateContent:
+      description: |
+        ((<oas_components_schemas_token_createContent_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          API_KEY: '#/components/schemas/ApiKeyToken'
+      oneOf:
+        - $ref: '#/components/schemas/ApiKeyToken'
+    TokenContent:
+      allOf:
+        - $ref: '#/components/schemas/Token'
+    Token:
+      description: |
+        ((<oas_components_schemas_token_description))
+      type: object
+      required:
+        - id
+        - authentication
+        - asset
+        - subject
+      properties:
+        id:
+          $ref: '#/components/schemas/TokenIdentifier'
+        authentication:
+          $ref: '#/components/schemas/TokenAuthentication'
+        asset:
+          $ref: '#/components/schemas/AssetConnection'
+        subject:
+          $ref: '#/components/schemas/SubjectConnection'
+      additionalProperties: false
+    TokenAuthentication:
+      description: |
+        ((<oas_components_schemas_token_authentication_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          JWT: '#/components/schemas/JsonWebTokenAuthentication'
+      oneOf:
+        - $ref: '#/components/schemas/JsonWebTokenAuthentication'
+    JsonWebTokenAuthentication:
+      description: |
+        ((<oas_components_schemas_json_web_token_authentication_description))
+      type: object
+      required:
+        - type
+        - bearer
+        - expires_at
+        - issued_at
+      properties:
+        type:
+          type: string
+          enum:
+            - JWT
+        bearer:
+          $ref: '#/components/schemas/TokenBearer'
+        expires_at:
+          $ref: '#/components/schemas/TokenExpirationTimestamp'
+        issued_at:
+          $ref: '#/components/schemas/TokenIssuingTimestamp'
+      additionalProperties: false
+    TokenBearer:
+      description: |
+        ((<oas_components_schemas_token_bearer_description))
+      allOf:
+        - $ref: '#/components/schemas/Bearer'
+    TokenExpirationTimestamp:
+      description: |
+        ((<oas_components_schemas_token_expiration_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    TokenIssuingTimestamp:
+      description: |
+        ((<oas_components_schemas_token_issuing_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    ApiKeyToken:
+      description: |
+        ((<oas_components_schemas_api_key_token_description))
+      type: object
+      required:
+        - type
+        - key
+        - secret
+      properties:
+        type:
+          type: string
+          enum:
+            - API_KEY
+        key:
+          $ref: '#/components/schemas/ApiKeyString'
+        secret:
+          $ref: '#/components/schemas/ApiSecretString'
+      additionalProperties: false
+    SubjectCreateRequest:
+      description: |
+        ((<oas_components_schemas_subject_create_request_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/SubjectCreateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    SubjectUpdateRequest:
+      description: |
+        ((<oas_components_schemas_subject_update_request_description))
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/SubjectUpdateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    SubjectResource:
+      description: |
+        ((<oas_components_schemas_subject_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/SubjectContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    SubjectResources:
+      description: |
+        ((<oas_components_schemas_subject_resources_description))
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubjectResource'
+          minItems: 1
+          maxItems: 100
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    SubjectCreateContent:
+      description: |
+        ((<oas_components_schemas_subject_create_content_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          API_KEY: '#/components/schemas/ApiKeySubject'
+      oneOf:
+        - $ref: '#/components/schemas/ApiKeySubject'
+    SubjectUpdateContent:
+      description: |
+        ((<oas_components_schemas_subject_update_content_description))
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/SubjectName'
+      additionalProperties: false
+    SubjectContent:
+      allOf:
+        - $ref: '#/components/schemas/Subjects'
+        - $ref: '#/components/schemas/Subject'
+    Subjects:
+      oneOf:
+        - $ref: '#/components/schemas/ApiKeySubject'
+    Subject:
+      description: |
+        ((<oas_components_schemas_subject_description))
+      type: object
+      required:
+        - id
+        - state
+      properties:
+        id:
+          $ref: '#/components/schemas/SubjectIdentifier'
+        state:
+          $ref: '#/components/schemas/SubjectState'
+        credentials:
+          $ref: '#/components/schemas/SubjectCredentials'
+      additionalProperties: false
+    SubjectState:
+      description: |
+        ((<oas_components_schemas_subject_state_description))
+      type: string
+      enum:
+        - ENABLED
+        - DISABLED
+    SubjectConnection:
+      description: |
+        ((<oas_components_schemas_subject_connection_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/SubjectIdentifier'
+      additionalProperties: false
+    SubjectCredentials:
+      description: |
+        ((<oas_components_schemas_subject_credentials_description))
+      type: object
+      required:
+        - key
+      properties:
+        key:
+          $ref: '#/components/schemas/SubjectKey'
+        secret:
+          $ref: '#/components/schemas/SubjectSecret'
+      additionalProperties: false
+    SubjectName:
+      description: |
+        ((<oas_components_schemas_subject_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    SubjectKey:
+      description: |
+        ((<oas_components_schemas_subject_key_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    SubjectSecret:
+      description: |
+        ((<oas_components_schemas_subject_secret_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    ApiKeySubject:
+      description: |
+        ((<oas_components_schemas_api_key_subject_description))
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - API_KEY
+        name:
+          $ref: '#/components/schemas/ApiKeySubjectName'
+      additionalProperties: false
+    ApiKeySubjectName:
+      description: |
+        ((<oas_components_schemas_api_key_subject_name_description))
+      type: string
+      pattern: '^[a-z0-9\-]{3,30}$'
+      minLength: 3
+      maxLength: 30
+      example: my-api-key-0
+    AssetCreateRequest:
+      description: |
+        ((<oas_components_schemas_asset_create_request_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/AssetCreateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    AssetUpdateRequest:
+      description: |
+        ((<oas_components_schemas_asset_update_request_description))
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/AssetUpdateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    AssetResource:
+      description: |
+        ((<oas_components_schemas_asset_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/AssetContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    AssetResources:
+      description: |
+        ((<oas_components_schemas_asset_resources_description))
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetResource'
+          minItems: 1
+          maxItems: 100
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    AssetCreateContent:
+      description: |
+        ((<oas_components_schemas_asset_create_content_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          UNIT: '#/components/schemas/UnitAsset'
+          GROUP: '#/components/schemas/GroupAsset'
+      oneOf:
+        - $ref: '#/components/schemas/UnitAsset'
+        - $ref: '#/components/schemas/GroupAsset'
+    AssetUpdateContent:
+      description: |
+        ((<oas_components_schemas_asset_update_content_description))
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/AssetName'
+      additionalProperties: false
+    AssetContent:
+      allOf:
+        - $ref: '#/components/schemas/Assets'
+        - $ref: '#/components/schemas/Asset'
+    Assets:
+      oneOf:
+        - $ref: '#/components/schemas/UnitAsset'
+        - $ref: '#/components/schemas/GroupAsset'
+        - $ref: '#/components/schemas/TenantAsset'
+    Asset:
+      description: |
+        ((<oas_components_schemas_asset_description))
+      type: object
+      required:
+        - id
+        - state
+      properties:
+        id:
+          $ref: '#/components/schemas/AssetIdentifier'
+        state:
+          $ref: '#/components/schemas/AssetState'
+        asset:
+          $ref: '#/components/schemas/AssetConnection'
+      additionalProperties: false
+    AssetName:
+      description: |
+        ((<oas_components_schemas_asset_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AssetState:
+      description: |
+        ((<oas_components_schemas_asset_state_description))
+      type: string
+      enum:
+        - ENABLED
+        - DISABLED
+    AssetConnection:
+      description: |
+        ((<oas_components_schemas_asset_connection_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/AssetIdentifier'
+      additionalProperties: false
+    TenantAsset:
+      description: |
+        ((<oas_components_schemas_tenant_asset_description))
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - TENANT
+        name:
+          $ref: '#/components/schemas/AssetName'
+      additionalProperties: false
+    GroupAsset:
+      description: |
+        ((<oas_components_schemas_group_asset_description))
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - GROUP
+        name:
+          $ref: '#/components/schemas/AssetName'
+      additionalProperties: false
+    UnitAsset:
+      description: |
+        ((<oas_components_schemas_unit_asset_description))
+      type: object
+      required:
+        - type
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - UNIT
+        name:
+          $ref: '#/components/schemas/AssetName'
+      additionalProperties: false
+    EntityCreateRequest:
+      description: |
+        ((<oas_components_schemas_entity_create_request_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/EntityCreateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    EntityUpdateRequest:
+      description: |
+        ((<oas_components_schemas_entity_update_request_description))
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/EntityUpdateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    EntityResource:
+      description: |
+        ((<oas_components_schemas_entity_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/EntityContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    EntityResources:
+      description: |
+        ((<oas_components_schemas_entity_resources_description))
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityResource'
+          minItems: 1
+          maxItems: 100
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    EntityCreateContent:
+      description: |
+        ((<oas_components_schemas_entity_create_content_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          COMPANY: '#/components/schemas/CompanyEntity'
+          INDIVIDUAL: '#/components/schemas/IndividualEntity'
+          LOCATION: '#/components/schemas/LocationEntity'
+      oneOf:
+        - $ref: '#/components/schemas/CompanyEntity'
+        - $ref: '#/components/schemas/IndividualEntity'
+        - $ref: '#/components/schemas/LocationEntity'
+    EntityUpdateContent:
+      description: |
+        ((<oas_components_schemas_entity_update_content_description))
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/EntityType'
+        state:
+          $ref: '#/components/schemas/EntityState'
+        mode:
+          $ref: '#/components/schemas/EntityMode'
+        entity:
+          $ref: '#/components/schemas/EntityConnection'
+        fiscalization:
+          $ref: '#/components/schemas/EntityFiscalization'
+        name:
+          $ref: '#/components/schemas/EntityName'
+        address:
+          $ref: '#/components/schemas/Address'
+        coordinates:
+          $ref: '#/components/schemas/LocationCoordinates'
+        label:
+          $ref: '#/components/schemas/LocationLabel'
+      additionalProperties: false
+    EntityContent:
+      allOf:
+        - $ref: '#/components/schemas/Entities'
+        - $ref: '#/components/schemas/Entity'
+    Entities:
+      oneOf:
+        - $ref: '#/components/schemas/CompanyEntity'
+        - $ref: '#/components/schemas/IndividualEntity'
+        - $ref: '#/components/schemas/LocationEntity'
+    Entity:
+      description: |
+        ((<oas_components_schemas_entity_description))
+      type: object
+      required:
+        - id
+        - state
+        - mode
+        - country
+        - systems
+      properties:
+        id:
+          $ref: '#/components/schemas/EntityIdentifier'
+        state:
+          $ref: '#/components/schemas/EntityState'
+        mode:
+          $ref: '#/components/schemas/EntityMode'
+        country:
+          $ref: '#/components/schemas/EntityCountry'
+        systems:
+          $ref: '#/components/schemas/EntitySystems'
+        vat_number:
+          $ref: '#/components/schemas/EntityVatNumber'
+      additionalProperties: false
+    EntityState:
+      description: |
+        ((<oas_components_schemas_entity_state_description))
+      type: string
+      enum:
+        - ACQUIRED
+        - COMMISSIONED
+        - DECOMMISSIONED
+    EntityMode:
+      description: |
+        ((<oas_components_schemas_entity_mode_description))
+      type: string
+      enum:
+        - INACTIVE
+        - OPERATIVE
+        - SUSPENDED
+        - DEGRADED
+    EntityFiscalization:
+      anyOf:
+        - $ref: '#/components/schemas/CompanyFiscalization'
+        - $ref: '#/components/schemas/IndividualFiscalization'
+    EntityCountry:
+      description: |
+        ((<oas_components_schemas_entity_country_description))
+      oneOf:
+        - $ref: '#/components/schemas/PlainString128'
+    EntityVatNumber:
+      description: |
+        ((<oas_components_schemas_entity_vat_number_description))
+      type: string
+      pattern: '^([A-Za-z0-9-]{1,20})$'
+      minLength: 1
+      maxLength: 20
+      example: FR12345678901
+    EntitySystems:
+      description: |
+        ((<oas_components_schemas_entity_systems_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/EntitySystem'
+    EntitySystem:
+      description: |
+        ((<oas_components_schemas_entity_system_description))
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          $ref: '#/components/schemas/EntitySystemType'
+        description:
+          $ref: '#/components/schemas/EntitySystemDescription'
+      additionalProperties: false
+    EntitySystemType:
+      description: |
+        ((<oas_components_schemas_entity_system_type_description))
+      type: string
+      enum:
+        - FISCAL_DEVICE
+    EntitySystemDescription:
+      description: |
+        ((<oas_components_schemas_entity_system_description_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    CompanyEntity:
+      description: |
+        ((<oas_components_schemas_company_entity_description))
+      type: object
+      required:
+        - type
+        - name
+        - address
+      properties:
+        type:
+          type: string
+          enum:
+            - COMPANY
+        name:
+          $ref: '#/components/schemas/CompanyName'
+        address:
+          $ref: '#/components/schemas/CompanyAddress'
+        fiscalization:
+          $ref: '#/components/schemas/CompanyFiscalization'
+      additionalProperties: false
+    CompanyName:
+      description: |
+        ((<oas_components_schemas_company_name_description))
+      type: object
+      required:
+        - legal
+        - trade
+      properties:
+        legal:
+          $ref: '#/components/schemas/LegalName'
+        trade:
+          $ref: '#/components/schemas/TradeName'
+      additionalProperties: false
+    LegalName:
+      description: |
+        ((<oas_components_schemas_legal_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    TradeName:
+      description: |
+        ((<oas_components_schemas_trade_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    CompanyAddress:
+      description: |
+        ((<oas_components_schemas_company_address_description))
+      allOf:
+        - $ref: '#/components/schemas/LegalAddress'
+    LegalAddress:
+      description: |
+        ((<oas_components_schemas_legal_address_description))
+      allOf:
+        - $ref: '#/components/schemas/Address'
+    IndividualEntity:
+      description: |
+        ((<oas_components_schemas_individual_entity_description))
+      type: object
+      required:
+        - type
+        - name
+        - address
+      properties:
+        type:
+          type: string
+          enum:
+            - INDIVIDUAL
+        name:
+          $ref: '#/components/schemas/IndividualName'
+        address:
+          $ref: '#/components/schemas/IndividualAddress'
+        fiscalization:
+          $ref: '#/components/schemas/IndividualFiscalization'
+      additionalProperties: false
+    IndividualName:
+      description: |
+        ((<oas_components_schemas_individual_name_description))
+      type: object
+      required:
+        - legal
+        - person
+      properties:
+        legal:
+          $ref: '#/components/schemas/LegalName'
+        person:
+          $ref: '#/components/schemas/PersonName'
+      additionalProperties: false
+    IndividualAddress:
+      description: |
+        ((<oas_components_schemas_individual_address_description))
+      allOf:
+        - $ref: '#/components/schemas/Address'
+    NaturalName:
+      description: |
+        ((<oas_components_schemas_natural_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PersonName'
+    NaturalAddress:
+      description: |
+        ((<oas_components_schemas_natural_address_description))
+      allOf:
+        - $ref: '#/components/schemas/Address'
+    LocationEntity:
+      description: |
+        ((<oas_components_schemas_location_entity_description))
+      type: object
+      required:
+        - type
+        - entity
+        - name
+        - address
+      properties:
+        type:
+          type: string
+          enum:
+            - LOCATION
+        entity:
+          $ref: '#/components/schemas/EntityConnection'
+        name:
+          $ref: '#/components/schemas/LocationName'
+        address:
+          $ref: '#/components/schemas/LocationAddress'
+        coordinates:
+          $ref: '#/components/schemas/LocationCoordinates'
+        label:
+          $ref: '#/components/schemas/LocationLabel'
+      additionalProperties: false
+    EntityConnection:
+      description: |
+        ((<oas_components_schemas_entity_connection_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/EntityIdentifier'
+      additionalProperties: false
+    EntityName:
+      description: |
+        ((<oas_components_schemas_entity_name_description))
+      oneOf:
+        - $ref: '#/components/schemas/CompanyName'
+        - $ref: '#/components/schemas/IndividualName'
+        - $ref: '#/components/schemas/LocationName'
+    EntityType:
+      description: |
+        ((<oas_components_schemas_entity_type_description))
+      type: string
+      enum:
+        - COMPANY
+        - INDIVIDUAL
+    CompanyFiscalization:
+      description: |
+        ((<oas_components_schemas_company_fiscalization_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          FR: '#/components/schemas/FrenchFiscalization'
+          IT: '#/components/schemas/ItalianFiscalization'
+      oneOf:
+        - $ref: '#/components/schemas/FrenchFiscalization'
+        - $ref: '#/components/schemas/ItalianFiscalization'
+    IndividualFiscalization:
+      description: |
+        ((<oas_components_schemas_individual_fiscalization_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          IT: '#/components/schemas/ItalianFiscalization'
+          FR: '#/components/schemas/FrenchFiscalization'
+      oneOf:
+        - $ref: '#/components/schemas/ItalianFiscalization'
+        - $ref: '#/components/schemas/FrenchFiscalization'
+    ItalianFiscalization:
+      description: |
+        ((<oas_components_schemas_italian_fiscalization_description))
+      type: object
+      required:
+        - type
+        - tax_id_number
+        - vat_id_number
+        - credentials
+      properties:
+        type:
+          type: string
+          enum:
+            - IT
+        tax_id_number:
+          $ref: '#/components/schemas/ItalianTaxIdentificationNumber'
+        vat_id_number:
+          $ref: '#/components/schemas/ItalianVatIdentificationNumber'
+        credentials:
+          $ref: '#/components/schemas/ItalianCredentials'
+      additionalProperties: false
+    ItalianTaxIdentificationNumber:
+      description: |
+        ((<oas_components_schemas_italian_tax_identification_number_description))
+      type: string
+      pattern: '^[0-9]{11}|[0-9A-Za-z]{16}'
+      minLength: 11
+      maxLength: 16
+      example: LLLLLL99L99L999L
+    ItalianPersonalTaxIdentificationNumber:
+      description: |
+        ((<oas_components_schemas_italian_personal_tax_identification_number_description))
+      type: string
+      minLength: 16
+      maxLength: 16
+      example: LLLLLL99L99L999L
+    ItalianVatIdentificationNumber:
+      description: |
+        ((<oas_components_schemas_italian_vat_identification_number_description))
+      type: string
+      pattern: '^([0-9]{11})$'
+      minLength: 11
+      maxLength: 11
+      example: '99999999999'
+    ItalianCredentials:
+      description: |
+        ((<oas_components_schemas_italian_credentials_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          FISCONLINE: '#/components/schemas/ItalianFisconlineCredentials'
+      oneOf:
+        - $ref: '#/components/schemas/ItalianFisconlineCredentials'
+    ItalianFisconlineCredentials:
+      description: |
+        ((<oas_components_schemas_italian_fisconline_credentials_description))
+      type: object
+      required:
+        - type
+        - pin
+        - password
+      properties:
+        type:
+          type: string
+          enum:
+            - FISCONLINE
+        pin:
+          $ref: '#/components/schemas/ItalianFisconlinePersonalIdentificationNumber'
+        password:
+          $ref: '#/components/schemas/ItalianFisconlinePassword'
+        tax_id_number:
+          $ref: '#/components/schemas/ItalianPersonalTaxIdentificationNumber'
+      additionalProperties: false
+    ItalianFisconlinePersonalIdentificationNumber:
+      description: |
+        ((<oas_components_schemas_italian_fisconline_personal_identification_number_description))
+      type: string
+      minLength: 1
+      maxLength: 10
+    ItalianFisconlinePassword:
+      description: |
+        ((<oas_components_schemas_italian_fisconline_password_description))
+      type: string
+      minLength: 1
+      maxLength: 50
+    FrenchFiscalization:
+      description: |
+        ((<oas_components_schemas_french_fiscalization_description))
+      type: object
+      required:
+        - type
+        - tax_id_number
+        - credentials
+      properties:
+        type:
+          type: string
+          enum:
+            - FR
+        tax_id_number:
+          $ref: '#/components/schemas/FrenchTaxIdentificationNumber'
+        fiscal_year_date:
+          $ref: '#/components/schemas/FiscalYearDate'
+        credentials:
+          $ref: '#/components/schemas/FrenchCredentials'
+      additionalProperties: false
+    FrenchTaxIdentificationNumber:
+      description: |
+        ((<oas_components_schemas_french_tax_identification_number_description))
+      type: string
+      pattern: '^([0-9]{9})$'
+      minLength: 9
+      maxLength: 9
+      example: '123456789'
+    FrenchCredentials:
+      description: |
+        ((<oas_components_schemas_french_credentials_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          LNE: '#/components/schemas/FrenchLneCredentials'
+          INFOCERT: '#/components/schemas/FrenchInfocertCredentials'
+      oneOf:
+        - $ref: '#/components/schemas/FrenchLneCredentials'
+        - $ref: '#/components/schemas/FrenchInfocertCredentials'
+    FrenchLneCredentials:
+      description: |
+        ((<oas_components_schemas_french_lne_credentials_description))
+      type: object
+      required:
+        - type
+        - properties
+      properties:
+        type:
+          type: string
+          enum:
+            - LNE
+        properties:
+          $ref: '#/components/schemas/EntityProperties'
+      additionalProperties: false
+    FrenchInfocertCredentials:
+      description: |
+        ((<oas_components_schemas_french_infocert_credentials_description))
+      type: object
+      required:
+        - type
+        - properties
+      properties:
+        type:
+          type: string
+          enum:
+            - INFOCERT
+        certificate_code:
+          $ref: '#/components/schemas/FrenchInfocertCertificateCode'
+        properties:
+          $ref: '#/components/schemas/EntityProperties'
+      additionalProperties: false
+    FrenchInfocertCertificateCode:
+      description: |
+        ((<oas_components_schemas_french_infocert_certificate_code_description))
+      type: string
+      pattern: '^[AB][0-9]{1,4}$'
+      minLength: 2
+      maxLength: 5
+      example: B9999
+    EntityProperties:
+      description: |
+        ((<oas_components_schemas_entity_properties_description))
+      type: object
+      maxProperties: 32
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    FiscalYearDate:
+      description: |
+        ((<oas_components_schemas_fiscalization_fiscal_year_date))      type: string
+      pattern: '^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
+      minLength: 5
+      maxLength: 5
+      example: 07-14
+    SystemCreateRequest:
+      description: |
+        ((<oas_components_schemas_system_create_request_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/SystemCreateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    SystemUpdateRequest:
+      description: |
+        ((<oas_components_schemas_system_update_request_description))
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/SystemUpdateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    SystemResource:
+      description: |
+        ((<oas_components_schemas_system_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/SystemContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    SystemResources:
+      description: |
+        ((<oas_components_schemas_system_resources_description))
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SystemResource'
+          minItems: 1
+          maxItems: 100
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    SystemCreateContent:
+      description: |
+        ((<oas_components_schemas_system_create_content_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          FISCAL_DEVICE: '#/components/schemas/FiscalDeviceSystem'
+      oneOf:
+        - $ref: '#/components/schemas/FiscalDeviceSystem'
+    SystemUpdateContent:
+      description: |
+        ((<oas_components_schemas_system_update_content_description))
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/SystemState'
+        mode:
+          $ref: '#/components/schemas/SystemMode'
+        entity:
+          $ref: '#/components/schemas/SystemEntity'
+        software:
+          $ref: '#/components/schemas/Software'
+        producer:
+          $ref: '#/components/schemas/ManufacturerPartNumberProduct'
+      additionalProperties: false
+    SystemContent:
+      allOf:
+        - $ref: '#/components/schemas/Systems'
+        - $ref: '#/components/schemas/System'
+    Systems:
+      oneOf:
+        - $ref: '#/components/schemas/FiscalDeviceSystem'
+    System:
+      description: |
+        ((<oas_components_schemas_system_description))
+      type: object
+      required:
+        - id
+        - state
+        - mode
+        - journal
+        - records
+        - vat_rates
+        - vat_exemptions
+      properties:
+        id:
+          $ref: '#/components/schemas/SystemIdentifier'
+        state:
+          $ref: '#/components/schemas/SystemState'
+        mode:
+          $ref: '#/components/schemas/SystemMode'
+        journal:
+          $ref: '#/components/schemas/SystemCryptography'
+        compliance:
+          $ref: '#/components/schemas/SystemCryptography'
+        records:
+          $ref: '#/components/schemas/SystemRecords'
+        vat_rates:
+          $ref: '#/components/schemas/SystemVatRates'
+        vat_exemptions:
+          $ref: '#/components/schemas/SystemVatExemptions'
+      additionalProperties: false
+    SystemState:
+      description: |
+        ((<oas_components_schemas_system_state_description))
+      type: string
+      enum:
+        - ACQUIRED
+        - COMMISSIONED
+        - DECOMMISSIONED
+    SystemMode:
+      description: |
+        ((<oas_components_schemas_system_mode_description))
+      type: string
+      enum:
+        - INACTIVE
+        - OPERATIVE
+        - SUSPENDED
+        - DEGRADED
+    SystemEntity:
+      description: |
+        ((<oas_components_schemas_system_entity_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/EntityIdentifier'
+      additionalProperties: false
+    SystemCryptography:
+      description: |
+        ((<oas_components_schemas_system_cryptography_description))
+      type: object
+      required:
+        - certificate
+        - signature
+      properties:
+        certificate:
+          $ref: '#/components/schemas/CryptographyCertificate'
+        signature:
+          $ref: '#/components/schemas/CryptographySignature'
+        software:
+          $ref: '#/components/schemas/Software'
+      additionalProperties: false
+    SystemRecords:
+      description: |
+        ((<oas_components_schemas_system_records_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/SystemRecord'
+    SystemRecord:
+      description: |
+        ((<oas_components_schemas_system_record_description))
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          $ref: '#/components/schemas/SystemRecordType'
+        description:
+          $ref: '#/components/schemas/SystemRecordDescription'
+      additionalProperties: false
+    SystemRecordType:
+      description: |
+        ((<oas_components_schemas_system_record_type_description))
+      type: string
+      enum:
+        - 'INTENTION::TRANSACTION'
+        - 'INTENTION::EVENT'
+        - 'INTENTION::EXPORT'
+        - 'INTENTION::DUPLICATE'
+        - 'INTENTION::CLOSING'
+        - 'TRANSACTION::RECEIPT'
+        - 'TRANSACTION::ABORT'
+        - 'TRANSACTION::CANCELLATION'
+        - 'TRANSACTION::CORRECTION'
+        - 'TRANSACTION::CREDIT_NOTE'
+        - 'TRANSACTION::DOWN_PAYMENT'
+        - 'TRANSACTION::DRAFT_RECEIPT'
+        - 'TRANSACTION::ENRICHMENT'
+        - 'TRANSACTION::INVOICE'
+        - 'TRANSACTION::PROOF_OF_PAYMENT'
+        - 'TRANSACTION::PRO_FORMA_INVOICE'
+        - 'CLOSING::DAILY'
+        - 'CLOSING::MONTHLY'
+        - 'CLOSING::YEARLY'
+        - 'EXPORT::RECORDS'
+    SystemRecordDescription:
+      description: |
+        ((<oas_components_schemas_system_record_description_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    SystemVatRates:
+      description: |
+        ((<oas_components_schemas_system_vat_rates_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/SystemVatRate'
+    SystemVatRate:
+      description: |
+        ((<oas_components_schemas_system_vat_rate_description))
+      type: object
+      required:
+        - code
+        - percentage
+        - description
+      properties:
+        code:
+          $ref: '#/components/schemas/SystemVatRateCode'
+        percentage:
+          $ref: '#/components/schemas/SystemVatRatePercentage'
+        description:
+          $ref: '#/components/schemas/SystemVatRateDescription'
+        historic:
+          $ref: '#/components/schemas/SystemVatRateHistoric'
+      additionalProperties: false
+    SystemVatRateCode:
+      description: |
+        ((<oas_components_schemas_system_vat_rate_code_description))
+      type: string
+      enum:
+        - STANDARD
+        - REDUCED_1
+        - REDUCED_2
+        - REDUCED_3
+      example: REDUCED_1
+    SystemVatRatePercentage:
+      description: |
+        ((<oas_components_schemas_system_vat_rate_percentage_description))
+      allOf:
+        - $ref: '#/components/schemas/UnsignedDecimal3p2'
+    SystemVatRateDescription:
+      description: |
+        ((<oas_components_schemas_system_vat_rate_description_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    SystemVatRateHistoric:
+      description: |
+        ((<oas_components_schemas_system_vat_rate_historic_description))
+      type: boolean
+    SystemVatExemptions:
+      description: |
+        ((<oas_components_schemas_system_vat_exemptions_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/SystemVatExemption'
+    SystemVatExemption:
+      description: |
+        ((<oas_components_schemas_system_vat_exemption_description))
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          $ref: '#/components/schemas/SystemVatExemptionCode'
+        description:
+          $ref: '#/components/schemas/SystemVatExemptionDescription'
+      additionalProperties: false
+    SystemVatExemptionCode:
+      description: |
+        ((<oas_components_schemas_system_vat_exemption_code_description))
+      type: string
+      enum:
+        - NOT_SUBJECT
+        - NOT_TAXABLE
+        - CAUSE_1
+        - CAUSE_2
+        - CAUSE_3
+        - CAUSE_4
+      example: CAUSE_1
+    SystemVatExemptionDescription:
+      description: |
+        ((<oas_components_schemas_system_vat_exemption_description_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    FiscalDeviceSystem:
+      description: |
+        ((<oas_components_schemas_system_fiscal_device_description))
+      type: object
+      required:
+        - type
+        - entity
+        - producer
+        - software
+      properties:
+        type:
+          type: string
+          enum:
+            - FISCAL_DEVICE
+        entity:
+          $ref: '#/components/schemas/SystemEntity'
+        producer:
+          $ref: '#/components/schemas/ManufacturerPartNumberProduct'
+        software:
+          $ref: '#/components/schemas/Software'
+      additionalProperties: false
+    RecordCreateRequest:
+      description: |
+        ((<oas_components_schemas_record_create_request_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/RecordCreateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    RecordUpdateRequest:
+      description: |
+        ((<oas_components_schemas_record_update_request_description))
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/RecordUpdateContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    RecordResource:
+      description: |
+        ((<oas_components_schemas_record_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/RecordContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    RecordResources:
+      description: |
+        ((<oas_components_schemas_record_resources_description))
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordResource'
+          minItems: 1
+          maxItems: 100
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    RecordCreateContent:
+      description: |
+        ((<oas_components_schemas_record_create_content_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          INTENTION: '#/components/schemas/IntentionRecord'
+          TRANSACTION: '#/components/schemas/TransactionRecord'
+      oneOf:
+        - $ref: '#/components/schemas/IntentionRecord'
+        - $ref: '#/components/schemas/TransactionRecord'
+    RecordUpdateContent:
+      description: |
+        ((<oas_components_schemas_record_update_content_description))
+      type: object
+      additionalProperties: false
+    RecordContent:
+      allOf:
+        - $ref: '#/components/schemas/Record'
+    Record:
+      description: |
+        ((<oas_components_schemas_record_description))
+      required:
+        - id
+        - type
+        - state
+        - mode
+        - system
+        - journal
+        - file
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/RecordIdentifier'
+        type:
+          $ref: '#/components/schemas/SystemRecordType'
+        state:
+          $ref: '#/components/schemas/RecordState'
+        mode:
+          $ref: '#/components/schemas/RecordMode'
+        system:
+          $ref: '#/components/schemas/RecordSystem'
+        record:
+          $ref: '#/components/schemas/RecordConnection'
+        used_in:
+          $ref: '#/components/schemas/RecordConnection'
+        replayed_by:
+          $ref: '#/components/schemas/RecordConnection'
+        journal:
+          $ref: '#/components/schemas/Journal'
+        file:
+          $ref: '#/components/schemas/RecordFile'
+        operation:
+          $ref: '#/components/schemas/RecordOperation'
+        compliance:
+          $ref: '#/components/schemas/Compliance'
+        transmission:
+          $ref: '#/components/schemas/RecordTransmission'
+        data:
+          $ref: '#/components/schemas/RecordData'
+        logs:
+          $ref: '#/components/schemas/RecordLogs'
+      additionalProperties: false
+    RecordFile:
+      description: |
+        ((<oas_components_schemas_record_file_description))
+      type: object
+      required:
+        - location
+      properties:
+        location:
+          $ref: '#/components/schemas/FileLocation'
+        artifact:
+          $ref: '#/components/schemas/RecordFileArtifact'
+        integrity:
+          $ref: '#/components/schemas/RecordFileIntegrity'
+      additionalProperties: false
+    RecordFileArtifact:
+      description: |
+        ((<oas_components_schemas_record_file_artifact_description))
+      allOf:
+        - $ref: '#/components/schemas/Content'
+    RecordFileIntegrity:
+      description: |
+        ((<oas_components_schemas_record_file_integrity_description))
+      allOf:
+        - $ref: '#/components/schemas/IntegrityContent'
+    RecordOperation:
+      description: |
+        ((<oas_components_schemas_record_operation_description))
+      allOf:
+        - $ref: '#/components/schemas/JsonData'
+    RecordTransmission:
+      description: |
+        ((<oas_components_schemas_record_transmission_description))
+      type: object
+      required:
+        - request
+      properties:
+        request:
+          $ref: '#/components/schemas/RecordTransmissionRequest'
+        response:
+          $ref: '#/components/schemas/RecordTransmissionResponse'
+      additionalProperties: false
+    RecordTransmissionRequest:
+      description: |
+        ((<oas_components_schemas_record_transmission_request_description))
+      allOf:
+        - $ref: '#/components/schemas/Content'
+    RecordTransmissionResponse:
+      description: |
+        ((<oas_components_schemas_record_transmission_response_description))
+      allOf:
+        - $ref: '#/components/schemas/Content'
+    RecordLogs:
+      description: |
+        ((<oas_components_schemas_record_logs_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/RecordLog'
+      minItems: 1
+      maxItems: 1000
+    RecordLog:
+      description: |
+        ((<oas_components_schemas_record_log_description))
+      type: object
+      required:
+        - severity
+        - message
+      properties:
+        severity:
+          $ref: '#/components/schemas/RecordLogSeverity'
+        message:
+          $ref: '#/components/schemas/RecordLogMessage'
+      additionalProperties: false
+    RecordLogSeverity:
+      description: |
+        ((<oas_components_schemas_record_log_severity_description))
+      type: string
+      enum:
+        - ERROR
+    RecordLogMessage:
+      description: |
+        ((<oas_components_schemas_record_log_message_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    RecordState:
+      description: |
+        ((<oas_components_schemas_record_state_description))
+      type: string
+      enum:
+        - ACCEPTED
+        - REJECTED
+        - COMPLETED
+        - FAILED
+    RecordMode:
+      description: |
+        ((<oas_components_schemas_record_mode_description))
+      type: string
+      enum:
+        - PROCESSING
+        - FINISHED
+    RecordSystem:
+      description: |
+        ((<oas_components_schemas_record_system_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/SystemIdentifier'
+      additionalProperties: false
+    RecordConnection:
+      description: |
+        ((<oas_components_schemas_record_connection_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/RecordIdentifier'
+      additionalProperties: false
+    RecordReference:
+      description: |
+        ((<oas_components_schemas_record_reference_description))
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/RecordIdentifier'
+        offset:
+          $ref: '#/components/schemas/RecordOffset'
+      additionalProperties: false
+    RecordOffset:
+      description: |
+        ((<oas_components_schemas_record_offset_description))
+      allOf:
+        - $ref: '#/components/schemas/UnsignedInteger4'
+    RecordCreators:
+      description: |
+        ((<oas_components_schemas_record_creators_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/RecordCreator'
+      minItems: 1
+      maxItems: 1
+    RecordCreator:
+      description: |
+        ((<oas_components_schemas_record_creator_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          PERSON: '#/components/schemas/PersonRecordCreator'
+      oneOf:
+        - $ref: '#/components/schemas/PersonRecordCreator'
+    PersonRecordCreator:
+      description: |
+        ((<oas_components_schemas_person_record_creator_description))
+      type: object
+      required:
+        - type
+        - label
+      properties:
+        type:
+          type: string
+          enum:
+            - PERSON
+        label:
+          $ref: '#/components/schemas/PersonLabel'
+        name:
+          $ref: '#/components/schemas/PersonName'
+      additionalProperties: false
+    RecordTrainingOption:
+      description: |
+        ((<oas_components_schemas_record_training_option_description))
+      type: boolean
+    IntentionRecord:
+      description: |
+        ((<oas_components_schemas_intention_record_description))
+      type: object
+      required:
+        - type
+        - system
+        - operation
+      properties:
+        type:
+          type: string
+          enum:
+            - INTENTION
+        system:
+          $ref: '#/components/schemas/RecordSystem'
+        operation:
+          $ref: '#/components/schemas/IntentionOperation'
+      additionalProperties: false
+    IntentionOperation:
+      description: |
+        ((<oas_components_schemas_intention_operation_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          TRANSACTION: '#/components/schemas/TransactionIntention'
+          EVENT: '#/components/schemas/EventIntention'
+          EXPORT: '#/components/schemas/ExportIntention'
+          DUPLICATE: '#/components/schemas/DuplicateIntention'
+          REPLAY: '#/components/schemas/ReplayIntention'
+      oneOf:
+        - $ref: '#/components/schemas/TransactionIntention'
+        - $ref: '#/components/schemas/EventIntention'
+        - $ref: '#/components/schemas/ExportIntention'
+        - $ref: '#/components/schemas/DuplicateIntention'
+        - $ref: '#/components/schemas/ReplayIntention'
+    TransactionIntention:
+      description: |
+        ((<oas_components_schemas_transaction_intention_description))
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - TRANSACTION
+        details:
+          $ref: '#/components/schemas/TransactionDetails'
+      additionalProperties: false
+    TransactionDetails:
+      description: |
+        ((<oas_components_schemas_transaction_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/TransactionProperties'
+      additionalProperties: false
+    TransactionProperties:
+      description: |
+        ((<oas_components_schemas_transaction_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    EventIntention:
+      description: |
+        ((<oas_components_schemas_event_intention_description))
+      type: object
+      required:
+        - type
+        - code
+        - description
+      properties:
+        type:
+          type: string
+          enum:
+            - EVENT
+        code:
+          $ref: '#/components/schemas/EventCode'
+        description:
+          $ref: '#/components/schemas/EventDescription'
+        occurred_at:
+          $ref: '#/components/schemas/EventTimestamp'
+        details:
+          $ref: '#/components/schemas/EventDetails'
+      additionalProperties: false
+    EventCode:
+      description: |
+        ((<oas_components_schemas_event_code_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString32'
+    EventDescription:
+      description: |
+        ((<oas_components_schemas_event_description_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    EventTimestamp:
+      description: |
+        ((<oas_components_schemas_event_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    EventDetails:
+      description: |
+        ((<oas_components_schemas_event_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/EventProperties'
+      additionalProperties: false
+    EventProperties:
+      description: |
+        ((<oas_components_schemas_event_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    ExportIntention:
+      description: |
+        ((<oas_components_schemas_export_intention_description))
+      type: object
+      required:
+        - type
+        - range
+      properties:
+        type:
+          type: string
+          enum:
+            - EXPORT
+        range:
+          $ref: '#/components/schemas/ExportRange'
+        filters:
+          $ref: '#/components/schemas/ExportFilters'
+        details:
+          $ref: '#/components/schemas/ExportDetails'
+      additionalProperties: false
+    ExportRange:
+      description: |
+        ((<oas_components_schemas_export_range_description))
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          $ref: '#/components/schemas/JournalSigningTimestamp'
+        end:
+          $ref: '#/components/schemas/JournalSigningTimestamp'
+      additionalProperties: false
+    ExportFilters:
+      description: |
+        ((<oas_components_schemas_export_filters_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/ExportFilter'
+      minItems: 1
+      maxItems: 1
+      uniqueItems: true
+      additionalProperties: false
+    ExportFilter:
+      description: |
+        ((<oas_components_schemas_export_filter_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          SYSTEM_RECORD: '#/components/schemas/ExportSystemRecordFilter'
+      oneOf:
+        - $ref: '#/components/schemas/ExportSystemRecordFilter'
+    ExportSystemRecordFilter:
+      description: |
+        ((<oas_components_schemas_export_system_record_filter_description))
+      type: object
+      required:
+        - type
+        - value
+      properties:
+        type:
+          type: string
+          enum:
+            - SYSTEM_RECORD
+        value:
+          $ref: '#/components/schemas/SystemRecordType'
+      additionalProperties: false
+    ExportDetails:
+      description: |
+        ((<oas_components_schemas_export_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/ExportProperties'
+      additionalProperties: false
+    ExportProperties:
+      description: |
+        ((<oas_components_schemas_export_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    DuplicateIntention:
+      description: |
+        ((<oas_components_schemas_duplicate_intention_description))
+      type: object
+      required:
+        - type
+        - record
+        - number
+        - reason
+      properties:
+        type:
+          type: string
+          enum:
+            - DUPLICATE
+        record:
+          $ref: '#/components/schemas/RecordReference'
+        number:
+          $ref: '#/components/schemas/DuplicateNumber'
+        reason:
+          $ref: '#/components/schemas/DuplicateReason'
+        details:
+          $ref: '#/components/schemas/DuplicateDetails'
+      additionalProperties: false
+    DuplicateNumber:
+      description: |
+        ((<oas_components_schemas_duplicate_number_description))
+      allOf:
+        - $ref: '#/components/schemas/UnsignedInteger4'
+    DuplicateReason:
+      description: |
+        ((<oas_components_schemas_duplicate_reason_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    DuplicateDetails:
+      description: |
+        ((<oas_components_schemas_duplicate_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/DuplicateProperties'
+      additionalProperties: false
+    DuplicateProperties:
+      description: |
+        ((<oas_components_schemas_duplicate_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    ReplayIntention:
+      description: |
+        ((<oas_components_schemas_replay_intention_description))
+      type: object
+      required:
+        - type
+        - recorded_at
+        - seed
+        - record
+        - content
+      properties:
+        type:
+          type: string
+          enum:
+            - REPLAY
+        recorded_at:
+          $ref: '#/components/schemas/ReplayRecordedTimestamp'
+        seed:
+          $ref: '#/components/schemas/ReplaySeed'
+        record:
+          $ref: '#/components/schemas/ReplayRecord'
+        content:
+          $ref: '#/components/schemas/ReplayContent'
+      additionalProperties: false
+    ReplayRecordedTimestamp:
+      description: |
+        ((<oas_components_schemas_replay_recorded_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    ReplaySeed:
+      description: |
+        ((<oas_components_schemas_replay_seed_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString64'
+    ReplayRecord:
+      description: |
+        ((<oas_components_schemas_replay_record_description))
+      allOf:
+        - $ref: '#/components/schemas/RecordConnection'
+    ReplayContent:
+      description: |
+        ((<oas_components_schemas_intention_replay_content_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          INTENTION: '#/components/schemas/ReplayIntentionContent'
+          TRANSACTION: '#/components/schemas/ReplayTransactionContent'
+      oneOf:
+        - $ref: '#/components/schemas/ReplayIntentionContent'
+        - $ref: '#/components/schemas/ReplayTransactionContent'
+    ReplayIntentionContent:
+      description: |
+        ((<oas_components_schemas_replay_intention_content_description))
+      type: object
+      required:
+        - type
+        - system
+        - operation
+      properties:
+        type:
+          type: string
+          enum:
+            - INTENTION
+        system:
+          $ref: '#/components/schemas/RecordSystem'
+        operation:
+          $ref: '#/components/schemas/ReplayIntentionOperation'
+      additionalProperties: false
+    ReplayIntentionOperation:
+      description: |
+        ((<oas_components_schemas_replay_intention_operation_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          TRANSACTION: '#/components/schemas/TransactionIntention'
+          EVENT: '#/components/schemas/EventIntention'
+          EXPORT: '#/components/schemas/ExportIntention'
+          DUPLICATE: '#/components/schemas/DuplicateIntention'
+      oneOf:
+        - $ref: '#/components/schemas/TransactionIntention'
+        - $ref: '#/components/schemas/EventIntention'
+        - $ref: '#/components/schemas/ExportIntention'
+        - $ref: '#/components/schemas/DuplicateIntention'
+    ReplayTransactionContent:
+      description: |
+        ((<oas_components_schemas_replay_transaction_content_description))
+      type: object
+      required:
+        - type
+        - record
+        - operation
+      properties:
+        type:
+          type: string
+          enum:
+            - TRANSACTION
+        record:
+          $ref: '#/components/schemas/RecordReference'
+        operation:
+          $ref: '#/components/schemas/TransactionOperation'
+      additionalProperties: false
+    TransactionRecord:
+      description: |
+        ((<oas_components_schemas_transaction_record_description))
+      type: object
+      required:
+        - type
+        - record
+        - operation
+      properties:
+        type:
+          type: string
+          enum:
+            - TRANSACTION
+        record:
+          $ref: '#/components/schemas/RecordReference'
+        operation:
+          $ref: '#/components/schemas/TransactionOperation'
+      additionalProperties: false
+    TransactionOperation:
+      description: |
+        ((<oas_components_schemas_transaction_operation_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          RECEIPT: '#/components/schemas/ReceiptTransaction'
+          ABORT: '#/components/schemas/AbortTransaction'
+          CANCELLATION: '#/components/schemas/CancellationTransaction'
+          CORRECTION: '#/components/schemas/CorrectionTransaction'
+          DOWN_PAYMENT: '#/components/schemas/DownPaymentTransaction'
+          DRAFT_RECEIPT: '#/components/schemas/DraftReceiptTransaction'
+          ENRICHMENT: '#/components/schemas/EnrichmentTransaction'
+          INVOICE: '#/components/schemas/InvoiceTransaction'
+          PROOF_OF_PAYMENT: '#/components/schemas/ProofOfPaymentTransaction'
+          PRO_FORMA_INVOICE: '#/components/schemas/ProFormaInvoiceTransaction'
+      oneOf:
+        - $ref: '#/components/schemas/AbortTransaction'
+        - $ref: '#/components/schemas/ReceiptTransaction'
+        - $ref: '#/components/schemas/DraftReceiptTransaction'
+        - $ref: '#/components/schemas/InvoiceTransaction'
+        - $ref: '#/components/schemas/ProFormaInvoiceTransaction'
+        - $ref: '#/components/schemas/EnrichmentTransaction'
+        - $ref: '#/components/schemas/CorrectionTransaction'
+        - $ref: '#/components/schemas/CancellationTransaction'
+        - $ref: '#/components/schemas/ProofOfPaymentTransaction'
+        - $ref: '#/components/schemas/DownPaymentTransaction'
+    AbortTransaction:
+      description: |
+        ((<oas_components_schemas_abort_transaction_description))
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - ABORT
+        details:
+          $ref: '#/components/schemas/AbortDetails'
+      additionalProperties: false
+    AbortDetails:
+      description: |
+        ((<oas_components_schemas_abort_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/AbortProperties'
+      additionalProperties: false
+    AbortProperties:
+      description: |
+        ((<oas_components_schemas_abort_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    ReceiptTransaction:
+      description: |
+        ((<oas_components_schemas_receipt_transaction_description))
+      type: object
+      required:
+        - type
+        - document
+        - entries
+        - payments
+      properties:
+        type:
+          type: string
+          enum:
+            - RECEIPT
+        document:
+          $ref: '#/components/schemas/Document'
+        entries:
+          $ref: '#/components/schemas/Entries'
+        customer:
+          $ref: '#/components/schemas/Customer'
+        payments:
+          $ref: '#/components/schemas/Payments'
+        details:
+          $ref: '#/components/schemas/ReceiptDetails'
+      additionalProperties: false
+    ReceiptDetails:
+      description: |
+        ((<oas_components_schemas_receipt_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/ReceiptProperties'
+      additionalProperties: false
+    ReceiptProperties:
+      description: |
+        ((<oas_components_schemas_receipt_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    DraftReceiptTransaction:
+      description: |
+        ((<oas_components_schemas_draft_receipt_transaction_description))
+      type: object
+      required:
+        - type
+        - document
+        - entries
+      properties:
+        type:
+          type: string
+          enum:
+            - DRAFT_RECEIPT
+        document:
+          $ref: '#/components/schemas/Document'
+        entries:
+          $ref: '#/components/schemas/Entries'
+        customer:
+          $ref: '#/components/schemas/Customer'
+        details:
+          $ref: '#/components/schemas/DraftReceiptDetails'
+      additionalProperties: false
+    DraftReceiptDetails:
+      description: |
+        ((<oas_components_schemas_draft_receipt_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/DraftReceiptProperties'
+      additionalProperties: false
+    DraftReceiptProperties:
+      description: |
+        ((<oas_components_schemas_draft_receipt_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    EnrichmentTransaction:
+      description: |
+        ((<oas_components_schemas_enrichment_transaction_description))
+      type: object
+      required:
+        - type
+        - record
+        - recipients
+        - breakdown
+      properties:
+        type:
+          type: string
+          enum:
+            - ENRICHMENT
+        record:
+          $ref: '#/components/schemas/EnrichmentRecord'
+        recipients:
+          $ref: '#/components/schemas/Recipients'
+        breakdown:
+          $ref: '#/components/schemas/VatBreakdown'
+        details:
+          $ref: '#/components/schemas/EnrichmentDetails'
+      additionalProperties: false
+    EnrichmentRecord:
+      description: |
+        ((<oas_components_schemas_enrichment_record_description))
+      allOf:
+        - $ref: '#/components/schemas/RecordReference'
+    EnrichmentDetails:
+      description: |
+        ((<oas_components_schemas_enrichment_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/EnrichmentProperties'
+      additionalProperties: false
+    EnrichmentProperties:
+      description: |
+        ((<oas_components_schemas_enrichment_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    InvoiceTransaction:
+      description: |
+        ((<oas_components_schemas_invoice_transaction_description))
+      type: object
+      required:
+        - type
+        - document
+        - entries
+        - recipients
+        - payments
+        - breakdown
+      properties:
+        type:
+          type: string
+          enum:
+            - INVOICE
+        document:
+          $ref: '#/components/schemas/Document'
+        entries:
+          $ref: '#/components/schemas/Entries'
+        recipients:
+          $ref: '#/components/schemas/Recipients'
+        payments:
+          $ref: '#/components/schemas/Payments'
+        breakdown:
+          $ref: '#/components/schemas/VatBreakdown'
+        details:
+          $ref: '#/components/schemas/InvoiceDetails'
+      additionalProperties: false
+    InvoiceDetails:
+      description: |
+        ((<oas_components_schemas_invoice_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/InvoiceProperties'
+      additionalProperties: false
+    InvoiceProperties:
+      description: |
+        ((<oas_components_schemas_invoice_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    ProFormaInvoiceTransaction:
+      description: |
+        ((<oas_components_schemas_pro_forma_invoice_transaction_description))
+      type: object
+      required:
+        - type
+        - document
+        - entries
+        - recipients
+      properties:
+        type:
+          type: string
+          enum:
+            - PRO_FORMA_INVOICE
+        document:
+          $ref: '#/components/schemas/Document'
+        entries:
+          $ref: '#/components/schemas/Entries'
+        recipients:
+          $ref: '#/components/schemas/Recipients'
+        breakdown:
+          $ref: '#/components/schemas/VatBreakdown'
+        details:
+          $ref: '#/components/schemas/ProFormaInvoiceDetails'
+      additionalProperties: false
+    ProFormaInvoiceDetails:
+      description: |
+        ((<oas_components_schemas_pro_forma_invoice_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/ProFormaInvoiceProperties'
+      additionalProperties: false
+    ProFormaInvoiceProperties:
+      description: |
+        ((<oas_components_schemas_pro_forma_invoice_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    CorrectionTransaction:
+      description: |
+        ((<oas_components_schemas_correction_transaction_description))
+      type: object
+      required:
+        - type
+        - record
+        - data
+      properties:
+        type:
+          type: string
+          enum:
+            - CORRECTION
+        record:
+          $ref: '#/components/schemas/CorrectionRecord'
+        data:
+          $ref: '#/components/schemas/CorrectionData'
+        details:
+          $ref: '#/components/schemas/CorrectionDetails'
+      additionalProperties: false
+    CorrectionRecord:
+      description: |
+        ((<oas_components_schemas_correction_record_description))
+      allOf:
+        - $ref: '#/components/schemas/RecordReference'
+    CorrectionData:
+      description: |
+        ((<oas_components_schemas_correction_data_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          RECEIPT: '#/components/schemas/ReceiptTransaction'
+      oneOf:
+        - $ref: '#/components/schemas/ReceiptTransaction'
+    CorrectionDetails:
+      description: |
+        ((<oas_components_schemas_correction_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/CorrectionProperties'
+      additionalProperties: false
+    CorrectionProperties:
+      description: |
+        ((<oas_components_schemas_correction_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    CancellationTransaction:
+      description: |
+        ((<oas_components_schemas_cancellation_transaction_description))
+      type: object
+      required:
+        - type
+        - record
+      properties:
+        type:
+          type: string
+          enum:
+            - CANCELLATION
+        record:
+          $ref: '#/components/schemas/CancellationRecord'
+        details:
+          $ref: '#/components/schemas/CancellationDetails'
+      additionalProperties: false
+    CancellationRecord:
+      description: |
+        ((<oas_components_schemas_cancellation_record_description))
+      allOf:
+        - $ref: '#/components/schemas/RecordReference'
+    CancellationDetails:
+      description: |
+        ((<oas_components_schemas_cancellation_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/CancellationProperties'
+      additionalProperties: false
+    CancellationProperties:
+      description: |
+        ((<oas_components_schemas_cancellation_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    ProofOfPaymentTransaction:
+      description: |
+        ((<oas_components_schemas_proof_of_payment_transaction_description))
+      type: object
+      required:
+        - type
+        - record
+        - payments
+      properties:
+        type:
+          type: string
+          enum:
+            - PROOF_OF_PAYMENT
+        record:
+          $ref: '#/components/schemas/ProofOfPaymentRecord'
+        payments:
+          $ref: '#/components/schemas/Payments'
+        details:
+          $ref: '#/components/schemas/ProofOfPaymentDetails'
+      additionalProperties: false
+    ProofOfPaymentRecord:
+      description: |
+        ((<oas_components_schemas_proof_of_payment_record_description))
+      allOf:
+        - $ref: '#/components/schemas/RecordReference'
+    ProofOfPaymentDetails:
+      description: |
+        ((<oas_components_schemas_proof_of_payment_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/ProofOfPaymentProperties'
+      additionalProperties: false
+    ProofOfPaymentProperties:
+      description: |
+        ((<oas_components_schemas_proof_of_payment_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    DownPaymentTransaction:
+      description: |
+        ((<oas_components_schemas_down_payment_transaction_description))
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - DOWN_PAYMENT
+        details:
+          $ref: '#/components/schemas/DownPaymentDetails'
+      additionalProperties: false
+    DownPaymentDetails:
+      description: |
+        ((<oas_components_schemas_down_payment_details_description))
+      type: object
+      required:
+        - creators
+      properties:
+        creators:
+          $ref: '#/components/schemas/RecordCreators'
+        training:
+          $ref: '#/components/schemas/RecordTrainingOption'
+        properties:
+          $ref: '#/components/schemas/DownPaymentProperties'
+      additionalProperties: false
+    DownPaymentProperties:
+      description: |
+        ((<oas_components_schemas_down_payment_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    FileResource:
+      description: |
+        ((<oas_components_schemas_file_resource_description))
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          $ref: '#/components/schemas/FileContent'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      additionalProperties: false
+    FileResources:
+      description: |
+        ((<oas_components_schemas_file_resources_description))
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileResource'
+          minItems: 1
+          maxItems: 100
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      additionalProperties: false
+    FileContent:
+      allOf:
+        - $ref: '#/components/schemas/File'
+    File:
+      description: |
+        ((<oas_components_schemas_file_description))
+      required:
+        - id
+        - created_at
+        - system
+        - location
+        - artifact
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/FileIdentifier'
+        created_at:
+          $ref: '#/components/schemas/FileCreationTimestamp'
+        system:
+          $ref: '#/components/schemas/RecordSystem'
+        location:
+          $ref: '#/components/schemas/FileLocation'
+        artifact:
+          $ref: '#/components/schemas/FileArtifact'
+        integrity:
+          $ref: '#/components/schemas/FileIntegrity'
+      additionalProperties: false
+    FileLocation:
+      description: |
+        ((<oas_components_schemas_file_location_description))
+      type: string
+      enum:
+        - SERVICE
+        - ARCHIVE
+    FileArtifact:
+      description: |
+        ((<oas_components_schemas_file_artifact_description))
+      required:
+        - type
+        - path
+      properties:
+        type:
+          $ref: '#/components/schemas/FileType'
+        path:
+          $ref: '#/components/schemas/FilePath'
+      additionalProperties: false
+    FileType:
+      description: |
+        ((<oas_components_schemas_file_type_description))
+      type: string
+      enum:
+        - application/zip
+    FilePath:
+      description: |
+        ((<oas_components_schemas_data_url_description))
+      allOf:
+        - $ref: '#/components/schemas/UniformResourceIdentifier'
+    FileIntegrity:
+      description: |
+        ((<oas_components_schemas_file_integrity_description))
+      required:
+        - type
+        - path
+      properties:
+        type:
+          $ref: '#/components/schemas/IntegrityContentType'
+        path:
+          $ref: '#/components/schemas/FilePath'
+      additionalProperties: false
+    FileCreationTimestamp:
+      description: |
+        ((<oas_components_schemas_file_creation_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    Document:
+      description: |
+        ((<oas_components_schemas_document_description))
+      type: object
+      required:
+        - number
+        - total_vat
+      properties:
+        number:
+          $ref: '#/components/schemas/DocumentNumber'
+        series:
+          $ref: '#/components/schemas/DocumentSeries'
+        text:
+          $ref: '#/components/schemas/DocumentText'
+        activity_code:
+          $ref: '#/components/schemas/DocumentActivityCode'
+        issued_at:
+          $ref: '#/components/schemas/DocumentIssuingTimestamp'
+        operation_date:
+          $ref: '#/components/schemas/DocumentOperationDate'
+        total_vat:
+          $ref: '#/components/schemas/DocumentTotalVat'
+      additionalProperties: false
+    DocumentNumber:
+      description: |
+        ((<oas_components_schemas_document_number_description))
+      allOf:
+        - $ref: '#/components/schemas/DocumentIdentifier'
+    DocumentSeries:
+      description: |
+        ((<oas_components_schemas_document_series_description))
+      allOf:
+        - $ref: '#/components/schemas/DocumentIdentifier'
+    DocumentIdentifier:
+      description: |
+        ((<oas_components_schemas_document_identifier_description))
+      type: string
+      pattern: '^[0-9A-Z_/\-\.]{1,20}$'
+      minLength: 1
+      maxLength: 20
+      example: '2022'
+    DocumentText:
+      description: |
+        ((<oas_components_schemas_document_text_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    DocumentActivityCode:
+      description: |
+        ((<oas_components_schemas_document_activity_code_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString32'
+    DocumentIssuingTimestamp:
+      description: |
+        ((<oas_components_schemas_document_issuing_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    DocumentOperationDate:
+      description: |
+        ((<oas_components_schemas_document_operation_date_description))
+      allOf:
+        - $ref: '#/components/schemas/DateFormatISO8601'
+    DocumentTotalVat:
+      description: |
+        ((<oas_components_schemas_document_total_vat_description))
+      type: object
+      required:
+        - amount
+        - exclusive
+        - inclusive
+      properties:
+        amount:
+          $ref: '#/components/schemas/VatAmount'
+        exclusive:
+          $ref: '#/components/schemas/VatExclusive'
+        inclusive:
+          $ref: '#/components/schemas/VatInclusive'
+      additionalProperties: false
+    Entries:
+      description: |
+        ((<oas_components_schemas_entries_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/Entry'
+      minItems: 1
+      maxItems: 1000
+    Entry:
+      discriminator:
+        propertyName: type
+        mapping:
+          SALE: '#/components/schemas/SaleEntry'
+          RETURN: '#/components/schemas/ReturnEntry'
+          VOUCHER: '#/components/schemas/VoucherEntry'
+      oneOf:
+        - $ref: '#/components/schemas/SaleEntry'
+        - $ref: '#/components/schemas/ReturnEntry'
+        - $ref: '#/components/schemas/VoucherEntry'
+    SaleEntry:
+      description: |
+        ((<oas_components_schemas_sale_entry_description))
+      type: object
+      required:
+        - type
+        - data
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - SALE
+        data:
+          $ref: '#/components/schemas/EntryData'
+        details:
+          $ref: '#/components/schemas/EntryDetails'
+      additionalProperties: false
+    ReturnEntry:
+      description: |
+        ((<oas_components_schemas_return_entry_description))
+      type: object
+      required:
+        - type
+        - data
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - RETURN
+        data:
+          $ref: '#/components/schemas/EntryData'
+        details:
+          $ref: '#/components/schemas/EntryDetails'
+      additionalProperties: false
+    VoucherEntry:
+      description: |
+        ((<oas_components_schemas_voucher_entry_description))
+      type: object
+      required:
+        - type
+        - data
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - VOUCHER
+        data:
+          $ref: '#/components/schemas/EntryData'
+        details:
+          $ref: '#/components/schemas/EntryDetails'
+      additionalProperties: false
+    EntryProperties:
+      description: |
+        ((<oas_components_schemas_entry_properties_description))
+      type: object
+      maxProperties: 32
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    EntryDetails:
+      description: |
+        ((<oas_components_schemas_entry_details_description))
+      type: object
+      required:
+        - concept
+      properties:
+        concept:
+          $ref: '#/components/schemas/EntryConcept'
+        purpose:
+          $ref: '#/components/schemas/EntryPurpose'
+        description:
+          $ref: '#/components/schemas/EntryDescription'
+        regulatory:
+          $ref: '#/components/schemas/EntryRegulatory'
+        label:
+          $ref: '#/components/schemas/EntryLabel'
+        number:
+          $ref: '#/components/schemas/EntryNumber'
+        properties:
+          $ref: '#/components/schemas/EntryProperties'
+      additionalProperties: false
+    EntryConcept:
+      description: |
+        ((<oas_components_schemas_entry_concept_description))
+      type: string
+      enum:
+        - GOOD
+        - SERVICE
+    EntryPurpose:
+      description: |
+        ((<oas_components_schemas_entry_purpose_description))
+      type: string
+      enum:
+        - STANDARD
+        - GIFT
+      default: STANDARD
+    EntryDescription:
+      description: |
+        ((<oas_components_schemas_entry_description_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    EntryRegulatory:
+      description: |
+        ((<oas_components_schemas_entry_regulatory_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    EntryLabel:
+      description: |
+        ((<oas_components_schemas_entry_label_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    EntryNumber:
+      description: |
+        ((<oas_components_schemas_entry_number_description))
+      allOf:
+        - $ref: '#/components/schemas/UnsignedInteger4'
+    EntryText:
+      description: |
+        ((<oas_components_schemas_entry_text_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    EntryData:
+      description: |
+        ((<oas_components_schemas_entry_data_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          ITEM: '#/components/schemas/ItemEntry'
+          GROUP: '#/components/schemas/GroupEntry'
+      oneOf:
+        - $ref: '#/components/schemas/ItemEntry'
+        - $ref: '#/components/schemas/GroupEntry'
+    ItemEntry:
+      description: |
+        ((<oas_components_schemas_item_entry_description))
+      type: object
+      required:
+        - type
+        - text
+        - unit
+        - value
+        - vat
+      properties:
+        type:
+          type: string
+          enum:
+            - ITEM
+        text:
+          $ref: '#/components/schemas/EntryText'
+        unit:
+          $ref: '#/components/schemas/Unit'
+        value:
+          $ref: '#/components/schemas/EntryValue'
+        vat:
+          $ref: '#/components/schemas/EntryVat'
+        product:
+          $ref: '#/components/schemas/Product'
+      additionalProperties: false
+    GroupEntry:
+      description: |
+        ((<oas_components_schemas_group_entry_description))
+      type: object
+      required:
+        - type
+        - text
+        - unit
+        - value
+        - vat
+        - items
+      properties:
+        type:
+          type: string
+          enum:
+            - GROUP
+        text:
+          $ref: '#/components/schemas/EntryText'
+        unit:
+          $ref: '#/components/schemas/Unit'
+        value:
+          $ref: '#/components/schemas/GroupEntryValue'
+        vat:
+          $ref: '#/components/schemas/GroupEntryVat'
+        items:
+          $ref: '#/components/schemas/GroupEntryItems'
+      additionalProperties: false
+    GroupEntryValue:
+      description: |
+        ((<oas_components_schemas_group_entry_value_description))
+      allOf:
+        - $ref: '#/components/schemas/EntryValue'
+    GroupEntryVat:
+      description: |
+        ((<oas_components_schemas_group_entry_vat_description))
+      oneOf:
+        - $ref: '#/components/schemas/EntryVat'
+    GroupEntryItems:
+      description: |
+        ((<oas_components_schemas_group_entry_items_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/GroupEntryItem'
+      minItems: 1
+      maxItems: 10
+    GroupEntryItem:
+      description: |
+        ((<oas_components_schemas_group_entry_item_description))
+      allOf:
+        - $ref: '#/components/schemas/ItemEntry'
+    RecordData:
+      description: |
+        ((<oas_components_schemas_record_data_description))
+      type: object
+      required:
+        - location
+      properties:
+        location:
+          $ref: '#/components/schemas/FileLocation'
+        artifact:
+          $ref: '#/components/schemas/FileArtifact'
+        integrity:
+          $ref: '#/components/schemas/RecordDataIntegrity'
+      additionalProperties: false
+    RecordDataIntegrity:
+      description: |
+        ((<oas_components_schemas_record_data_integrity_description))
+      allOf:
+        - $ref: '#/components/schemas/IntegrityContent'
+    Compliance:
+      description: |
+        ((<oas_components_schemas_compliance_description))
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/ComplianceData'
+        url:
+          $ref: '#/components/schemas/ComplianceUrl'
+        artifact:
+          $ref: '#/components/schemas/ComplianceArtifact'
+      additionalProperties: false
+    ComplianceData:
+      description: |
+        ((<oas_components_schemas_compliance_data_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    ComplianceUrl:
+      description: |
+        ((<oas_components_schemas_compliance_url_description))
+      allOf:
+        - $ref: '#/components/schemas/UniformResourceIdentifier'
+    ComplianceArtifact:
+      description: |
+        ((<oas_components_schemas_compliance_artifact_description))
+      allOf:
+        - $ref: '#/components/schemas/Content'
+    Journal:
+      description: |
+        ((<oas_components_schemas_journal_description))
+      type: object
+      required:
+        - signature
+        - signed_at
+      properties:
+        signature:
+          $ref: '#/components/schemas/JournalSignature'
+        signed_at:
+          $ref: '#/components/schemas/JournalSigningTimestamp'
+        record:
+          $ref: '#/components/schemas/JournalPreviousRecord'
+      additionalProperties: false
+    JournalSignature:
+      description: |
+        ((<oas_components_schemas_journal_signature_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString64'
+    JournalSigningTimestamp:
+      description: |
+        ((<oas_components_schemas_journal_signing_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    JournalPreviousRecord:
+      description: |
+        ((<oas_components_schemas_journal_previous_record_description))
+      allOf:
+        - $ref: '#/components/schemas/RecordConnection'
+    EntryValue:
+      description: |
+        ((<oas_components_schemas_entry_value_description))
+      type: object
+      required:
+        - base
+      properties:
+        base:
+          $ref: '#/components/schemas/BaseValue'
+        discount:
+          $ref: '#/components/schemas/DiscountValue'
+        surcharge:
+          $ref: '#/components/schemas/SurchargeValue'
+      additionalProperties: false
+    BaseValue:
+      description: |
+        ((<oas_components_schemas_base_value_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    DiscountValue:
+      description: |
+        ((<oas_components_schemas_discount_value_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    SurchargeValue:
+      description: |
+        ((<oas_components_schemas_surcharge_value_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    Unit:
+      description: |
+        ((<oas_components_schemas_unit_description))
+      type: object
+      required:
+        - quantity
+        - price
+      properties:
+        quantity:
+          $ref: '#/components/schemas/UnitQuantity'
+        measure:
+          $ref: '#/components/schemas/UnitMeasure'
+        factor:
+          $ref: '#/components/schemas/UnitFactor'
+        price:
+          $ref: '#/components/schemas/UnitPrice'
+      additionalProperties: false
+    UnitQuantity:
+      description: |
+        ((<oas_components_schemas_unit_quantity_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    UnitMeasure:
+      description: |
+        ((<oas_components_schemas_unit_measure_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString32'
+    UnitFactor:
+      description: |
+        ((<oas_components_schemas_unit_factor_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    UnitPrice:
+      description: |
+        ((<oas_components_schemas_unit_price_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    EntryVat:
+      description: |
+        ((<oas_components_schemas_entry_vat_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          VAT_RATE: '#/components/schemas/VatRateCategory'
+          VAT_EXEMPTION: '#/components/schemas/VatExemptionCategory'
+      oneOf:
+        - $ref: '#/components/schemas/VatRateCategory'
+        - $ref: '#/components/schemas/VatExemptionCategory'
+    VatRateCategory:
+      description: |
+        ((<oas_components_schemas_vat_rate_category_description))
+      type: object
+      required:
+        - type
+        - code
+        - percentage
+        - amount
+        - exclusive
+        - inclusive
+      properties:
+        type:
+          type: string
+          enum:
+            - VAT_RATE
+        code:
+          $ref: '#/components/schemas/SystemVatRateCode'
+        percentage:
+          $ref: '#/components/schemas/SystemVatRatePercentage'
+        amount:
+          $ref: '#/components/schemas/VatAmount'
+        exclusive:
+          $ref: '#/components/schemas/VatExclusive'
+        inclusive:
+          $ref: '#/components/schemas/VatInclusive'
+      additionalProperties: false
+    VatExemptionCategory:
+      description: |
+        ((<oas_components_schemas_vat_exemption_category_description))
+      type: object
+      required:
+        - type
+        - code
+      properties:
+        type:
+          type: string
+          enum:
+            - VAT_EXEMPTION
+        code:
+          $ref: '#/components/schemas/SystemVatExemptionCode'
+      additionalProperties: false
+    VatAmount:
+      description: |
+        ((<oas_components_schemas_vat_amount_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    VatExclusive:
+      description: |
+        ((<oas_components_schemas_vat_exclusive_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    VatInclusive:
+      description: |
+        ((<oas_components_schemas_vat_inclusive_description))
+      allOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    VatBreakdown:
+      description: |
+        ((<oas_components_schemas_vat_breakdown_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/VatCategory'
+      minItems: 1
+      maxItems: 100
+    VatCategory:
+      description: |
+        ((<oas_components_schemas_vat_category_description))
+      type: object
+      required:
+        - percentage
+        - amount
+      properties:
+        percentage:
+          $ref: '#/components/schemas/SystemVatRatePercentage'
+        amount:
+          $ref: '#/components/schemas/VatAmount'
+      additionalProperties: false
+    Customer:
+      description: |
+        ((<oas_components_schemas_customer_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          EXTERNAL: '#/components/schemas/ExternalCustomer'
+          INTERNAL: '#/components/schemas/InternalCustomer'
+      oneOf:
+        - $ref: '#/components/schemas/ExternalCustomer'
+        - $ref: '#/components/schemas/InternalCustomer'
+    ExternalCustomer:
+      description: |
+        ((<oas_components_schemas_external_customer_description))
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - EXTERNAL
+        code:
+          $ref: '#/components/schemas/CustomerCode'
+      additionalProperties: false
+    InternalCustomer:
+      description: |
+        ((<oas_components_schemas_internal_customer_description))
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - INTERNAL
+        code:
+          $ref: '#/components/schemas/CustomerCode'
+      additionalProperties: false
+    CustomerCode:
+      description: |
+        ((<oas_components_schemas_customer_code_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    Recipients:
+      description: |
+        ((<oas_components_schemas_recipients_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/Recipient'
+      minItems: 1
+      maxItems: 100
+    Recipient:
+      description: |
+        ((<oas_components_schemas_recipient_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          CONSUMER: '#/components/schemas/ConsumerRecipient'
+          BUSINESS: '#/components/schemas/BusinessRecipient'
+      oneOf:
+        - $ref: '#/components/schemas/ConsumerRecipient'
+        - $ref: '#/components/schemas/BusinessRecipient'
+    ConsumerRecipient:
+      description: |
+        ((<oas_components_schemas_customer_recipient_description))
+      type: object
+      required:
+        - type
+        - name
+        - address
+      properties:
+        type:
+          type: string
+          enum:
+            - CONSUMER
+        name:
+          $ref: '#/components/schemas/NaturalName'
+        address:
+          $ref: '#/components/schemas/NaturalAddress'
+        shipping:
+          $ref: '#/components/schemas/Shipping'
+        identification:
+          $ref: '#/components/schemas/Identification'
+        origin:
+          $ref: '#/components/schemas/RecipientOrigin'
+      additionalProperties: false
+    BusinessRecipient:
+      description: |
+        ((<oas_components_schemas_business_recipient_description))
+      type: object
+      required:
+        - type
+        - name
+        - address
+        - identification
+      properties:
+        type:
+          type: string
+          enum:
+            - BUSINESS
+        name:
+          $ref: '#/components/schemas/LegalName'
+        address:
+          $ref: '#/components/schemas/LegalAddress'
+        shipping:
+          $ref: '#/components/schemas/Shipping'
+        identification:
+          $ref: '#/components/schemas/Identification'
+        origin:
+          $ref: '#/components/schemas/RecipientOrigin'
+      additionalProperties: false
+    RecipientOrigin:
+      description: |
+        ((<oas_components_schemas_recipient_origin_description))
+      type: string
+      enum:
+        - NATIONAL
+        - INTERNATIONAL
+      default: NATIONAL
+    Identification:
+      description: |
+        ((<oas_components_schemas_identification_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          VAT: '#/components/schemas/VatIdentification'
+      oneOf:
+        - $ref: '#/components/schemas/VatIdentification'
+    VatIdentification:
+      description: |
+        ((<oas_components_schemas_vat_identification_description))
+      type: object
+      required:
+        - type
+        - number
+      properties:
+        type:
+          type: string
+          enum:
+            - VAT
+        number:
+          $ref: '#/components/schemas/EntityVatNumber'
+      additionalProperties: false
+    Shipping:
+      description: |
+        ((<oas_components_schemas_shipping_description))
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          $ref: '#/components/schemas/ShippingAddress'
+        date:
+          $ref: '#/components/schemas/ShippingDate'
+      additionalProperties: false
+    ShippingAddress:
+      description: |
+        ((<oas_components_schemas_shipping_address_description))
+      allOf:
+        - $ref: '#/components/schemas/Address'
+    ShippingDate:
+      description: |
+        ((<oas_components_schemas_shipping_date_description))
+      allOf:
+        - $ref: '#/components/schemas/DateFormatISO8601'
+    Payments:
+      description: |
+        ((<oas_components_schemas_payments_description))
+      type: array
+      items:
+        $ref: '#/components/schemas/Payment'
+      minItems: 1
+      maxItems: 10
+    Payment:
+      discriminator:
+        propertyName: type
+        mapping:
+          CASH: '#/components/schemas/CashPayment'
+          CARD: '#/components/schemas/CardPayment'
+          ONLINE: '#/components/schemas/OnlinePayment'
+          OTHER: '#/components/schemas/OtherPayment'
+          OUTSTANDING: '#/components/schemas/OutstandingPayment'
+          VOUCHER: '#/components/schemas/VoucherPayment'
+      oneOf:
+        - $ref: '#/components/schemas/CashPayment'
+        - $ref: '#/components/schemas/CardPayment'
+        - $ref: '#/components/schemas/OnlinePayment'
+        - $ref: '#/components/schemas/OtherPayment'
+        - $ref: '#/components/schemas/OutstandingPayment'
+        - $ref: '#/components/schemas/VoucherPayment'
+    CashPayment:
+      description: |
+        ((<oas_components_schemas_cash_payment_description))
+      type: object
+      required:
+        - type
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - CASH
+        details:
+          $ref: '#/components/schemas/PaymentDetails'
+      additionalProperties: false
+    CardPayment:
+      description: |
+        ((<oas_components_schemas_card_payment_description))
+      type: object
+      required:
+        - type
+        - details
+        - number
+        - kind
+      properties:
+        type:
+          type: string
+          enum:
+            - CARD
+        details:
+          $ref: '#/components/schemas/PaymentDetails'
+        number:
+          $ref: '#/components/schemas/PaymentCardNumber'
+        kind:
+          $ref: '#/components/schemas/PaymentCardKind'
+      additionalProperties: false
+    OnlinePayment:
+      description: |
+        ((<oas_components_schemas_online_payment_description))
+      type: object
+      required:
+        - type
+        - details
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - ONLINE
+        details:
+          $ref: '#/components/schemas/PaymentDetails'
+        name:
+          $ref: '#/components/schemas/PaymentName'
+      additionalProperties: false
+    OtherPayment:
+      description: |
+        ((<oas_components_schemas_other_payment_description))
+      type: object
+      required:
+        - type
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - OTHER
+        details:
+          $ref: '#/components/schemas/PaymentDetails'
+        name:
+          $ref: '#/components/schemas/PaymentName'
+      additionalProperties: false
+    OutstandingPayment:
+      description: |
+        ((<oas_components_schemas_outstanding_payment_description))
+      type: object
+      required:
+        - type
+        - details
+        - concept
+      properties:
+        type:
+          type: string
+          enum:
+            - OUTSTANDING
+        details:
+          $ref: '#/components/schemas/PaymentDetails'
+        concept:
+          $ref: '#/components/schemas/EntryConcept'
+      additionalProperties: false
+    VoucherPayment:
+      description: |
+        ((<oas_components_schemas_voucher_payment_description))
+      type: object
+      required:
+        - type
+        - details
+        - number
+        - kind
+      properties:
+        type:
+          type: string
+          enum:
+            - VOUCHER
+        details:
+          $ref: '#/components/schemas/PaymentDetails'
+        number:
+          $ref: '#/components/schemas/PaymentCardNumber'
+        kind:
+          $ref: '#/components/schemas/VoucherPaymentKind'
+      additionalProperties: false
+    VoucherPaymentKind:
+      description: |
+        ((<oas_components_schemas_voucher_payment_kind_description))
+      type: string
+      enum:
+        - SINGLE
+        - MULTIPLE
+    PaymentProperties:
+      description: |
+        ((<oas_components_schemas_payment_properties_description))
+      type: object
+      maxProperties: 16
+      additionalProperties:
+        type: string
+        maxLength: 64
+      example:
+        FAC-DUP-RES: 1A2B3C
+        my_tag_123: '20250811'
+    PaymentDetails:
+      description: |
+        ((<oas_components_schemas_payment_details_description))
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          $ref: '#/components/schemas/PaymentAmount'
+        currency:
+          $ref: '#/components/schemas/PaymentCurrency'
+        date:
+          $ref: '#/components/schemas/PaymentDate'
+        discount:
+          $ref: '#/components/schemas/PaymentDiscount'
+        properties:
+          $ref: '#/components/schemas/PaymentProperties'
+      additionalProperties: false
+    PaymentAmount:
+      description: |
+        ((<oas_components_schemas_payment_amount_description))
+      oneOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    PaymentDiscount:
+      description: |
+        ((<oas_components_schemas_payment_discount_description))
+      oneOf:
+        - $ref: '#/components/schemas/Decimal12p8'
+    PaymentCurrency:
+      description: |
+        ((<oas_components_schemas_payment_currency_description))
+      oneOf:
+        - $ref: '#/components/schemas/CurrencyFormatISO4217'
+    PaymentDate:
+      description: |
+        ((<oas_components_schemas_payment_date_description))
+      oneOf:
+        - $ref: '#/components/schemas/DateFormatISO8601'
+    PaymentCardKind:
+      description: |
+        ((<oas_components_schemas_payment_card_kind_description))
+      type: string
+      enum:
+        - CREDIT
+        - DEBIT
+        - PREPAID
+        - GIFT
+        - TICKET
+    PaymentCardNumber:
+      description: |
+        ((<oas_components_schemas_payment_card_number_description))
+      allOf:
+        - $ref: '#/components/schemas/MaskedCardNumberFormatISO7812'
+    PaymentName:
+      description: |
+        ((<oas_components_schemas_payment_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    CryptographyCertificatePEM:
+      description: |
+        ((<oas_components_schemas_cryptography_certificate_pem_description))
+      allOf:
+        - $ref: '#/components/schemas/PrivacyEnhancedMailFormat'
+    PrivacyEnhancedMailFormat:
+      description: |
+        ((<oas_components_schemas_privacy_enhanced_main_format_description))
+      type: string
+      maxLength: 16384
+    Content:
+      description: |
+        ((<oas_components_schemas_content_description))
+      required:
+        - type
+        - data
+      properties:
+        type:
+          $ref: '#/components/schemas/ContentType'
+        data:
+          $ref: '#/components/schemas/ContentData'
+      additionalProperties: false
+    ContentType:
+      description: |
+        ((<oas_components_schemas_content_type_description))
+      type: string
+      enum:
+        - application/json
+        - application/xml
+        - application/pdf
+        - application/zip
+    ContentData:
+      description: |
+        ((<oas_components_schemas_content_data_description))
+      type: string
+      format: byte
+      maxLength: 65536
+    IntegrityContent:
+      description: |
+        ((<oas_components_schemas_integrity_content_description))
+      required:
+        - type
+        - data
+      properties:
+        type:
+          $ref: '#/components/schemas/IntegrityContentType'
+        data:
+          $ref: '#/components/schemas/IntegrityContentData'
+      additionalProperties: false
+    IntegrityContentType:
+      description: |
+        ((<oas_components_schemas_integrity_content_type_description))
+      type: string
+      enum:
+        - application/jose
+    IntegrityContentData:
+      description: |
+        ((<oas_components_schemas_integrity_content_data_description))
+      type: string
+      format: byte
+      maxLength: 16384
+    CryptographySignature:
+      description: |
+        ((<oas_components_schemas_cryptography_signature_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          ECDSA: '#/components/schemas/CryptographySignatureECDSA'
+          RSA: '#/components/schemas/CryptographySignatureRSA'
+      oneOf:
+        - $ref: '#/components/schemas/CryptographySignatureECDSA'
+        - $ref: '#/components/schemas/CryptographySignatureRSA'
+    CryptographySignatureECDSA:
+      description: |
+        ((<oas_components_schemas_cryptography_signature_ecdsa_description))
+      type: object
+      required:
+        - type
+        - hash
+      properties:
+        type:
+          type: string
+          enum:
+            - ECDSA
+        hash:
+          $ref: '#/components/schemas/CryptographyHashECDSA'
+      additionalProperties: false
+    CryptographyHashECDSA:
+      description: |
+        ((<oas_components_schemas_cryptography_hash_ecdsa_description))
+      type: string
+      enum:
+        - SHA-256
+        - SHA-384
+    CryptographySignatureRSA:
+      description: |
+        ((<oas_components_schemas_cryptography_signature_rsa_description))
+      type: object
+      required:
+        - type
+        - hash
+      properties:
+        type:
+          type: string
+          enum:
+            - RSA
+        hash:
+          $ref: '#/components/schemas/CryptographyHashRSA'
+      additionalProperties: false
+    CryptographyHashRSA:
+      description: |
+        ((<oas_components_schemas_cryptography_hash_rsa_description))
+      type: string
+      enum:
+        - SHA-256
+    CryptographyCertificate:
+      description: |
+        ((<oas_components_schemas_cryptography_certificate_description))
+      type: object
+      required:
+        - serial_number
+        - expires_at
+        - x509_pem
+      properties:
+        serial_number:
+          $ref: '#/components/schemas/CertificateSerialNumber'
+        expires_at:
+          $ref: '#/components/schemas/CertificateExpirationTimestamp'
+        x509_pem:
+          $ref: '#/components/schemas/CryptographyCertificatePEM'
+      additionalProperties: false
+    CertificateSerialNumber:
+      description: |
+        ((<oas_components_schemas_cryptography_serial_number_description))
+      allOf:
+        - $ref: '#/components/schemas/AlphaNumerical32'
+    CertificateExpirationTimestamp:
+      description: |
+        ((<oas_components_schemas_cryptography_expiration_timestamp_description))
+      allOf:
+        - $ref: '#/components/schemas/DatetimeFormatRFC3339'
+    Software:
+      description: |
+        ((<oas_components_schemas_software_description))
+      type: object
+      required:
+        - name
+        - version
+      properties:
+        name:
+          $ref: '#/components/schemas/SoftwareName'
+        version:
+          $ref: '#/components/schemas/SoftwareVersion'
+      additionalProperties: false
+    SoftwareName:
+      description: |
+        ((<oas_components_schemas_software_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    SoftwareVersion:
+      description: |
+        ((<oas_components_schemas_software_version_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    Product:
+      description: |
+        ((<oas_components_schemas_product_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          GTIN-8: '#/components/schemas/GlobalTradeItemNumber8Product'
+          GTIN-12: '#/components/schemas/GlobalTradeItemNumber12Product'
+          GTIN-13: '#/components/schemas/GlobalTradeItemNumber13Product'
+          GTIN-14: '#/components/schemas/GlobalTradeItemNumber14Product'
+          MPN: '#/components/schemas/ManufacturerPartNumberProduct'
+          SKU: '#/components/schemas/StockKeepingUnitProduct'
+          OTHER: '#/components/schemas/OtherProduct'
+      oneOf:
+        - $ref: '#/components/schemas/GlobalTradeItemNumber8Product'
+        - $ref: '#/components/schemas/GlobalTradeItemNumber12Product'
+        - $ref: '#/components/schemas/GlobalTradeItemNumber13Product'
+        - $ref: '#/components/schemas/GlobalTradeItemNumber14Product'
+        - $ref: '#/components/schemas/ManufacturerPartNumberProduct'
+        - $ref: '#/components/schemas/StockKeepingUnitProduct'
+        - $ref: '#/components/schemas/OtherProduct'
+    GlobalTradeItemNumber8Product:
+      description: |
+        ((<oas_components_schemas_global_trade_item_number_8_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - GTIN-8
+        number:
+          $ref: '#/components/schemas/ProductGlobalTradeItemNumber8'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      additionalProperties: false
+    GlobalTradeItemNumber12Product:
+      description: |
+        ((<oas_components_schemas_global_trade_item_number_12_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - GTIN-12
+        number:
+          $ref: '#/components/schemas/ProductGlobalTradeItemNumber12'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      additionalProperties: false
+    GlobalTradeItemNumber13Product:
+      description: |
+        ((<oas_components_schemas_global_trade_item_number_13_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - GTIN-13
+        number:
+          $ref: '#/components/schemas/ProductGlobalTradeItemNumber13'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      additionalProperties: false
+    GlobalTradeItemNumber14Product:
+      description: |
+        ((<oas_components_schemas_global_trade_item_number_14_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - GTIN-14
+        number:
+          $ref: '#/components/schemas/ProductGlobalTradeItemNumber14'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      additionalProperties: false
+    ManufacturerPartNumberProduct:
+      description: |
+        ((<oas_components_schemas_manufacturer_part_number_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - MPN
+        number:
+          $ref: '#/components/schemas/ProductManufacturerPartNumber'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      additionalProperties: false
+    StockKeepingUnitProduct:
+      description: |
+        ((<oas_components_schemas_stock_keeping_unit_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - SKU
+        number:
+          $ref: '#/components/schemas/ProductStockKeepingUnitNumber'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      additionalProperties: false
+    OtherProduct:
+      description: |
+        ((<oas_components_schemas_other_product_description))
+      type: object
+      required:
+        - type
+        - number
+        - details
+      properties:
+        type:
+          type: string
+          enum:
+            - OTHER
+        number:
+          $ref: '#/components/schemas/ProductNumber'
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+        code:
+          $ref: '#/components/schemas/ProductCode'
+      additionalProperties: false
+    ProductDetails:
+      description: |
+        ((<oas_components_schemas_product_details_description))
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/ProductName'
+        brand:
+          $ref: '#/components/schemas/ProductBrand'
+        model:
+          $ref: '#/components/schemas/ProductModel'
+        serial:
+          $ref: '#/components/schemas/ProductSerial'
+        label:
+          $ref: '#/components/schemas/ProductLabel'
+        batch:
+          $ref: '#/components/schemas/ProductBatch'
+        date_of_entry:
+          $ref: '#/components/schemas/ProductDateOfEntry'
+        date_of_production:
+          $ref: '#/components/schemas/ProductDateOfProduction'
+      additionalProperties: false
+    ProductManufacturerPartNumber:
+      description: |
+        ((<oas_components_schemas_product_manufacturer_part_number_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+      example: PSP20U-99P98R
+    ProductName:
+      description: |
+        ((<oas_components_schemas_product_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    ProductModel:
+      description: |
+        ((<oas_components_schemas_product_model_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    ProductBrand:
+      description: |
+        ((<oas_components_schemas_product_brand_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    ProductSerial:
+      description: |
+        ((<oas_components_schemas_product_serial_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    ProductLabel:
+      description: |
+        ((<oas_components_schemas_product_label_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString256'
+    ProductNumber:
+      description: |
+        ((<oas_components_schemas_product_number_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+      example: '10000'
+    ProductBatch:
+      description: |
+        ((<oas_components_schemas_product_batch_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+      example: AGT-M10000
+    ProductDateOfEntry:
+      description: |
+        ((<oas_components_schemas_product_date_of_entry_description))
+      allOf:
+        - $ref: '#/components/schemas/DateFormatISO8601'
+    ProductDateOfProduction:
+      description: |
+        ((<oas_components_schemas_product_date_of_production_description))
+      allOf:
+        - $ref: '#/components/schemas/DateFormatISO8601'
+    ProductCode:
+      description: |
+        ((<oas_components_schemas_product_code_description))
+      allOf:
+        - $ref: '#/components/schemas/AlphaNumerical20'
+    ProductGlobalTradeItemNumber8:
+      description: |
+        ((<oas_components_schemas_product_global_trade_item_number_8_description))
+      allOf:
+        - $ref: '#/components/schemas/Numerical8'
+    ProductGlobalTradeItemNumber12:
+      description: |
+        ((<oas_components_schemas_product_global_trade_item_number_12_description))
+      allOf:
+        - $ref: '#/components/schemas/Numerical12'
+    ProductGlobalTradeItemNumber13:
+      description: |
+        ((<oas_components_schemas_product_global_trade_item_number_13_description))
+      allOf:
+        - $ref: '#/components/schemas/Numerical13'
+    ProductGlobalTradeItemNumber14:
+      description: |
+        ((<oas_components_schemas_product_global_trade_item_number_14_description))
+      allOf:
+        - $ref: '#/components/schemas/Numerical14'
+    ProductStockKeepingUnitNumber:
+      description: |
+        ((<oas_components_schemas_product_stock_keeping_unit_number_description))
+      type: string
+      pattern: '^[A-Za-z0-9]+([A-Za-z0-9-_/.+:;]+)*$'
+      minLength: 8
+      maxLength: 12
+      example: G1-T-F-XL-R4
+    LocationName:
+      description: |
+        ((<oas_components_schemas_location_name_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString32'
+    LocationAddress:
+      description: |
+        ((<oas_components_schemas_location_address_description))
+      allOf:
+        - $ref: '#/components/schemas/Address'
+    LocationCoordinates:
+      description: |
+        ((<oas_components_schemas_location_coordinates_description))
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          $ref: '#/components/schemas/Latitude'
+        longitude:
+          $ref: '#/components/schemas/Longitude'
+      additionalProperties: false
+    Latitude:
+      description: |
+        ((<oas_components_schemas_location_latitude_description))
+      type: string
+      pattern: '^(-)?\d{1,2}(\.\d{1,6})?$'
+      example: '48.199916'
+    Longitude:
+      description: |
+        ((<oas_components_schemas_location_longitude_description))
+      type: string
+      pattern: '^(-)?\d{1,3}(\.\d{1,6})?$'
+      example: '48.199916'
+    LocationLabel:
+      description: |
+        ((<oas_components_schemas_location_label_description))
+      type: string
+      pattern: '^([0-9]{14})$'
+      minLength: 14
+      maxLength: 14
+      example: '73282932000074'
+    Address:
+      description: |
+        ((<oas_components_schemas_address_description))
+      type: object
+      required:
+        - line
+        - code
+        - city
+        - country
+      properties:
+        line:
+          $ref: '#/components/schemas/AddressLine'
+        code:
+          $ref: '#/components/schemas/AddressCode'
+        city:
+          $ref: '#/components/schemas/AddressCity'
+        country:
+          $ref: '#/components/schemas/AddressCountry'
+      additionalProperties: false
+    AddressLine:
+      description: |
+        ((<oas_components_schemas_address_line_description))
+      discriminator:
+        propertyName: type
+        mapping:
+          STREET_NUMBER: '#/components/schemas/StreetNumberAddressLine'
+      oneOf:
+        - $ref: '#/components/schemas/StreetNumberAddressLine'
+    StreetNumberAddressLine:
+      description: |
+        ((<oas_components_schemas_street_number_address_line_description))
+      type: object
+      required:
+        - type
+        - street
+        - number
+      properties:
+        type:
+          type: string
+          enum:
+            - STREET_NUMBER
+        prefix:
+          $ref: '#/components/schemas/AddressPrefix'
+        street:
+          $ref: '#/components/schemas/AddressStreet'
+        infix:
+          $ref: '#/components/schemas/AddressInfix'
+        number:
+          $ref: '#/components/schemas/AddressNumber'
+        suffix:
+          $ref: '#/components/schemas/AddressSuffix'
+      additionalProperties: false
+    AddressPrefix:
+      description: |
+        ((<oas_components_schemas_address_prefix_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressStreet:
+      description: |
+        ((<oas_components_schemas_address_street_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressInfix:
+      description: |
+        ((<oas_components_schemas_address_infix_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressNumber:
+      description: |
+        ((<oas_components_schemas_address_number_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressSuffix:
+      description: |
+        ((<oas_components_schemas_address_suffix_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressCode:
+      description: |
+        ((<oas_components_schemas_address_code_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressCity:
+      description: |
+        ((<oas_components_schemas_address_city_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    AddressCountry:
+      description: |
+        ((<oas_components_schemas_address_country_description))
+      oneOf:
+        - $ref: '#/components/schemas/CountryCode2'
+    PersonName:
+      description: |
+        ((<oas_components_schemas_person_name_description))
+      type: object
+      required:
+        - gender
+        - forename
+        - surname
+      properties:
+        gender:
+          $ref: '#/components/schemas/PersonGender'
+        prefix:
+          $ref: '#/components/schemas/PersonNamePrefix'
+        forename:
+          $ref: '#/components/schemas/PersonForename'
+        infix:
+          $ref: '#/components/schemas/PersonNameInfix'
+        surname:
+          $ref: '#/components/schemas/PersonSurname'
+        suffix:
+          $ref: '#/components/schemas/PersonNameSuffix'
+      additionalProperties: false
+    PersonGender:
+      description: |
+        ((<oas_components_schemas_person_gender_description))
+      type: string
+      enum:
+        - DIVERSE
+        - FEMALE
+        - MALE
+    PersonNamePrefix:
+      description: |
+        ((<oas_components_schemas_person_name_prefix_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    PersonForename:
+      description: |
+        ((<oas_components_schemas_person_forename_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    PersonNameInfix:
+      description: |
+        ((<oas_components_schemas_person_name_infix_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    PersonSurname:
+      description: |
+        ((<oas_components_schemas_person_surname_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    PersonNameSuffix:
+      description: |
+        ((<oas_components_schemas_person_name_suffix_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    PersonLabel:
+      description: |
+        ((<oas_components_schemas_person_label_description))
+      allOf:
+        - $ref: '#/components/schemas/PlainString128'
+    Numerical8:
+      description: |
+        ((<oas_components_schemas_numerical_8_description))
+      type: string
+      pattern: '^\d{8}$'
+      example: '01234567'
+    Numerical12:
+      description: |
+        ((<oas_components_schemas_numerical_12_description))
+      type: string
+      pattern: '^\d{12}$'
+      example: '012345677012'
+    Numerical13:
+      description: |
+        ((<oas_components_schemas_numerical_13_description))
+      type: string
+      pattern: '^\d{13}$'
+      example: '0143456701110'
+    Numerical14:
+      description: |
+        ((<oas_components_schemas_numerical_14_description))
+      type: string
+      pattern: '^\d{14}$'
+      example: '00012345600012'
+    UnsignedInteger4:
+      description: |
+        ((<oas_components_schemas_unsigned_integer_4_description))
+      type: string
+      pattern: '^(\d{1,4})$'
+      example: '1234'
+    Decimal12p8:
+      description: |
+        ((<oas_components_schemas_decimal_12p8_description))
+      type: string
+      pattern: '^(-)?\d{1,12}(\.\d{1,8})?$'
+      example: '123456789012.34567890'
+    AlphaNumerical20:
+      description: |
+        ((<oas_components_schemas_alpha_numerical_20_description))
+      type: string
+      pattern: '^( *[0-9A-Za-z.\-_/] *)*$'
+      minLength: 1
+      maxLength: 20
+      example: 0a1B2cD ...
+    AlphaNumerical32:
+      description: |
+        ((<oas_components_schemas_alpha_numerical_32_description))
+      type: string
+      pattern: '^( *[0-9A-Za-z.\-_/] *)*$'
+      minLength: 1
+      maxLength: 32
+      example: 0a1B2cD ...
+    UnsignedDecimal3p2:
+      description: |
+        ((<oas_components_schemas_unsigned_decimal_3p2_description))
+      type: string
+      pattern: '^\d{1,3}(\.\d{1,2})?$'
+      example: '123.45'
+    UniversallyUniqueIdentifierV3:
+      description: |
+        ((<oas_components_schemas_universally_unique_identifier_v3_description))
+      type: string
+      format: uuid
+      pattern: '^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$'
+      example: c6437ef1-5b86-3a4e-a071-c2d4ad414e65
+      x-go-type: uuid.UUID
+      x-go-type-import:
+        name: uuid
+        path: github.com/google/uuid
+    UniversallyUniqueIdentifierV4:
+      description: |
+        ((<oas_components_schemas_universally_unique_identifier_v4_description))
+      type: string
+      format: uuid
+      pattern: '^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$'
+      example: 1c81cb86-c2e8-4074-afc3-a0601b2bf063
+      x-go-type: uuid.UUID
+      x-go-type-import:
+        name: uuid
+        path: github.com/google/uuid
+    UniversallyUniqueIdentifierV7:
+      description: |
+        ((<oas_components_schemas_universally_unique_identifier_v7_description))
+      type: string
+      format: uuid
+      pattern: '^[0-9a-f]{8}-?[0-9a-f]{4}-?7[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$'
+      example: 0189f7ea-ae2c-7809-8aeb-b819cf5e9e7f
+      x-go-type: uuid.UUID
+      x-go-type-import:
+        name: uuid
+        path: github.com/google/uuid
+    PlainString32:
+      description: |
+        ((<oas_components_schemas_plain_string_32_description))
+      type: string
+      minLength: 1
+      maxLength: 32
+      example: text example...
+    PlainString64:
+      description: |
+        ((<oas_components_schemas_plain_string_64_description))
+      type: string
+      minLength: 1
+      maxLength: 64
+      example: text example...
+    PlainString128:
+      description: |
+        ((<oas_components_schemas_plain_string_128_description))
+      type: string
+      minLength: 1
+      maxLength: 128
+      example: text example...
+    PlainString256:
+      description: |
+        ((<oas_components_schemas_plain_string_256_description))
+      type: string
+      minLength: 1
+      maxLength: 256
+      example: text example...
+    ErrorResponse:
+      description: |
+        ((<oas_components_schemas_error_response_description))
+      type: object
+      required:
+        - code
+        - message
+        - status
+        - error
+      properties:
+        status:
+          $ref: '#/components/schemas/ErrorStatus'
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        error:
+          $ref: '#/components/schemas/ErrorText'
+        message:
+          $ref: '#/components/schemas/ErrorMessage'
+      additionalProperties: false
+    ErrorStatus:
+      description: |
+        ((<oas_components_schemas_error_status_description))
+      type: integer
+      format: int32
+      example: 401
+    ErrorCode:
+      description: |
+        ((<oas_components_schemas_error_code_description))
+      type: string
+      example: E_UNAUTHORIZED_ACCESS
+    ErrorText:
+      description: |
+        ((<oas_components_schemas_error_text_description))
+      type: string
+      example: Unauthorized Access
+    ErrorMessage:
+      description: |
+        ((<oas_components_schemas_error_message_description))
+      type: string
+      example: Not authorized to perform this operation.
+    Metadata:
+      description: |
+        ((<oas_components_schemas_metadata_description))
+      allOf:
+        - type: object
+          maxProperties: 20
+          additionalProperties:
+            type: string
+            maxLength: 500
+          example:
+            my_property_1: '1234'
+            my_property_2: 'https://my-internal-system/path/to/resource/1234'
+    ApiKeyString:
+      description: |
+        ((<oas_components_schemas_api_key_string_description))
+      type: string
+    ApiSecretString:
+      description: |
+        ((<oas_components_schemas_api_secret_string_description))
+      type: string
+    Bearer:
+      description: |
+        ((<oas_components_schemas_bearer_description))
+      type: string
+    Pagination:
+      description: |
+        ((<oas_components_schemas_pagination_description))
+      type: object
+      required:
+        - next
+        - token
+        - limit
+      properties:
+        next:
+          $ref: '#/components/schemas/PaginationNext'
+        token:
+          $ref: '#/components/schemas/PaginationToken'
+        limit:
+          $ref: '#/components/schemas/PaginationLimit'
+    PaginationNext:
+      description: |
+        ((<oas_components_schemas_pagination_next_description))
+      allOf:
+        - $ref: '#/components/schemas/UniformResourceIdentifier'
+    PaginationToken:
+      description: |
+        ((<oas_components_schemas_pagination_token_description))
+      type: string
+      pattern: '^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}={2})$'
+      maxLength: 1024
+    PaginationLimit:
+      description: |
+        ((<oas_components_schemas_pagination_limit_description))
+      type: integer
+      minimum: 1
+      maximum: 100
+      default: 10
+    UniformResourceIdentifier:
+      description: |
+        ((<oas_components_schemas_uniform_resource_identifier_description))
+      allOf:
+        - format: '(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?'
+          type: string
+    JsonData:
+      description: |
+        ((<oas_components_schemas_json_data_description))
+      type: string
+      maxLength: 65536
+    CountryCode2:
+      description: |
+        ((<oas_components_schemas_country_iso3166-1_alpha2_description))
+      allOf:
+        - type: string
+          enum:
+            - AD
+            - AE
+            - AF
+            - AG
+            - AI
+            - AL
+            - AM
+            - AO
+            - AQ
+            - AR
+            - AS
+            - AT
+            - AU
+            - AW
+            - AX
+            - AZ
+            - BA
+            - BB
+            - BD
+            - BE
+            - BF
+            - BG
+            - BH
+            - BQ
+            - BI
+            - BJ
+            - BL
+            - BM
+            - BN
+            - BO
+            - BR
+            - BS
+            - BT
+            - BV
+            - BW
+            - BY
+            - BZ
+            - CA
+            - CC
+            - CD
+            - CF
+            - CG
+            - CH
+            - CI
+            - CK
+            - CL
+            - CM
+            - CN
+            - CO
+            - CR
+            - CU
+            - CV
+            - CW
+            - CX
+            - CY
+            - CZ
+            - DE
+            - DJ
+            - DK
+            - DM
+            - DO
+            - DZ
+            - EC
+            - EE
+            - EG
+            - EH
+            - ER
+            - ES
+            - ET
+            - FI
+            - FJ
+            - FK
+            - FM
+            - FO
+            - FR
+            - GA
+            - GB
+            - GD
+            - GE
+            - GF
+            - GG
+            - GH
+            - GI
+            - GL
+            - GM
+            - GN
+            - GP
+            - GQ
+            - GR
+            - GS
+            - GT
+            - GU
+            - GW
+            - GY
+            - HK
+            - HM
+            - HN
+            - HR
+            - HT
+            - HU
+            - ID
+            - IE
+            - IL
+            - IM
+            - IN
+            - IO
+            - IQ
+            - IR
+            - IS
+            - IT
+            - JE
+            - JM
+            - JO
+            - JP
+            - KE
+            - KG
+            - KH
+            - KI
+            - KM
+            - KN
+            - KP
+            - KR
+            - KW
+            - KY
+            - KZ
+            - LA
+            - LB
+            - LC
+            - LI
+            - LK
+            - LR
+            - LS
+            - LT
+            - LU
+            - LV
+            - LY
+            - MA
+            - MC
+            - MD
+            - ME
+            - MF
+            - MG
+            - MH
+            - MK
+            - ML
+            - MM
+            - MN
+            - MO
+            - MP
+            - MQ
+            - MR
+            - MS
+            - MT
+            - MU
+            - MV
+            - MW
+            - MX
+            - MY
+            - MZ
+            - NA
+            - NC
+            - NE
+            - NF
+            - NG
+            - NI
+            - NL
+            - 'NO'
+            - NP
+            - NR
+            - NU
+            - NZ
+            - OM
+            - PA
+            - PE
+            - PF
+            - PG
+            - PH
+            - PK
+            - PL
+            - PM
+            - PN
+            - PR
+            - PS
+            - PT
+            - PW
+            - PY
+            - QA
+            - RE
+            - RO
+            - RS
+            - RU
+            - RW
+            - SA
+            - SB
+            - SC
+            - SD
+            - SE
+            - SG
+            - SH
+            - SI
+            - SJ
+            - SK
+            - SL
+            - SM
+            - SN
+            - SO
+            - SR
+            - SS
+            - ST
+            - SV
+            - SX
+            - SY
+            - SZ
+            - TC
+            - TD
+            - TF
+            - TG
+            - TH
+            - TJ
+            - TK
+            - TL
+            - TM
+            - TN
+            - TO
+            - TR
+            - TT
+            - TV
+            - TW
+            - TZ
+            - UA
+            - UG
+            - UM
+            - US
+            - UY
+            - UZ
+            - VA
+            - VC
+            - VE
+            - VG
+            - VI
+            - VN
+            - VU
+            - WF
+            - WS
+            - YE
+            - YT
+            - ZA
+            - ZM
+            - ZW
+    DateFormatISO8601:
+      description: |
+        ((<oas_components_schemas_date_format_iso8601_description))
+      type: string
+      pattern: '^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$'
+      minLength: 10
+      maxLength: 10
+      example: '2006-01-02'
+    DatetimeFormatRFC3339:
+      description: |
+        ((<oas_components_schemas_date_format_rfc3339_description))
+      type: string
+      format: date-time
+      minLength: 25
+      maxLength: 25
+      example: '2006-01-02T15:04:05+00:00'
+    MaskedCardNumberFormatISO7812:
+      description: |
+        ((<oas_components_schemas_masked_card_number_format_iso7812_description))
+      type: string
+      pattern: '^([*0-9]{4,19})$'
+      minLength: 4
+      maxLength: 19
+      example: '***************1234'
+    CurrencyFormatISO4217:
+      description: |
+        ((<oas_components_schemas_currency_format_iso4217_description))
+      type: string
+      enum:
+        - EUR
+  securitySchemes:
+    JWT:
+      $ref: '#/components/securitySchemes/JsonWebToken'
+    JsonWebToken:
+      description: |
+        ((<oas_components_schemas_json_web_token_description))
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

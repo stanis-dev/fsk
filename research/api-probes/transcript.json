@@ -1,0 +1,978 @@
+[
+  {
+    "step": "auth",
+    "request": {
+      "method": "POST",
+      "path": "/tokens",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "API_KEY",
+          "key": "<redacted:38 chars>",
+          "secret": "<redacted:43 chars>"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 414,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Trace-Identifier": "019ebd40-b4e6-7a6a-bfa7-1795ea61ea18"
+      },
+      "body": {
+        "content": {
+          "authentication": {
+            "bearer": "<redacted:1010 chars>",
+            "expires_at": "2026-06-13T19:13:15Z",
+            "issued_at": "2026-06-12T19:13:15Z",
+            "type": "JWT"
+          },
+          "id": "4fd0cfc7-03a1-4237-b7f2-be472a0bfc91",
+          "organization": {
+            "id": "2c1e0ab4-911a-4edf-a566-1d1d66037e10"
+          },
+          "subject": {
+            "id": "a04dec18-a938-4a68-8e22-b9ae624e3673"
+          }
+        }
+      }
+    }
+  },
+  {
+    "step": "create UNIT organization",
+    "request": {
+      "method": "POST",
+      "path": "/organizations",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "UNIT",
+          "name": "Trattoria Da Mario (Z2R probe)"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 764,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Scope-Identifier": "2c1e0ab4-911a-4edf-a566-1d1d66037e10",
+        "X-Trace-Identifier": "019ebd40-b671-797a-8988-510b72bd4098"
+      },
+      "body": {
+        "content": {
+          "id": "7ad7bbb7-5072-4c34-86b7-9a821c981432",
+          "name": "Trattoria Da Mario (Z2R probe)",
+          "organization": {
+            "id": "2c1e0ab4-911a-4edf-a566-1d1d66037e10"
+          },
+          "state": "ENABLED",
+          "type": "UNIT"
+        }
+      }
+    }
+  },
+  {
+    "step": "create taxpayer (scoped to UNIT)",
+    "request": {
+      "method": "POST",
+      "path": "/taxpayers",
+      "scope_header": "7ad7bbb7-5072-4c34-86b7-9a821c981432",
+      "body": {
+        "content": {
+          "type": "COMPANY",
+          "name": {
+            "legal": "Trattoria Da Mario S.r.l.",
+            "trade": "Trattoria Da Mario"
+          },
+          "address": {
+            "line": {
+              "type": "STREET_NUMBER",
+              "street": "Via Roma",
+              "number": "42"
+            },
+            "code": "20121",
+            "city": "Milano",
+            "country": "IT"
+          },
+          "fiscalization": {
+            "type": "IT",
+            "tax_id_number": "12345678903",
+            "vat_id_number": "12345678903",
+            "credentials": {
+              "type": "FISCONLINE",
+              "pin": "<redacted:10 chars>",
+              "password": "<redacted:15 chars>",
+              "tax_id_number": "RSSMRA85M01H501Z"
+            }
+          }
+        }
+      }
+    },
+    "response": {
+      "status": 405,
+      "ms": 283,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-b9c6-7f08-8920-94a6ac5db8d4"
+      },
+      "body": {
+        "content": {
+          "code": "E_METHOD_NOT_ALLOWED",
+          "error": "Method not allowed",
+          "message": "taxpayer operation invalid: cannot create new legal taxpayer for non-unit organization '2c1e0ab4-911a-4edf-a566-1d1d66037e10'",
+          "status": 405
+        }
+      }
+    }
+  },
+  {
+    "step": "create scoped subject",
+    "request": {
+      "method": "POST",
+      "path": "/subjects",
+      "scope_header": "7ad7bbb7-5072-4c34-86b7-9a821c981432",
+      "body": {
+        "content": {
+          "type": "API_KEY",
+          "name": "z2r-probe"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 585,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Scope-Identifier": "7ad7bbb7-5072-4c34-86b7-9a821c981432",
+        "X-Trace-Identifier": "019ebd40-ba8d-7e86-b855-6896f4227455"
+      },
+      "body": {
+        "content": {
+          "credentials": {
+            "key": "<redacted:40 chars>",
+            "secret": "<redacted:43 chars>"
+          },
+          "id": "2f3ff410-3b21-408d-ad72-a218e390af28",
+          "name": "z2r-probe",
+          "state": "ENABLED",
+          "type": "API_KEY"
+        }
+      }
+    }
+  },
+  {
+    "step": "auth as scoped subject",
+    "request": {
+      "method": "POST",
+      "path": "/tokens",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "API_KEY",
+          "key": "<redacted:40 chars>",
+          "secret": "<redacted:43 chars>"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 291,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Trace-Identifier": "019ebd40-bcdd-7b11-a57a-9b1b6961a1f5"
+      },
+      "body": {
+        "content": {
+          "authentication": {
+            "bearer": "<redacted:1021 chars>",
+            "expires_at": "2026-06-13T19:13:17Z",
+            "issued_at": "2026-06-12T19:13:17Z",
+            "type": "JWT"
+          },
+          "id": "86e6cdec-c1f4-4f03-a532-80b02b80986c",
+          "organization": {
+            "id": "7ad7bbb7-5072-4c34-86b7-9a821c981432"
+          },
+          "subject": {
+            "id": "2f3ff410-3b21-408d-ad72-a218e390af28"
+          }
+        }
+      }
+    }
+  },
+  {
+    "step": "create taxpayer (as scoped subject)",
+    "request": {
+      "method": "POST",
+      "path": "/taxpayers",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "COMPANY",
+          "name": {
+            "legal": "Trattoria Da Mario S.r.l.",
+            "trade": "Trattoria Da Mario"
+          },
+          "address": {
+            "line": {
+              "type": "STREET_NUMBER",
+              "street": "Via Roma",
+              "number": "42"
+            },
+            "code": "20121",
+            "city": "Milano",
+            "country": "IT"
+          },
+          "fiscalization": {
+            "type": "IT",
+            "tax_id_number": "12345678903",
+            "vat_id_number": "12345678903",
+            "credentials": {
+              "type": "FISCONLINE",
+              "pin": "<redacted:10 chars>",
+              "password": "<redacted:15 chars>",
+              "tax_id_number": "RSSMRA85M01H501Z"
+            }
+          }
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 171,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-be06-798e-9df2-7213ae5f1367"
+      },
+      "body": {
+        "content": {
+          "address": {
+            "city": "Milano",
+            "code": "20121",
+            "country": "IT",
+            "line": {
+              "number": "42",
+              "street": "Via Roma",
+              "type": "STREET_NUMBER"
+            }
+          },
+          "country": "Italy",
+          "created_at": "2026-06-12T19:13:17.339716Z",
+          "fiscalization": {
+            "credentials": {
+              "password": "<redacted:8 chars>",
+              "pin": "<redacted:8 chars>",
+              "tax_id_number": "RSSMRA85M01H501Z",
+              "type": "FISCONLINE"
+            },
+            "tax_id_number": "12345678903",
+            "type": "IT",
+            "vat_id_number": "12345678903"
+          },
+          "id": "019ebd40-be1b-7aed-b2f7-59673b714f1e",
+          "locations": [
+            {
+              "description": "Head office location.",
+              "type": "HEAD_OFFICE"
+            },
+            {
+              "description": "Branch location.",
+              "type": "BRANCH"
+            }
+          ],
+          "mode": "INACTIVE",
+          "name": {
+            "legal": "Trattoria Da Mario S.r.l.",
+            "trade": "Trattoria Da Mario"
+          },
+          "state": "ACQUIRED",
+          "type": "COMPANY",
+          "updated_at": "2026-06-12T19:13:17.339716Z",
+          "vat_number": "IT12345678903"
+        }
+      }
+    }
+  },
+  {
+    "step": "create BRANCH location",
+    "request": {
+      "method": "POST",
+      "path": "/locations",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "BRANCH",
+          "taxpayer": {
+            "id": "019ebd40-be1b-7aed-b2f7-59673b714f1e"
+          },
+          "name": "Milano Centro",
+          "address": {
+            "line": {
+              "type": "STREET_NUMBER",
+              "street": "Via Roma",
+              "number": "42"
+            },
+            "code": "20121",
+            "city": "Milano",
+            "country": "IT"
+          }
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 123,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-beaa-7e73-9ff3-003bc7e28e90"
+      },
+      "body": {
+        "content": {
+          "address": {
+            "city": "Milano",
+            "code": "20121",
+            "country": "IT",
+            "line": {
+              "number": "42",
+              "street": "Via Roma",
+              "type": "STREET_NUMBER"
+            }
+          },
+          "created_at": "2026-06-12T19:13:17.493765Z",
+          "id": "019ebd40-beb5-7bad-b019-05b0fff94854",
+          "mode": "INACTIVE",
+          "name": "Milano Centro",
+          "state": "ACQUIRED",
+          "systems": [
+            {
+              "description": "Fiscal device (SIGN IT lite).",
+              "type": "FISCAL_DEVICE"
+            }
+          ],
+          "taxpayer": {
+            "id": "019ebd40-be1b-7aed-b2f7-59673b714f1e"
+          },
+          "type": "BRANCH",
+          "updated_at": "2026-06-12T19:13:17.493765Z"
+        }
+      }
+    }
+  },
+  {
+    "step": "create FISCAL_DEVICE system",
+    "request": {
+      "method": "POST",
+      "path": "/systems",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "FISCAL_DEVICE",
+          "location": {
+            "id": "019ebd40-beb5-7bad-b019-05b0fff94854"
+          },
+          "producer": {
+            "type": "MPN",
+            "number": "Z2R-POS-001",
+            "details": {
+              "name": "Zero-to-Receipt Probe POS"
+            }
+          },
+          "software": {
+            "name": "z2r-probe",
+            "version": "0.1.0"
+          }
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 508,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-bf2a-78c3-8a48-8a640843e9a1"
+      },
+      "body": {
+        "content": {
+          "compliance": {
+            "software": {
+              "name": "fiskaly SIGN IT",
+              "version": "v1"
+            }
+          },
+          "created_at": "2026-06-12T19:13:17.974504Z",
+          "id": "019ebd40-c096-77af-a28d-71b63889518e",
+          "journal": {
+            "cryptography": {
+              "certificate": {
+                "expires_at": "2029-06-12T19:13:17Z",
+                "serial_number": "E6A7279E608924985CE8666268FDE91D",
+                "x509_pem": "-----BEGIN CERTIFICATE-----\nMIIDWzCCAg+gAwIBAgIRAOanJ55giSSYXOhmYmj96R0wQQYJKoZIhvcNAQEKMDSg\nDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEFAKID\nAgEgMBMxETAPBgNVBAoTCGZpc2thbHkuMB4XDTI2MDYxMjE5MTMxN1oXDTI5MDYx\nMjE5MTMxN1owEzERMA8GA1UEChMIZmlza2FseS4wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQDxq2GyHa9oZignHd6gBFQ1TOm81Do54YtpUls5BYN+gvp+\nICw+aytMLvDZF+icKkalckMO9d2gtZrz6n9m1MkrwYW3QdGYeVoxOMqkHsP6nUMC\nraxzd4hGUvP+0Q0XY1Ofuqj3u63XVGRs3fyeNa84xlnURbCVoeo+012W19B7EM/L\npFlLXBZD5118MW02HxywCH5ou+iVxle0g3JKRC5vBa5eC2TtNFw5vu8LSmwVNqlM\n96YCymKPfkW5Jajh+k656j5862i7FfWQ4XWIhGcHcJ70Kzgf1cYiu403Xe9x+1bi\nNfMg0OW/SG+y+her+ERQPsLF8hLdXmkNmSPT67+/AgMBAAGjQjBAMA4GA1UdDwEB\n/wQEAwIChDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQmNG32Z90Lqiy70VBc\nEo23PaC19zBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAQUAoRwwGgYJKoZI\nhvcNAQEIMA0GCWCGSAFlAwQCAQUAogMCASADggEBALYhwinpUA+hY9bhFJx/FJiR\nW6sNTTSsDfV/Vtju1oQvlIxaHN1/ju4ew/NUi3iopTP/rXltvRR/ZAVjtfBsC2+D\nDWS6j9r3/KGf9SQrQMI3DUkvSUw7Vp6uaJPRsx1MGmUw56pazqQSa75usW3/rLcp\nJG818fPxPCLwW42AW8/ZmHkgKsODIiA80c0xertt6y5WJEgSnjxoATkqdLreW9tR\nCbZ3/206hBBBPswg31j6QxIL2qOj5p4WkwqLH/sgwf0u2gfv0gNssrgbQKU0kmez\n3Noqzbhvw7UqOyxFLFMSJrHAmGmS1A/uXaGnLNOcEe2WNPhS2CgryT8W+UWa7KE=\n-----END CERTIFICATE-----\n"
+              },
+              "signature": {
+                "hash": "SHA-256",
+                "type": "RSA"
+              }
+            }
+          },
+          "kind": "INTERNAL",
+          "location": {
+            "id": "019ebd40-beb5-7bad-b019-05b0fff94854"
+          },
+          "mode": "INACTIVE",
+          "producer": {
+            "details": {
+              "name": "Zero-to-Receipt Probe POS"
+            },
+            "number": "Z2R-POS-001",
+            "type": "MPN"
+          },
+          "records": [
+            {
+              "description": "Intention of an upcoming transaction.",
+              "type": "INTENTION::TRANSACTION"
+            },
+            {
+              "description": "Receipt transaction information.",
+              "type": "TRANSACTION::RECEIPT"
+            },
+            {
+              "description": "Correction of an issued transaction.",
+              "type": "TRANSACTION::CORRECTION"
+            },
+            {
+              "description": "Cancellation of an issued transaction.",
+              "type": "TRANSACTION::CANCELLATION"
+            }
+          ],
+          "software": {
+            "name": "z2r-probe",
+            "version": "0.1.0"
+          },
+          "state": "ACQUIRED",
+          "type": "FISCAL_DEVICE",
+          "updated_at": "2026-06-12T19:13:17.974504Z",
+          "vat_exemptions": [
+            {
+              "code": "NOT_SUBJECT",
+              "description": "Not subject (Non soggette)"
+            },
+            {
+              "code": "NOT_TAXABLE",
+              "description": "Not taxable (Non imponibili)"
+            },
+            {
+              "code": "CAUSE_1",
+              "description": "Exempt (Esenti)"
+            },
+            {
+              "code": "CAUSE_2",
+              "description": "Exclusive Art. 15"
+            },
+            {
+              "code": "CAUSE_3",
+              "description": "Marginal scheme (Regime del margine)"
+            },
+            {
+              "code": "CAUSE_4",
+              "description": "Other (Altre non IVA)"
+            }
+          ],
+          "vat_rates": [
+            {
+              "code": "STANDARD",
+              "description": "Standard VAT rate",
+              "historic": false,
+              "percentage": "22"
+            },
+            {
+              "code": "REDUCED_1",
+              "description": "Reduced VAT rate 1",
+              "historic": false,
+              "percentage": "10"
+            },
+            {
+              "code": "REDUCED_2",
+              "description": "Reduced VAT rate 2",
+              "historic": false,
+              "percentage": "5"
+            },
+            {
+              "code": "REDUCED_3",
+              "description": "Super-reduced VAT rate",
+              "historic": false,
+              "percentage": "4"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "step": "commission taxpayer",
+    "request": {
+      "method": "PATCH",
+      "path": "/taxpayers/019ebd40-be1b-7aed-b2f7-59673b714f1e",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "state": "COMMISSIONED"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 129,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-c11f-7cb3-87f2-44d41b44510c"
+      },
+      "body": {
+        "content": {
+          "address": {
+            "city": "Milano",
+            "code": "20121",
+            "country": "IT",
+            "line": {
+              "number": "42",
+              "street": "Via Roma",
+              "type": "STREET_NUMBER"
+            }
+          },
+          "country": "Italy",
+          "created_at": "2026-06-12T19:13:17.339716Z",
+          "fiscalization": {
+            "credentials": {
+              "password": "<redacted:8 chars>",
+              "pin": "<redacted:8 chars>",
+              "tax_id_number": "RSSMRA85M01H501Z",
+              "type": "FISCONLINE"
+            },
+            "tax_id_number": "12345678903",
+            "type": "IT",
+            "vat_id_number": "12345678903"
+          },
+          "id": "019ebd40-be1b-7aed-b2f7-59673b714f1e",
+          "locations": [
+            {
+              "description": "Head office location.",
+              "type": "HEAD_OFFICE"
+            },
+            {
+              "description": "Branch location.",
+              "type": "BRANCH"
+            }
+          ],
+          "mode": "OPERATIVE",
+          "name": {
+            "legal": "Trattoria Da Mario S.r.l.",
+            "trade": "Trattoria Da Mario"
+          },
+          "state": "COMMISSIONED",
+          "type": "COMPANY",
+          "updated_at": "2026-06-12T19:13:18.132424Z",
+          "vat_number": "IT12345678903"
+        }
+      }
+    }
+  },
+  {
+    "step": "commission location",
+    "request": {
+      "method": "PATCH",
+      "path": "/locations/019ebd40-beb5-7bad-b019-05b0fff94854",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "state": "COMMISSIONED"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 192,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-c1ee-742e-b327-28d33fda2949"
+      },
+      "body": {
+        "content": {
+          "address": {
+            "city": "Milano",
+            "code": "20121",
+            "country": "IT",
+            "line": {
+              "number": "42",
+              "street": "Via Roma",
+              "type": "STREET_NUMBER"
+            }
+          },
+          "created_at": "2026-06-12T19:13:17.493765Z",
+          "id": "019ebd40-beb5-7bad-b019-05b0fff94854",
+          "mode": "OPERATIVE",
+          "name": "Milano Centro",
+          "state": "COMMISSIONED",
+          "systems": [
+            {
+              "description": "Fiscal device (SIGN IT lite).",
+              "type": "FISCAL_DEVICE"
+            }
+          ],
+          "taxpayer": {
+            "id": "019ebd40-be1b-7aed-b2f7-59673b714f1e"
+          },
+          "type": "BRANCH",
+          "updated_at": "2026-06-12T19:13:18.330297Z"
+        }
+      }
+    }
+  },
+  {
+    "step": "commission system",
+    "request": {
+      "method": "PATCH",
+      "path": "/systems/019ebd40-c096-77af-a28d-71b63889518e",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "state": "COMMISSIONED"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 202,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-c2aa-71a8-a360-6718f61048f4"
+      },
+      "body": {
+        "content": {
+          "compliance": {
+            "software": {
+              "name": "fiskaly SIGN IT",
+              "version": "v1"
+            }
+          },
+          "created_at": "2026-06-12T19:13:17.974504Z",
+          "id": "019ebd40-c096-77af-a28d-71b63889518e",
+          "journal": {
+            "cryptography": {
+              "certificate": {
+                "expires_at": "2029-06-12T19:13:17Z",
+                "serial_number": "E6A7279E608924985CE8666268FDE91D",
+                "x509_pem": "-----BEGIN CERTIFICATE-----\nMIIDWzCCAg+gAwIBAgIRAOanJ55giSSYXOhmYmj96R0wQQYJKoZIhvcNAQEKMDSg\nDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEFAKID\nAgEgMBMxETAPBgNVBAoTCGZpc2thbHkuMB4XDTI2MDYxMjE5MTMxN1oXDTI5MDYx\nMjE5MTMxN1owEzERMA8GA1UEChMIZmlza2FseS4wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQDxq2GyHa9oZignHd6gBFQ1TOm81Do54YtpUls5BYN+gvp+\nICw+aytMLvDZF+icKkalckMO9d2gtZrz6n9m1MkrwYW3QdGYeVoxOMqkHsP6nUMC\nraxzd4hGUvP+0Q0XY1Ofuqj3u63XVGRs3fyeNa84xlnURbCVoeo+012W19B7EM/L\npFlLXBZD5118MW02HxywCH5ou+iVxle0g3JKRC5vBa5eC2TtNFw5vu8LSmwVNqlM\n96YCymKPfkW5Jajh+k656j5862i7FfWQ4XWIhGcHcJ70Kzgf1cYiu403Xe9x+1bi\nNfMg0OW/SG+y+her+ERQPsLF8hLdXmkNmSPT67+/AgMBAAGjQjBAMA4GA1UdDwEB\n/wQEAwIChDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQmNG32Z90Lqiy70VBc\nEo23PaC19zBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAQUAoRwwGgYJKoZI\nhvcNAQEIMA0GCWCGSAFlAwQCAQUAogMCASADggEBALYhwinpUA+hY9bhFJx/FJiR\nW6sNTTSsDfV/Vtju1oQvlIxaHN1/ju4ew/NUi3iopTP/rXltvRR/ZAVjtfBsC2+D\nDWS6j9r3/KGf9SQrQMI3DUkvSUw7Vp6uaJPRsx1MGmUw56pazqQSa75usW3/rLcp\nJG818fPxPCLwW42AW8/ZmHkgKsODIiA80c0xertt6y5WJEgSnjxoATkqdLreW9tR\nCbZ3/206hBBBPswg31j6QxIL2qOj5p4WkwqLH/sgwf0u2gfv0gNssrgbQKU0kmez\n3Noqzbhvw7UqOyxFLFMSJrHAmGmS1A/uXaGnLNOcEe2WNPhS2CgryT8W+UWa7KE=\n-----END CERTIFICATE-----\n"
+              },
+              "signature": {
+                "hash": "SHA-256",
+                "type": "RSA"
+              }
+            }
+          },
+          "kind": "INTERNAL",
+          "location": {
+            "id": "019ebd40-beb5-7bad-b019-05b0fff94854"
+          },
+          "mode": "OPERATIVE",
+          "producer": {
+            "details": {
+              "name": "Zero-to-Receipt Probe POS"
+            },
+            "number": "Z2R-POS-001",
+            "type": "MPN"
+          },
+          "records": [
+            {
+              "description": "Intention of an upcoming transaction.",
+              "type": "INTENTION::TRANSACTION"
+            },
+            {
+              "description": "Receipt transaction information.",
+              "type": "TRANSACTION::RECEIPT"
+            },
+            {
+              "description": "Correction of an issued transaction.",
+              "type": "TRANSACTION::CORRECTION"
+            },
+            {
+              "description": "Cancellation of an issued transaction.",
+              "type": "TRANSACTION::CANCELLATION"
+            }
+          ],
+          "software": {
+            "name": "z2r-probe",
+            "version": "0.1.0"
+          },
+          "state": "COMMISSIONED",
+          "type": "FISCAL_DEVICE",
+          "updated_at": "2026-06-12T19:13:18.523696Z",
+          "vat_exemptions": [
+            {
+              "code": "NOT_SUBJECT",
+              "description": "Not subject (Non soggette)"
+            },
+            {
+              "code": "NOT_TAXABLE",
+              "description": "Not taxable (Non imponibili)"
+            },
+            {
+              "code": "CAUSE_1",
+              "description": "Exempt (Esenti)"
+            },
+            {
+              "code": "CAUSE_2",
+              "description": "Exclusive Art. 15"
+            },
+            {
+              "code": "CAUSE_3",
+              "description": "Marginal scheme (Regime del margine)"
+            },
+            {
+              "code": "CAUSE_4",
+              "description": "Other (Altre non IVA)"
+            }
+          ],
+          "vat_rates": [
+            {
+              "code": "STANDARD",
+              "description": "Standard VAT rate",
+              "historic": false,
+              "percentage": "22"
+            },
+            {
+              "code": "REDUCED_1",
+              "description": "Reduced VAT rate 1",
+              "historic": false,
+              "percentage": "10"
+            },
+            {
+              "code": "REDUCED_2",
+              "description": "Reduced VAT rate 2",
+              "historic": false,
+              "percentage": "5"
+            },
+            {
+              "code": "REDUCED_3",
+              "description": "Super-reduced VAT rate",
+              "historic": false,
+              "percentage": "4"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "step": "record INTENTION",
+    "request": {
+      "method": "POST",
+      "path": "/records",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "INTENTION",
+          "system": {
+            "id": "019ebd40-c096-77af-a28d-71b63889518e"
+          },
+          "operation": {
+            "type": "TRANSACTION"
+          }
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 225,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-c32e-79f6-b750-c2f75162b80f"
+      },
+      "body": {
+        "content": {
+          "file": {
+            "location": "SERVICE"
+          },
+          "id": "019ebd40-c33b-7e39-ae3b-29a7e3511517",
+          "journal": {
+            "signature": "d0AppQkPHE9hRFMauZdCuLxCN5ePtKBU74EvNhXaA6DEdZwcF5xIZCBVVN3EIlB4",
+            "signed_at": "2026-06-12T19:13:18.662801989Z"
+          },
+          "mode": "PROCESSING",
+          "operation": "{\"type\":\"TRANSACTION\"}",
+          "state": "ACCEPTED",
+          "system": {
+            "id": "019ebd40-c096-77af-a28d-71b63889518e"
+          },
+          "type": "INTENTION::TRANSACTION"
+        }
+      }
+    }
+  },
+  {
+    "step": "record TRANSACTION (RECEIPT)",
+    "request": {
+      "method": "POST",
+      "path": "/records",
+      "scope_header": null,
+      "body": {
+        "content": {
+          "type": "TRANSACTION",
+          "record": {
+            "id": "019ebd40-c33b-7e39-ae3b-29a7e3511517"
+          },
+          "operation": {
+            "type": "RECEIPT",
+            "document": {
+              "number": "1",
+              "total_vat": {
+                "amount": "2.20",
+                "exclusive": "10.00",
+                "inclusive": "12.20"
+              }
+            },
+            "entries": [
+              {
+                "type": "SALE",
+                "data": {
+                  "type": "ITEM",
+                  "text": "Menu del giorno",
+                  "unit": {
+                    "quantity": "1",
+                    "price": "12.20"
+                  },
+                  "value": {
+                    "base": "12.20"
+                  },
+                  "vat": {
+                    "type": "VAT_RATE",
+                    "code": "STANDARD",
+                    "percentage": "22.00",
+                    "amount": "2.20",
+                    "exclusive": "10.00",
+                    "inclusive": "12.20"
+                  }
+                },
+                "details": {
+                  "concept": "GOOD"
+                }
+              }
+            ],
+            "payments": [
+              {
+                "type": "CASH",
+                "details": {
+                  "amount": "12.20",
+                  "currency": "EUR"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "ms": 189,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Idempotency-Replayed": "false",
+        "X-Trace-Identifier": "019ebd40-c40b-7375-9297-bb04f262431d"
+      },
+      "body": {
+        "content": {
+          "compliance": {
+            "data": "DCW0000/0000-0000",
+            "url": "https://ivaservizi.agenziaentrate.gov.it/ser/api/documenti/v1/doc/documenti/00000000/stampa/"
+          },
+          "file": {
+            "location": "SERVICE"
+          },
+          "id": "019ebd40-c41e-78aa-8d1a-aef358591242",
+          "journal": {
+            "record": {
+              "id": "019ebd40-c33b-7e39-ae3b-29a7e3511517"
+            },
+            "signature": "piUzMGXSI3BYqLwYgxEnpvJ2SZSoT-luivZCtDM2IU8r7KuHxrrQmEasoQHN4QAU",
+            "signed_at": "2026-06-12T19:13:18.89356108Z"
+          },
+          "mode": "FINISHED",
+          "operation": "{\"document\":{\"number\":\"1\",\"total_vat\":{\"amount\":\"2.20\",\"exclusive\":\"10.00\",\"inclusive\":\"12.20\"}},\"entries\":[{\"data\":{\"text\":\"Menu del giorno\",\"type\":\"ITEM\",\"unit\":{\"price\":\"12.20\",\"quantity\":\"1\"},\"value\":{\"base\":\"12.20\"},\"vat\":{\"amount\":\"2.20\",\"code\":\"STANDARD\",\"exclusive\":\"10.00\",\"inclusive\":\"12.20\",\"percentage\":\"22.00\",\"type\":\"VAT_RATE\"}},\"details\":{\"concept\":\"GOOD\",\"purpose\":\"STANDARD\"},\"type\":\"SALE\"}],\"payments\":[{\"details\":{\"amount\":\"12.20\",\"currency\":\"EUR\"},\"type\":\"CASH\"}],\"type\":\"RECEIPT\"}",
+          "record": {
+            "id": "019ebd40-c33b-7e39-ae3b-29a7e3511517"
+          },
+          "state": "COMPLETED",
+          "system": {
+            "id": "019ebd40-c096-77af-a28d-71b63889518e"
+          },
+          "transmission": {
+            "request": {
+              "data": "e30A",
+              "type": "application/json"
+            },
+            "response": {
+              "data": "e30A",
+              "type": "application/json"
+            }
+          },
+          "type": "TRANSACTION::RECEIPT"
+        }
+      }
+    }
+  },
+  {
+    "step": "poll record (0)",
+    "request": {
+      "method": "GET",
+      "path": "/records/019ebd40-c41e-78aa-8d1a-aef358591242",
+      "scope_header": null,
+      "body": null
+    },
+    "response": {
+      "status": 200,
+      "ms": 90,
+      "headers": {
+        "X-Api-Version": "2026-02-03",
+        "X-Trace-Identifier": "019ebd40-c4c8-74b0-8935-36d969eeb6b2"
+      },
+      "body": {
+        "content": {
+          "compliance": {
+            "data": "DCW0000/0000-0000",
+            "url": "https://ivaservizi.agenziaentrate.gov.it/ser/api/documenti/v1/doc/documenti/00000000/stampa/"
+          },
+          "file": {
+            "location": "SERVICE"
+          },
+          "id": "019ebd40-c41e-78aa-8d1a-aef358591242",
+          "journal": {
+            "record": {
+              "id": "019ebd40-c33b-7e39-ae3b-29a7e3511517"
+            },
+            "signature": "piUzMGXSI3BYqLwYgxEnpvJ2SZSoT-luivZCtDM2IU8r7KuHxrrQmEasoQHN4QAU",
+            "signed_at": "2026-06-12T19:13:18.89356108Z"
+          },
+          "mode": "FINISHED",
+          "record": {
+            "id": "019ebd40-c33b-7e39-ae3b-29a7e3511517"
+          },
+          "state": "COMPLETED",
+          "system": {
+            "id": "019ebd40-c096-77af-a28d-71b63889518e"
+          },
+          "type": "TRANSACTION::RECEIPT"
+        }
+      }
+    }
+  }
+]
