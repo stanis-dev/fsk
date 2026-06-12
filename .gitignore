@@ -19,3 +19,4 @@ research/api-probes/raw/
 .DS_Store
 .idea/
 .vscode/
+.claude/
