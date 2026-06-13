@@ -75,7 +75,7 @@ and the fix. Exit code 1 — it works as a CI gate.
 | Path | What |
 |---|---|
 | `internal/fiskaly` | Typed SIGN IT client: token lifecycle, idempotency keys, receipt builder (gross → full VAT breakdown), provisioning flow |
-| `internal/mcpserver` | The 6 MCP tools; credentials stay server-side, agents hold opaque sandbox ids |
+| `internal/mcpserver` | The 7 MCP tools (incl. `ask_fiskaly_docs`, a grounded passthrough to fiskaly's own Ask-AI RAG); credentials stay server-side, agents hold opaque sandbox ids |
 | `internal/audit` | Session trail + deterministic compliance rules + report renderer |
 | `internal/sim` | Local SIGN IT simulator, faithful to live-probed behaviors, with fault scenarios |
 | `cmd/z2r-mcp` | MCP server (stdio) |

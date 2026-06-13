@@ -57,6 +57,7 @@ issue_receipt     → gross-priced items in, AdE-referenced receipt out
 get_record        → record state + compliance data
 cancel_receipt    → CANCELLATION transaction for a completed receipt
 audit_session     → the judge: replays your trail against compliance rules
+ask_fiskaly_docs  → cited answers from fiskaly's own Ask-AI (advisory; verify)
 
 Docs: https://developer.fiskaly.com/sign-it/2026-02-03/integration_guide
 Machine-readable: https://workspace.fiskaly.com/llms.txt and /CLAUDE.md`

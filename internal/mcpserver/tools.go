@@ -22,15 +22,16 @@ type Config struct {
 }
 
 type Server struct {
-	cfg   Config
-	store *Store
+	cfg     Config
+	store   *Store
+	askDocs *askDocsClient
 }
 
 func New(cfg Config) (*Server, error) {
 	if strings.Contains(cfg.BaseURL, "live.") {
 		return nil, fmt.Errorf("refusing to start against %s: LIVE transmits real fiscal documents to AdE; this server is TEST-only by design", cfg.BaseURL)
 	}
-	return &Server{cfg: cfg, store: NewStore()}, nil
+	return &Server{cfg: cfg, store: NewStore(), askDocs: newAskDocsClient()}, nil
 }
 
 func (s *Server) MCP() *mcp.Server {
@@ -77,6 +78,14 @@ func (s *Server) MCP() *mcp.Server {
 			"rules (idempotency discipline, INTENTION ordering, lifecycle, terminal-state confirmation, " +
 			"TEST-host isolation) and returns an audit report with citations. Run before claiming success.",
 	}, s.auditSession)
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name: "ask_fiskaly_docs",
+		Description: "Ask fiskaly's official 'Ask AI' documentation assistant a natural-language question " +
+			"and get a cited answer grounded in fiskaly's docs, OpenAPI spec and knowledge base. Use for " +
+			"'how do I…' / 'what does this field mean' questions. Advisory and may be imperfectly scoped — " +
+			"verify against get_integration_context and the actual API. Defaults to the SIGN IT product.",
+	}, s.askFiskalyDocs)
 
 	return srv
 }
@@ -289,6 +298,47 @@ func (s *Server) getIntegrationContext(ctx context.Context, req *mcp.CallToolReq
 	return &mcp.CallToolResult{
 		Content: []mcp.Content{&mcp.TextContent{Text: integrationBrief}},
 	}, nil, nil
+}
+
+// --- ask_fiskaly_docs --------------------------------------------------------------
+
+type AskDocsIn struct {
+	Question string `json:"question" jsonschema:"the natural-language documentation question"`
+	Product  string `json:"product,omitempty" jsonschema:"fiskaly product context for grounding; default SIGN_IT (others: SIGN_DE, SIGN_ES, SIGN_FR, SIGN_AT, UAPI)"`
+}
+
+type AskDocsOut struct {
+	Answer    string     `json:"answer"`
+	Grounded  bool       `json:"grounded"`
+	Citations []Citation `json:"citations"`
+	FollowUps []string   `json:"follow_ups,omitempty"`
+	Source    string     `json:"source"`
+	Note      string     `json:"note,omitempty"`
+}
+
+func (s *Server) askFiskalyDocs(ctx context.Context, req *mcp.CallToolRequest, in AskDocsIn) (*mcp.CallToolResult, AskDocsOut, error) {
+	if strings.TrimSpace(in.Question) == "" {
+		return nil, AskDocsOut{}, fmt.Errorf("question is required")
+	}
+	product := in.Product
+	if product == "" {
+		product = "SIGN_IT"
+	}
+	out := AskDocsOut{Source: "fiskaly Ask-AI (workspace.fiskaly.com) — RAG over docs, OpenAPI spec & knowledge base"}
+
+	// External dependency: degrade gracefully so a docs outage never breaks
+	// the agent. A failure returns a usable note, not a hard tool error.
+	res, err := s.askDocs.ask(ctx, in.Question, product, "developer")
+	if err != nil {
+		out.Note = fmt.Sprintf("fiskaly Ask-AI is unavailable right now (%v). Fall back to get_integration_context and the API reference.", err)
+		return nil, out, nil
+	}
+	out.Answer = res.Answer
+	out.Grounded = res.Grounded
+	out.Citations = res.Citations
+	out.FollowUps = res.FollowUps
+	out.Note = "Advisory and AI-generated; citations may cross-reference sibling Unified-API products (SIGN IT/FR share a spec). Verify load-bearing claims against the actual API."
+	return nil, out, nil
 }
 
 // --- audit_session -----------------------------------------------------------------
