@@ -1,23 +1,14 @@
 # Secrets — never commit
 .env
 .env.*
-!.env.example
 *.pem
 *.key
-
-# Go
-bin/
-dist/
-*.test
-*.out
-coverage.*
-
-# Probe transcripts may contain tokens before redaction
-research/api-probes/raw/
 
 # OS / editor
 .DS_Store
 .idea/
 .vscode/
-.claude/*
-!.claude/skills/
+.claude/
+
+# Commit the agent-orientation file despite the user's global ignore of AGENTS.md
+!AGENTS.md
