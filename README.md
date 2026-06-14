@@ -20,7 +20,10 @@ For one of the opportunities, build a functional prototype. That we’ll discuss
 
 Successful project completion will have two deliverables: "Opportunities" document and a functional prototype.
 
-My take: provide coding agent focused tooling by best standards of DX by mid-June 2026
+Prototype: an MCP (docs + action + sandbox-control tools) wrapped by an integration Skill, running against a
+fault-injecting sandbox, with a deterministic judge that runs both as an MCP tool and as a CI gate
+
+**Critical guiding rule: prototype must address the largest impact through the smallest effort**
 
 ## Context
 

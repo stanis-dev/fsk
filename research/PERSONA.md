@@ -87,10 +87,12 @@ future wave of "my receipts stopped working" tickets on day 91.
 - **Model-impedance pain** — squeezing orders / discounts / split-payments into
   nested record/entry/VAT structures where nothing is derived and everything must
   reconcile.
-- **Undocumented-contract pain** — the rules you only learn from `422`s and
-  `405`s (subject-name regex, "legal *and* trade name required," scoped-subject
-  requirement, commissioning order, composite record types). The docs say one
-  thing; the error teaches you the truth.
+- **Undocumented-contract pain** — the rules the schema can't express, learned only from `422`s and
+  `405`s: the scoped-subject sequencing (a UNIT-scoped subject before `POST
+  /taxpayers`, or a 405) and commissioning order. The schema-level constraints she
+  also trips on (subject-name regex, "legal *and* trade name required," the
+  record-type taxonomy) are in the reference, but their descriptions are blank
+  (the 168), so the error still teaches faster than the docs.
 - **Resilience pain** — outages, FAILED records, retries-with-idempotency,
   polling to a terminal state, all without freezing checkout.
 - **Lifecycle / ops pain** — provisioning thousands of merchants, credential

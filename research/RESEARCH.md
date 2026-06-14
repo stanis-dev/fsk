@@ -105,7 +105,7 @@ quickstart, no llms.txt.
 ## The strategic read
 
 fiskaly built the AI **read** layer (RAG chat + GEO files) but the **action** layer is conspicuously missing:
-unpublished MCP, dormant try-it, dead console link, archived SDKs, zero examples. Their own job ad says they want
+unpublished MCP, dormant try-it, dead console link, archived SDKs. Their own job ad says they want
 judge-agents-auditing-coder-agents. The docs pipeline itself (template + overlays) has no QA gate — hence 168 blank
 descriptions in production.
 

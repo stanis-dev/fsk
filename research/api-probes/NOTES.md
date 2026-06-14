@@ -43,3 +43,21 @@ Ground truth from a complete happy-path run (14 calls, see `transcript.json`). A
 
 See `state.json`. Each probe run creates a fresh UNIT org stack — cleanup is via DECOMMISSIONED/DISABLED states only (no
 DELETE in the API).
+
+## Addendum (2026-06-14 re-probe)
+
+Confirmed live against `test.api.fiskaly.com`, `X-Api-Version: 2026-02-03`:
+
+- `X-Idempotency-Key` is required on **every** POST, including `POST /tokens` (omitting it returns `400 E_BAD_REQUEST`
+  "Header parameter X-Idempotency-Key is required, but not found"). Not only POST/PATCH on resources.
+- The key must be a **lowercase-hex** UUID v3/v4. `uuidgen` output (uppercase) is rejected with a regex mismatch against
+  `^[0-9a-f]{8}-?...$`; the validator tries both the v4 and v3 patterns.
+- Request/header validation runs **before** auth: the idempotency-key `400` fires even with an empty/invalid bearer.
+- Token response top-level `content` keys are `authentication, id, organization, subject`; the JWT lives under
+  `content.authentication`, not `content.access_token`.
+- Mustache leak confirmed firsthand: a request-validation `400` embeds the violated schema, whose `description` is the
+  literal `{{>oas_components_schemas_universally_unique_identifier_v4_description}}`. Same template-resolution defect as
+  the 168 blank docs descriptions, surfacing in live API error bodies. The terse `405` authz errors do NOT embed schema.
+- Earlier "four undocumented contracts" framing corrected: the schema-level constraints (subject-name regex, `legal`+`trade`
+  required, the record-type taxonomy, PATCH idempotency) ARE in the spec. The genuinely unexpressible contracts are the
+  scoped-subject sequencing and commissioning order.

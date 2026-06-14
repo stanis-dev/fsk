@@ -8,8 +8,9 @@ responses_ embed schema descriptions with unresolved `{{>...}}` partials. Nobody
 **2. AI enablement - read layer already built** - workspace.fiskaly.com ships llms.txt, an 8.5MB llms-full.txt, a
 CLAUDE.md agent guide, machine-readable product/regulatory manifests, and a working RAG chat. The documented
 `@fiskaly/docs-mcp` is not on npm, the try-it component ships in the bundle but never renders, `/api/console` is a 404,
-every SDK repo is archived, and the spec contains zero request examples. An AI agent can _read about_ fiskaly perfectly
-and still can't _do_ anything.
+every SDK repo is archived, and the spec has no authored request examples: only field-level values a renderer stitches
+into samples that don't encode the required-together fields or call ordering the compositional flows (e.g. `POST /records`)
+need. An AI agent can _read about_ fiskaly perfectly and still can't _do_ anything.
 
 **3. The customer buys certainty, not endpoints.** Italy makes this concrete: software fiscalization goes fully
 operational in 2027 (provv. 111204/2025), ~80% of Italy's 1.7M hardware registers reach end-of-life by then, and
@@ -33,9 +34,10 @@ customers, then turned inward.
 
 **#3 — Docs CI: the 168 blank descriptions** A conformance pipeline over the docs supply chain: resolve the template
 against every country overlay (catches all 168 unresolved keys — deterministically, no LLM needed), diff documented
-behavior against live TEST API behavior (probing found four undocumented contracts: subject-name regex, mandatory trade
-names, composite record types, PATCH idempotency — see `research/api-probes/NOTES.md`), and gate releases on zero
-placeholders. The launch checklist for Sweden and Poland overlays writes itself.
+behavior against live TEST API behavior (the schema-level contracts the probe hit are in fact documented: subject-name
+regex, `legal`+`trade` required, the record-type taxonomy; what the diff catches is the same template defect leaking
+server-side, with `400` error bodies embedding unresolved `{{>...}}` partials, confirmed live; see
+`research/api-probes/NOTES.md`), and gate releases on zero placeholders. The launch checklist for Sweden and Poland overlays writes itself.
 
 **#4 — CalVer migration tooling** SIGN IT shipped four date versions in 17 months, one of which renamed core resources
 (`entities`/`assets` → `taxpayers`/`locations`/`organizations`) with migration notes living in a Zendesk article. The
