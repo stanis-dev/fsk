@@ -1,0 +1,4 @@
+fiskaly contract conformance: /work
+
+5/5 rules passed.
+VERDICT: conformant. exit 0

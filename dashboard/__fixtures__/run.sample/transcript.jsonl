@@ -1,0 +1,4 @@
+{"type":"system","model":"claude-sonnet-4-6","cwd":"/work","claude_code_version":"2.1.0"}
+{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Read","input":{"file_path":"pos/checkout.go"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","content":"ok","is_error":false}]}}
+{"type":"result","result":"done","num_turns":12,"total_cost_usd":1.5}
