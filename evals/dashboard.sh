@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Launch the eval dashboard from anywhere:  ./evals/dashboard.sh
+# Launch the eval dashboard:  ./evals/dashboard.sh   then open http://localhost:8080
 #
-# dashboard/ is its own Go module, so we run from inside it (the repo root has no
-# go.mod) and pass the absolute path to the run script. Open http://localhost:8080.
+# The dashboard is a Next.js app in dashboard/. It reads ~/.cache/fiskaly-eval and
+# triggers runs via evals/run-eval-docker.sh (override with FISKALY_EVAL_SCRIPT).
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root/dashboard"
-exec go run . -script "$repo_root/evals/run-eval-docker.sh" "$@"
+pnpm install --frozen-lockfile
+exec pnpm dev -p 8080 "$@"
