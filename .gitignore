@@ -12,3 +12,7 @@
 
 # Commit the agent-orientation file despite the user's global ignore of AGENTS.md
 !AGENTS.md
+
+# Go build artifacts (rebuildable via `go build`)
+/mcp/fiskaly-mcp
+/sims/judge/judge
