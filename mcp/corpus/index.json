@@ -1,0 +1,47 @@
+[
+  {
+    "id": "probe:auth-and-headers",
+    "title": "SIGN IT — authentication, host, and required headers",
+    "url": "fsk://probe/notes#auth-and-headers",
+    "source": "probe",
+    "path": "POST /tokens",
+    "version": "2026-02-03",
+    "text": "Host: all calls go to https://test.api.fiskaly.com (TEST) or https://live.api.fiskaly.com (LIVE). Required on every call: header X-Api-Version: 2026-02-03. Required on every POST (including POST /tokens): header X-Idempotency-Key, a lowercase-hex UUID v4 (uppercase from uuidgen is rejected). Request/header validation runs BEFORE auth, so a missing idempotency key returns 400 even with an invalid bearer. Authenticate by POST /tokens with the API key/secret (fields key and secret); the JWT is returned under content.authentication (NOT content.access_token) and is valid 24h. Send it as Authorization: Bearer <jwt> on subsequent calls."
+  },
+  {
+    "id": "probe:scoped-subject",
+    "title": "SIGN IT — scoping a subject to a unit organization",
+    "url": "fsk://probe/notes#scoped-subject",
+    "source": "probe",
+    "path": "POST /subjects",
+    "version": "2026-02-03",
+    "text": "The HUB API key authenticates as a GROUP organization. Create a UNIT with POST /organizations {type: UNIT, name}. You cannot create a taxpayer on a GROUP org (returns 405 E_METHOD_NOT_ALLOWED). Instead, POST /subjects {type: API_KEY, name} WITH header X-Scope-Identifier: <unit-id> to mint credentials scoped to that UNIT; the key and secret are returned ONCE under content.credentials and are non-recoverable. Then POST /tokens with those scoped credentials to get a UNIT-scoped JWT; subsequent calls need no scope header."
+  },
+  {
+    "id": "probe:provisioning",
+    "title": "SIGN IT — provisioning taxpayer, location, and system",
+    "url": "fsk://probe/notes#provisioning",
+    "source": "probe",
+    "path": "POST /taxpayers",
+    "version": "2026-02-03",
+    "text": "With a UNIT-scoped token: POST /taxpayers (type COMPANY) where name requires BOTH legal and trade, plus the Italian fiscalization block {type: IT, tax_id_number(11), vat_id_number(11), credentials: {type: FISCONLINE, pin, password, tax_id_number(16)}} (dummy values accepted in TEST). POST /locations (type BRANCH) with taxpayer.id, name (<=32 chars), address. POST /systems (type FISCAL_DEVICE) requires location, producer {type: MPN, number, details.name}, software {name, version}. Each is created state=ACQUIRED mode=INACTIVE. Commission each via PATCH .../{id} {content: {state: COMMISSIONED}} in order taxpayer -> location -> system; mode flips to OPERATIVE automatically. X-Idempotency-Key is required on PATCH too."
+  },
+  {
+    "id": "probe:records-flow",
+    "title": "SIGN IT — issuing a receipt: the two-call records flow",
+    "url": "fsk://probe/notes#records-flow",
+    "source": "probe",
+    "path": "POST /records",
+    "version": "2026-02-03",
+    "text": "A receipt is TWO POST /records calls, not a single /receipts POST. 1) INTENTION: POST /records {type: INTENTION, system.id, operation: {type: TRANSACTION}} -> state=ACCEPTED mode=PROCESSING. 2) TRANSACTION: POST /records {type: TRANSACTION, record.id: <intention-id>, operation: {type: RECEIPT, document: {number, total_vat: {amount, exclusive, inclusive}}, entries: [SALE/ITEM with full VAT breakdown], payments: [CASH >=1]}}. In TEST this returns state=COMPLETED mode=FINISHED synchronously, with compliance.data a DCW progressive number (zeroed in TEST) and compliance.url the AdE print endpoint. LIVE is async -> poll the record until FINISHED."
+  },
+  {
+    "id": "probe:money-model",
+    "title": "SIGN IT — VAT, amounts, and value rules",
+    "url": "fsk://probe/notes#money-model",
+    "source": "probe",
+    "path": "",
+    "version": "2026-02-03",
+    "text": "Amounts are decimal STRINGS matching ^(-)?\\d{1,12}(\\.\\d{1,8})?$, not numbers. A VatRateCategory requires ALL of percentage, amount, exclusive, and inclusive — the API derives none of them, so the integration must compute every field. All resource IDs are UUIDv7 (time-ordered). Subject credentials are shown once and are non-recoverable. There is no DELETE; resources are retired via DECOMMISSIONED/DISABLED states."
+  }
+]
