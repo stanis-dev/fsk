@@ -4,7 +4,8 @@
 research/
 report/
 memo/
-judge/
-pos/
+sims/judge/
+sims/pos/
+sims/dashboard/
 .claude/
 *.output

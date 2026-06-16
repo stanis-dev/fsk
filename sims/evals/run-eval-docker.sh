@@ -11,8 +11,9 @@
 
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-fixture="$repo_root/pos"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+sims_root="$repo_root/sims"
+fixture="$sims_root/pos"
 image="fiskaly-eval"
 model="${RUN_MODEL:-claude-sonnet-4-6}"
 effort="${RUN_EFFORT:-medium}"
@@ -50,7 +51,7 @@ tests for the new behavior.
 EOF
 
 echo "building image (cached after first build)..."
-docker build -f "$repo_root/evals/Dockerfile" -t "$image" "$repo_root"
+docker build -f "$sims_root/evals/Dockerfile" -t "$image" "$repo_root"
 
 # Runs live under ~/.cache/fiskaly-eval so the dashboard finds them (same path as
 # run-eval.sh). It's under /Users, which Docker Desktop shares into its VM by default,
@@ -83,7 +84,7 @@ docker run --rm \
 (cd "$work" && go test ./...) >"$run_dir/test.txt" 2>&1 && tests=PASS || tests=FAIL
 git -C "$work" add -A
 git -C "$work" diff --cached >"$run_dir/changes.diff"
-(cd "$repo_root/judge" && go run . "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
+(cd "$sims_root/judge" && go run . "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
 
 summary=""
 if command -v jq >/dev/null; then

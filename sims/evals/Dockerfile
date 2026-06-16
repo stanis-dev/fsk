@@ -27,7 +27,7 @@ RUN apt-get update \
 COPY --from=mcpbuild /fiskaly-mcp /usr/local/bin/fiskaly-mcp
 RUN printf '{ "mcpServers": { "fiskaly": { "command": "/usr/local/bin/fiskaly-mcp" } } }\n' >/etc/mcp.json
 
-COPY evals/docker-entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY sims/evals/docker-entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /work

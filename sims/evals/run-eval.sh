@@ -12,8 +12,9 @@
 
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-fixture="$repo_root/pos"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+sims_root="$repo_root/sims"
+fixture="$sims_root/pos"
 model="${RUN_MODEL:-claude-sonnet-4-6}"
 effort="${RUN_EFFORT:-medium}"
 
@@ -101,7 +102,7 @@ git -C "$work" diff --cached >"$run_dir/changes.diff"
 
 # Judge: deterministic fiskaly-contract conformance — the compliance check that
 # go build / go test structurally cannot perform.
-(cd "$repo_root/judge" && go run . "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
+(cd "$sims_root/judge" && go run . "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
 
 # Summary from the final result event, if jq is available.
 summary=""
