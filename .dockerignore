@@ -1,0 +1,10 @@
+.git
+.env
+.env.*
+research/
+report/
+memo/
+judge/
+pos/
+.claude/
+*.output
