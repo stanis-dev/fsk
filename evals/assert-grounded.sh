@@ -11,8 +11,10 @@ transcript="${1:?usage: assert-grounded.sh <transcript.jsonl>}"
 
 # stream-json writes one event per line, in order, so line numbers are a faithful
 # ordering. We compare the first search call against the first code mutation.
-search_line=$(grep -n '"name":"search_fiskaly_docs"' "$transcript" | head -1 | cut -d: -f1 || true)
-mutate_line=$(grep -nE '"name":"(Write|Edit|MultiEdit)"' "$transcript" | head -1 | cut -d: -f1 || true)
+# Match the tool only inside a tool_use event (not its definition or result), and
+# allow Claude Code's MCP namespacing (search_fiskaly_docs -> mcp__<server>__search_fiskaly_docs).
+search_line=$(grep -n 'search_fiskaly_docs' "$transcript" | grep '"type":"tool_use"' | head -1 | cut -d: -f1 || true)
+mutate_line=$(grep -nE '"name":"(Write|Edit|MultiEdit)"' "$transcript" | grep '"type":"tool_use"' | head -1 | cut -d: -f1 || true)
 
 if [ -z "$search_line" ]; then
   echo "NOT GROUNDED: agent never called search_fiskaly_docs"
