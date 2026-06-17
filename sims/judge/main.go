@@ -22,6 +22,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"go/scanner"
+	"go/token"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -132,14 +134,15 @@ var catalog = []rule{
 		hint: "fire-and-forget on PROCESSING never reaches the tax authority; you must poll to FINISHED",
 	},
 	{
-		// Match the breakdown being CONSTRUCTED — the fields as quoted JSON keys or
-		// struct tags ("exclusive, "inclusive) — not merely mentioned. This avoids a
-		// vacuous pass on prose like the seed's "VAT-exclusive" doc comments.
+		// Match the breakdown being CONSTRUCTED — every field as a quoted JSON key or
+		// struct tag ("percentage, "amount, "exclusive, "inclusive) — not merely
+		// mentioned. readSource strips comments, so prose like "VAT-exclusive" cannot
+		// satisfy this; and the API derives none of the four, so all four are required.
 		id:   "vat-breakdown",
-		want: []*regexp.Regexp{re(`"exclusive`), re(`"inclusive`)},
+		want: []*regexp.Regexp{re(`"percentage`), re(`"amount`), re(`"exclusive`), re(`"inclusive`)},
 		desc: "sends the full VatRateCategory breakdown (percentage/amount/exclusive/inclusive)",
 		cite: "NOTES.md: VatRateCategory requires ALL of percentage, amount, exclusive, inclusive — the API derives none",
-		hint: "the API derives no VAT field; the integration must compute and send the exclusive and inclusive amounts",
+		hint: "the API derives no VAT field; the integration must compute and send all four — percentage, amount, exclusive, inclusive",
 	},
 	{
 		id:   "no-legacy-resources",
@@ -149,11 +152,13 @@ var catalog = []rule{
 		hint: "/entities and /assets are the pre-rename resources; migrate to the current names",
 	},
 	{
+		// Require the header name AND the current date, so dropping X-Api-Version
+		// while leaving the date in a constant cannot pass.
 		id:   "api-version-current",
-		want: []*regexp.Regexp{re(`2026-02-03`)},
-		desc: "pins the current dated API version",
-		cite: "NOTES.md: X-Api-Version: 2026-02-03",
-		hint: "an older X-Api-Version date targets a superseded contract",
+		want: []*regexp.Regexp{re(`(?i)X-Api-Version`), re(`2026-02-03`)},
+		desc: "sends the X-Api-Version header pinned to the current date",
+		cite: "NOTES.md: X-Api-Version: 2026-02-03 required on all calls",
+		hint: "an older X-Api-Version date (or a missing header) targets a superseded contract",
 	},
 }
 
@@ -282,8 +287,12 @@ func selectRules(byID map[string]rule, spec string) ([]rule, error) {
 	return out, nil
 }
 
-// readSource concatenates non-test Go source under dir. Tests are excluded so a
-// mock that mimics an invented API cannot satisfy a rule.
+// readSource concatenates non-test Go source under dir, with comments stripped.
+// Tests are excluded so a mock that mimics an invented API cannot satisfy a rule;
+// comments are excluded so rules match the code an integration actually runs, not
+// explanatory prose — a deny rule must not fire on a comment like
+// "do not call /refunds; use /records CANCELLATION", and a want rule must not be
+// satisfied by a token that appears only in a comment.
 func readSource(dir string) (string, error) {
 	var b strings.Builder
 	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
@@ -297,9 +306,39 @@ func readSource(dir string) (string, error) {
 		if err != nil {
 			return err
 		}
-		b.Write(data)
+		b.WriteString(stripComments(data))
 		b.WriteByte('\n')
 		return nil
 	})
 	return b.String(), err
+}
+
+// stripComments returns the Go source with comment tokens removed. It lexes with
+// go/scanner so string literals are preserved intact — the // in
+// "https://test.api.fiskaly.com" is part of a STRING token, not a line comment,
+// and is not mangled. Falls back to the raw bytes if scanning yields nothing.
+func stripComments(src []byte) string {
+	var s scanner.Scanner
+	fset := token.NewFileSet()
+	file := fset.AddFile("", fset.Base(), len(src))
+	// nil error handler + default mode: comments are skipped, errors are tolerated
+	// (the judge must never crash on whatever the agent produced).
+	s.Init(file, src, nil, 0)
+	var b strings.Builder
+	for {
+		_, tok, lit := s.Scan()
+		if tok == token.EOF {
+			break
+		}
+		if lit != "" {
+			b.WriteString(lit)
+		} else {
+			b.WriteString(tok.String())
+		}
+		b.WriteByte(' ')
+	}
+	if b.Len() == 0 {
+		return string(src)
+	}
+	return b.String()
 }

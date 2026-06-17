@@ -58,12 +58,26 @@ func TestSelectRulesOrderAndUnknown(t *testing.T) {
 }
 
 func TestPositiveRuleNeedsEveryWant(t *testing.T) {
-	r := ruleByID(t, "vat-breakdown") // requires BOTH exclusive and inclusive
-	if r.pass(`vat := map[string]string{"exclusive": "1.00"}`) {
-		t.Error("vat-breakdown passed with only 'exclusive' present")
+	r := ruleByID(t, "vat-breakdown") // requires ALL of percentage/amount/exclusive/inclusive
+	// Three of the four present is not enough.
+	if r.pass(`{"exclusive":"1.00","inclusive":"1.22","percentage":"22"}`) {
+		t.Error("vat-breakdown passed without the 'amount' field")
 	}
-	if !r.pass(`{"exclusive":"1.00","inclusive":"1.22","percentage":"22"}`) {
-		t.Error("vat-breakdown failed with both exclusive and inclusive present")
+	if !r.pass(`{"percentage":"22","amount":"0.66","exclusive":"3.00","inclusive":"3.66"}`) {
+		t.Error("vat-breakdown failed with all four fields present")
+	}
+}
+
+func TestApiVersionCurrentNeedsHeaderAndDate(t *testing.T) {
+	r := ruleByID(t, "api-version-current")
+	if r.pass(`const apiVersion = "2026-02-03"`) {
+		t.Error("api-version-current passed with the date but no X-Api-Version header")
+	}
+	if r.pass(`req.Header.Set("X-Api-Version", "2025-08-12")`) {
+		t.Error("api-version-current passed with an old date")
+	}
+	if !r.pass(`req.Header.Set("X-Api-Version", "2026-02-03")`) {
+		t.Error("api-version-current failed with both the header and the current date")
 	}
 }
 
@@ -74,6 +88,37 @@ func TestDenyRuleFailsWhenForbiddenTokenAppears(t *testing.T) {
 	}
 	if r.pass(`http.Post(base + "/refunds", ...)`) {
 		t.Error("no-invented-refunds should fail when /refunds appears")
+	}
+}
+
+// A deny rule must fire on real request construction but NOT on an explanatory
+// comment — readSource strips comments before rules run.
+func TestDenyRuleIgnoresComments(t *testing.T) {
+	dir := t.TempDir()
+	correct := "package x\n" +
+		"// Do not call /refunds; void via /records CANCELLATION instead.\n" +
+		"func void() { http.Post(base+\"/records\", nil) }\n"
+	if err := os.WriteFile(filepath.Join(dir, "x.go"), []byte(correct), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	src, err := readSource(dir)
+	if err != nil {
+		t.Fatalf("readSource error: %v", err)
+	}
+	if contains(src, "/refunds") {
+		t.Error("readSource kept /refunds from a comment; comments must be stripped")
+	}
+	if !ruleByID(t, "no-invented-refunds").pass(src) {
+		t.Error("no-invented-refunds wrongly failed a correct impl that only mentions /refunds in a comment")
+	}
+	// And it still fires when /refunds is a real path string.
+	bad := "package x\nfunc void() { http.Post(base+\"/refunds\", nil) }\n"
+	if err := os.WriteFile(filepath.Join(dir, "x.go"), []byte(bad), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	src, _ = readSource(dir)
+	if ruleByID(t, "no-invented-refunds").pass(src) {
+		t.Error("no-invented-refunds should fail on a real /refunds request")
 	}
 }
 

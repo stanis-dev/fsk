@@ -91,7 +91,11 @@ humans and the dashboard.
 
 `cd sims/judge && go run . -list` prints every rule. Positive rules require a
 distinctive token the correct contract must contain; negative (`deny`) rules fire
-when a red-herring token appears. Today's catalog:
+when a red-herring token appears. The judge reads code with **comments stripped**
+(via `go/scanner`, so string literals like `"https://test.api.fiskaly.com"` stay
+intact): a `deny` rule fires only on real request construction, never on an
+explanatory comment, and a `want` token that appears only in a comment does not
+count. Today's catalog:
 
 | rule | kind | what it asserts |
 | --- | --- | --- |
@@ -99,14 +103,14 @@ when a red-herring token appears. Today's catalog:
 | `token-exchange` | want | `POST /tokens` for the JWT |
 | `idempotency-key` | want | `X-Idempotency-Key` on writes |
 | `api-version` | want | the `X-Api-Version` header |
-| `api-version-current` | want | the **current** `2026-02-03` version |
+| `api-version-current` | want | the `X-Api-Version` header **and** the current `2026-02-03` date |
 | `records-flow` | want | issues via `/records` |
 | `scope-identifier` | want | `X-Scope-Identifier` (UNIT-scoped subject) |
 | `commissioning` | want | `COMMISSIONED` lifecycle PATCH |
 | `cancellation-ref` | want | a `CANCELLATION` record (voiding) |
 | `no-invented-refunds` | deny | fails if a `/refunds` endpoint appears |
 | `polling` | want | polls to the `FINISHED` terminal state |
-| `vat-breakdown` | want | sends `exclusive` **and** `inclusive` VAT fields |
+| `vat-breakdown` | want | constructs all four VatRateCategory keys (`percentage`/`amount`/`exclusive`/`inclusive`) |
 | `no-legacy-resources` | deny | fails if `/assets` or `/entities` appears |
 
 ## Run and verify a scenario
