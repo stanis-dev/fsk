@@ -18,7 +18,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       <Link className="text-blue-700 underline" href="/">← runs</Link>
       <h1 className="my-2 text-xl font-bold">{s.id}</h1>
       <div className="mb-4 flex flex-wrap gap-4 rounded bg-muted p-3">
-        <span>coder {s.coder}</span><span>model {s.model}</span><span>harness {s.harness}</span>
+        <span>scenario {s.scenario}</span><span>coder {s.coder}</span><span>model {s.model}</span><span>harness {s.harness}</span>
         <span>effort {s.effort}</span><span>turns {s.turns}</span><span>cost {s.cost}</span>
         <span>build <JudgeBadge value={s.build} /></span>
         <span>tests <JudgeBadge value={s.tests} /></span>

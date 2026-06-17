@@ -41,11 +41,12 @@ export function listRuns(dir = runsDir()): Summary[] {
 export function summarizeRun(dir: string, created = safeMtime(dir)): Summary {
   const s: Summary = {
     id: path.basename(dir), created: created.toISOString(), status: "running",
-    coder: "", harness: "", model: "", effort: "", build: "", tests: "", judge: "", turns: "", cost: "",
+    scenario: "", coder: "", harness: "", model: "", effort: "", build: "", tests: "", judge: "", turns: "", cost: "",
   };
 
   const log = logInfo(path.join(dir, "transcript.jsonl"));
   const meta = readMeta(dir);
+  s.scenario = meta.scenario || "—";
   s.effort = meta.effort || "—";
   s.model = log.model || meta.model;
   s.coder = (log.ccver ? "claude-code" : "") || meta.coder || "?";
@@ -115,12 +116,12 @@ function logInfo(file: string): { model: string; cwd: string; ccver: string } {
   return { model: "", cwd: "", ccver: "" };
 }
 
-function readMeta(dir: string): { harness: string; coder: string; model: string; effort: string } {
+function readMeta(dir: string): { harness: string; coder: string; model: string; effort: string; scenario: string } {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8"));
-    return { harness: str(m.harness), coder: str(m.coder), model: str(m.model), effort: str(m.effort) };
+    return { harness: str(m.harness), coder: str(m.coder), model: str(m.model), effort: str(m.effort), scenario: str(m.scenario) };
   } catch {
-    return { harness: "", coder: "", model: "", effort: "" };
+    return { harness: "", coder: "", model: "", effort: "", scenario: "" };
   }
 }
 

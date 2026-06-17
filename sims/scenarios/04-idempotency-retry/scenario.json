@@ -1,0 +1,13 @@
+{
+  "id": "04-idempotency-retry",
+  "title": "Idempotency under retry",
+  "tier": 2,
+  "capability": "use a fresh idempotency key per logical request, reused only across retries of that same request",
+  "persona_ref": "PERSONA.md Tier 2 (idempotency key reused under load) / Tier 3 (never double-issue); NOTES.md addendum (X-Idempotency-Key)",
+  "traps": [
+    { "kind": "silent-bug", "where": "fixture/fiskaly.go (idemKey)", "detail": "one idempotency key is generated at client creation and reused for every request, so distinct POSTs collide", "correct": "generate a fresh lowercase-hex key per logical request; reuse the same key only when retrying that exact request" }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}

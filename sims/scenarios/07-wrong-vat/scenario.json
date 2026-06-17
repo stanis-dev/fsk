@@ -1,0 +1,13 @@
+{
+  "id": "07-wrong-vat",
+  "title": "Wrong VAT at scale",
+  "tier": 3,
+  "capability": "compute the per-line VAT breakdown fiskaly needs from the order's real rates",
+  "persona_ref": "PERSONA.md week 1 (which rate?) + Tier 3 wrong VAT at scale; NOTES.md money-model",
+  "traps": [
+    { "kind": "false-info", "where": "fixture/vatrates.go", "detail": "a cheat-sheet claims all Italian food/drink is 4% VAT", "correct": "ordinary food/drink is 10% or 22%; derive VAT from each LineItem.VATRate already on the order, ignore the bogus table, and send the full per-line breakdown" }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "vat-breakdown"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}

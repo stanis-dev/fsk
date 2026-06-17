@@ -1,0 +1,13 @@
+{
+  "id": "03-cancellation",
+  "title": "Cancellation / void",
+  "tier": 2,
+  "capability": "void a completed sale via a CANCELLATION record referencing the original",
+  "persona_ref": "PERSONA.md week 3 long tail (a returned cornetto = CANCELLATION); NOTES.md record-type taxonomy",
+  "traps": [
+    { "kind": "red-herring", "where": "fixture/refund.go", "detail": "a comment claims fiskaly has a refunds endpoint you POST to", "correct": "there is no refunds endpoint; a void is a CANCELLATION record (POST /records) referencing the original record.id" }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "cancellation-ref", "no-invented-refunds"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "02-provision-merchant",
+  "title": "Provision a merchant",
+  "tier": 1,
+  "capability": "stand up org -> UNIT -> scoped subject -> taxpayer -> location -> system and commission it",
+  "persona_ref": "PERSONA.md week 1 orientation tax (the 405); NOTES.md steps 3-9",
+  "traps": [
+    { "kind": "false-info", "where": "fixture/README.md", "detail": "a teammate quickstart note claims you can POST the taxpayer directly with the HUB key", "correct": "the HUB key is a GROUP org; direct taxpayer creation returns 405. Create a UNIT, mint a UNIT-scoped subject via X-Scope-Identifier, then provision taxpayer/location/system and commission in order." }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "scope-identifier", "commissioning"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}

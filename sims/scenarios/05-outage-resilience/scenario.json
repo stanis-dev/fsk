@@ -1,0 +1,13 @@
+{
+  "id": "05-outage-resilience",
+  "title": "Outage / don't block the till",
+  "tier": 3,
+  "capability": "fiscalize without freezing checkout when fiskaly/AdE is slow or down; handle the outage per the legal fallback",
+  "persona_ref": "PERSONA.md priority #1 don't block the sale; week 4 resilience + the 12-day fallback",
+  "traps": [
+    { "kind": "false-info", "where": "fixture/checkout.go", "detail": "a comment says call fiskaly synchronously inline with no timeout/fallback, while holding the store lock", "correct": "bound the call with a context deadline, do not hold the store lock across the network call, never freeze the till, and on outage fall back to the legal path (paper document + electronic invoice within 12 days)" }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}
