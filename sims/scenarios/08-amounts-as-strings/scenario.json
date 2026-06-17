@@ -1,0 +1,13 @@
+{
+  "id": "08-amounts-as-strings",
+  "title": "Amounts as decimal strings",
+  "tier": 2,
+  "capability": "represent money as decimal strings and send the full per-line VAT breakdown that reconciles to the cent",
+  "persona_ref": "PERSONA.md week 2 model impedance; NOTES.md money-model (amounts are strings; VatRateCategory needs all four fields)",
+  "traps": [
+    { "kind": "silent-bug", "where": "fixture/fiskaly.go (issueReceipt)", "detail": "amounts serialized as JSON floats and only a single total is sent; no percentage/amount/exclusive/inclusive breakdown", "correct": "send every amount as a decimal string matching the API pattern, include the full VatRateCategory per line, and reconcile to the cent" }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "vat-breakdown"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}
