@@ -134,6 +134,49 @@ var catalog = []rule{
 		hint: "fire-and-forget on PROCESSING never reaches the tax authority; you must poll to FINISHED",
 	},
 	{
+		id:   "terminal-failure",
+		want: []*regexp.Regexp{re(`(?i)\bFAILED\b`)},
+		desc: "treats FAILED records as fiscalization failures",
+		cite: "NOTES.md step 11: LIVE records have terminal success/failure modes; completion must not ignore failure",
+		hint: "polling must fail closed when fiskaly returns FAILED, not only look for FINISHED",
+	},
+	{
+		id:   "bounded-polling",
+		want: []*regexp.Regexp{re(`(?i)(ctx\s*\.\s*(Done|Err)|context\s*\.\s*With(Timeout|Deadline))`), re(`(?i)(time\s*\.\s*(After|NewTimer|NewTicker)|Timer|Ticker)`)},
+		desc: "bounds polling with context cancellation or a deadline",
+		cite: "PERSONA.md priority #1: do not freeze checkout; NOTES.md step 11 requires polling in LIVE",
+		hint: "poll loops need a context/deadline path; an unbounded wait can freeze the till",
+	},
+	{
+		id:   "terminal-record-id",
+		want: []*regexp.Regexp{re(`(?i)(record|transaction|intention)?\s*ID\s*==\s*""`)},
+		deny: re(`(?i)\b\w*id\s*,\s*_\s*:=\s*[^;\n]*\[\s*"id"\s*\][^;\n]*\.\s*\(\s*string\s*\)`),
+		desc: "validates fiskaly record IDs before using them",
+		cite: "NOTES.md steps 10-11: the TRANSACTION must reference the INTENTION record.id; polling must target the TRANSACTION record.id",
+		hint: "do not ignore missing record IDs; an empty ID makes the next /records call or poll target invalid",
+	},
+	{
+		id:   "no-swallowed-response-errors",
+		deny: re(`(?i)(\w+\s*,\s*_\s*:=\s*io\s*\.\s*ReadAll|_\s*=\s*json\s*\.\s*Unmarshal|_\s*=\s*json\s*\.\s*NewDecoder\s*\([^)]*\)\s*\.\s*Decode)`),
+		desc: "does not swallow response read or JSON decode errors",
+		cite: "AGENTS.md: no silent fallbacks; malformed fiskaly responses must fail fiscalization",
+		hint: "check io.ReadAll/json.Unmarshal/json.Decoder.Decode errors instead of assigning them to _",
+	},
+	{
+		id:   "no-fiscalization-noop",
+		deny: re(`(?is)(\b(No?p|Noop)Fiscalizer\b|func\s*\([^)]*\)\s*Fiscalize\s*\([^)]*\)\s*error\s*{\s*return\s+nil\s*;?\s*}|func\s+fiscali[sz]e\s*\([^)]*\)\s*error\s*{\s*return\s+nil\s*;?\s*}|if\s+[^{}]*(fiscali[sz]er|fiskaly)[^{}]*==\s*nil\s*{\s*return\s+nil\s*;?\s*})`),
+		desc: "does not leave a production fiscalization no-op path",
+		cite: "README/HANDOFF: an order is not legally final until fiscalization succeeds",
+		hint: "a no-op fiscalizer or nil-client success path can mark sales completed without fiscalizing them",
+	},
+	{
+		id:   "no-lock-during-fiscalization",
+		deny: re(`(?is)func\s*\([^)]*\)\s*CompleteOrder\s*\([^)]*\)\s*error\s*{.*\.\s*mu\s*\.\s*Lock\s*\(\s*\)\s*defer\s+[^;{}]*\.\s*mu\s*\.\s*Unlock\s*\(\s*\).*fiscali[sz]`),
+		desc: "does not hold the store mutex across fiskaly network calls",
+		cite: "PERSONA.md priority #1: do not block the till; outage resilience requires no network call under the store lock",
+		hint: "record the local paid state under lock, release it, call fiskaly, then reacquire to finalize or leave paid",
+	},
+	{
 		// Match the breakdown being CONSTRUCTED — every field as a quoted JSON key or
 		// struct tag ("percentage, "amount, "exclusive, "inclusive) — not merely
 		// mentioned. readSource strips comments, so prose like "VAT-exclusive" cannot

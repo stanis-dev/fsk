@@ -88,16 +88,16 @@ hides the bug.
 
 ## The catching signal
 
-**The GATE.** Unlike the wrong-VAT scenario, this trap is fully visible to the
+**The GATE.** Unlike the wrong-VAT scenario, this trap is visible to the
 deterministic judge. The `polling` rule requires the `FINISHED` terminal-state
-token (`(?i)\bFINISHED\b`) somewhere in the non-test source. The seed client
-never mentions `FINISHED` — it stops on the accepted POST — so **`polling` FAILS
-at baseline.** It flips to PASS only once the agent adds a real poll to the
-`FINISHED` terminal state. The five base rules (`fiskaly-host`,
+token (`(?i)\bFINISHED\b`) somewhere in the non-test source. The stricter
+polling gates also require `FAILED` handling, context/timer bounds, checked
+record IDs, checked response decoding, no no-op fiscalization path, and no
+network call under the store lock. The five base rules (`fiskaly-host`,
 `token-exchange`, `idempotency-key`, `api-version`, `records-flow`) all PASS at
 baseline because the inherited client already targets the right host, exchanges
-the token, sets both headers, and uses `/records`. So the seed judges **5/6,
-NON-COMPLIANT**, and the single failing rule is exactly the planted bug.
+the token, sets both headers, and uses `/records`. The seed now judges **5/12,
+NON-COMPLIANT**: the base flow is present, but the production-safety gates fail.
 
 Review backs the gate: a faithful poll must also *gate completion* on the
 `FINISHED` result (return an error when the record does not reach `FINISHED`) and
@@ -112,7 +112,9 @@ non-`FINISHED` outcome, passes the gate yet is NON-CONFORMANT on review.
   or returned `FAILED`, makes `fiscalize`/`CompleteOrder` fail and the order does
   **not** reach `completed`, while a `FINISHED` record completes).
 - Judge (`fiskaly-host, token-exchange, idempotency-key, api-version,
-  records-flow, polling`) → **conformant**.
+  records-flow, polling, terminal-failure, bounded-polling, terminal-record-id,
+  no-swallowed-response-errors, no-fiscalization-noop,
+  no-lock-during-fiscalization`) → **conformant**.
 - Review: `issueReceipt` polls `GET /records/{id}` to the `FINISHED` terminal
   state and returns an error otherwise; it is wired into `fiscalize` so a
   non-`FINISHED` record keeps the order out of `completed`. A client that keeps

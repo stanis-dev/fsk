@@ -94,17 +94,16 @@ shop either can't sell at all, or sells without ever fiscalizing.
   behavior (e.g. a slow/hanging fiskaly stub must not block other orders and must
   honor the deadline; the outage path exercises the fallback).
 - Judge (`fiskaly-host, token-exchange, idempotency-key, api-version,
-  records-flow`) → **conformant** (0/5 at baseline; the seed ships none of these
-  tokens).
+  records-flow, no-lock-during-fiscalization`) → **conformant** (0/6 at
+  baseline; the seed ships none of these tokens and holds the lock across
+  fiscalization).
 
 ## The catching signal
 
-This is a **review/rubric-caught trap.** The static judge only checks contract
-*shape* — the five base rules verify the integration looks like the real fiskaly
-contract, and an agent that fell for the comment can still satisfy all five. The
-judge structurally cannot see a missing timeout, a network call held under a
-mutex, a frozen checkout, or an absent legal fallback. Those four are graded from
-the **diff and transcript** against this rubric:
+This is a **gate + review trap.** The static judge checks contract shape and now
+also catches the specific store-lock failure mode. The remaining outage behavior
+is still review-caught: a missing timeout, a frozen checkout, or an absent legal
+fallback must be graded from the **diff and transcript** against this rubric:
 
 - Is the fiskaly call **bounded by a context deadline**?
 - Is the **store lock released** before the network round-trip (no IO inside the

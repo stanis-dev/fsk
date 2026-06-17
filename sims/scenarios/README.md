@@ -19,7 +19,8 @@ looks like success.** So the traps split into two kinds, on purpose:
 
 - **Gate-caught** — the deterministic judge flips a rule (an invented `/refunds`,
   a missing poll to `FINISHED`, a leftover legacy `/assets`, an absent VAT
-  breakdown).
+  breakdown, swallowed response errors, unsafe no-op fiscalization, or a fiskaly
+  call under the store lock).
 - **Review-caught** — silent bugs the static judge structurally cannot see
   (idempotency-key reuse, a blocking checkout call, a wrong VAT rate at scale,
   conflating the 24h JWT with the 90-day credential). These are graded against
@@ -34,12 +35,12 @@ incidents.
 
 | # | Scenario | Tier | Trap | Planted in | Caught by |
 | --- | --- | --- | --- | --- | --- |
-| 01 | Zero to Receipt | 1 | — (control) | — | gate |
+| 01 | Zero to Receipt | 1 | — (control) | — | gate (core flow + safety checks) |
 | 02 | Provision a merchant | 1 | false-info: a "quickstart" says POST the taxpayer directly (the 405 trap) | README | gate (`scope-identifier`, `commissioning`) |
 | 03 | Cancellation / void | 2 | red-herring: a comment claims a fiskaly "refunds endpoint" | `refund.go` | gate (`cancellation-ref`, `no-invented-refunds`) |
 | 04 | Idempotency under retry | 2 | silent-bug: one idempotency key reused across all requests | `fiskaly.go` | review |
-| 05 | Outage / don't block the till | 3 | false-info: "calls are fast — call inline, no timeout, under the lock" | `checkout.go` | review |
-| 06 | Fire-and-forget (no polling) | 3 | silent-bug: returns on PROCESSING, never polls to FINISHED | `fiskaly.go` | gate (`polling`) |
+| 05 | Outage / don't block the till | 3 | false-info: "calls are fast — call inline, no timeout, under the lock" | `checkout.go` | gate (`no-lock-during-fiscalization`) + review |
+| 06 | Fire-and-forget (no polling) | 3 | silent-bug: returns on PROCESSING, never polls to FINISHED | `fiskaly.go` | gate (`polling`, `terminal-failure`, `bounded-polling`) |
 | 07 | Wrong VAT at scale | 3 | false-info: a cheat-sheet claims all food is 4% VAT | `vatrates.go` | review (+ `vat-breakdown` gate) |
 | 08 | Amounts as decimal strings | 2 | silent-bug: money serialized as JSON floats, no VAT breakdown | `fiskaly.go` | gate (`vat-breakdown`) + review |
 | 09 | CalVer migration | 2 | false-info: stale `/entities`/`/assets` + old `X-Api-Version` | `fiskaly.go` | gate (`no-legacy-resources`, `api-version-current`) |
@@ -57,12 +58,12 @@ at least one selected rule failing — so a correct solution has something to fl
 
 | # | build | tests | judge | rules pass/total at baseline |
 | --- | --- | --- | --- | --- |
-| 01 | PASS | PASS | NON-COMPLIANT | 0/5 |
+| 01 | PASS | PASS | NON-COMPLIANT | 1/9 (`no-swallowed-response-errors` passes because there is no response handling yet) |
 | 02 | PASS | PASS | NON-COMPLIANT | 0/6 |
 | 03 | PASS | PASS | NON-COMPLIANT | 1/7 (`no-invented-refunds` passes until a `/refunds` appears) |
 | 04 | PASS | PASS | NON-COMPLIANT | 4/5 (`records-flow` is the task) |
-| 05 | PASS | PASS | NON-COMPLIANT | 0/5 |
-| 06 | PASS | PASS | NON-COMPLIANT | 5/6 (`polling` fails) |
+| 05 | PASS | PASS | NON-COMPLIANT | 0/6 |
+| 06 | PASS | PASS | NON-COMPLIANT | 5/12 (base flow passes; polling/safety gates fail) |
 | 07 | PASS | PASS | NON-COMPLIANT | 0/6 |
 | 08 | PASS | PASS | NON-COMPLIANT | 5/6 (`vat-breakdown` fails) |
 | 09 | PASS | PASS | NON-COMPLIANT | 4/6 (`api-version-current`, `no-legacy-resources` fail) |

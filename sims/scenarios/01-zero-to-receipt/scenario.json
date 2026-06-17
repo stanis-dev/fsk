@@ -6,7 +6,7 @@
   "persona_ref": "PERSONA.md: the end-to-end scenario; OPPORTUNITIES.md #1 Zero to Receipt",
   "traps": [],
   "judge": {
-    "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"]
+    "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "terminal-record-id", "no-swallowed-response-errors", "no-fiscalization-noop", "no-lock-during-fiscalization"]
   },
   "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
   "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }

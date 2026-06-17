@@ -110,6 +110,12 @@ count. Today's catalog:
 | `cancellation-ref` | want | a `CANCELLATION` record (voiding) |
 | `no-invented-refunds` | deny | fails if a `/refunds` endpoint appears |
 | `polling` | want | polls to the `FINISHED` terminal state |
+| `terminal-failure` | want | handles `FAILED` as a fiscalization failure |
+| `bounded-polling` | want | poll loop has context/deadline and timer bounds |
+| `terminal-record-id` | want + deny | validates fiskaly record IDs and rejects ignored `id` assertions |
+| `no-swallowed-response-errors` | deny | fails when response read/decode errors are assigned to `_` |
+| `no-fiscalization-noop` | deny | fails on no-op fiscalizer or nil-client success paths |
+| `no-lock-during-fiscalization` | deny | fails when `CompleteOrder` holds the store mutex across fiscalization |
 | `vat-breakdown` | want | constructs all four VatRateCategory keys (`percentage`/`amount`/`exclusive`/`inclusive`) |
 | `no-legacy-resources` | deny | fails if `/assets` or `/entities` appears |
 

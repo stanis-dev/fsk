@@ -7,7 +7,7 @@
   "traps": [
     { "kind": "false-info", "where": "fixture/checkout.go", "detail": "a comment says call fiskaly synchronously inline with no timeout/fallback, while holding the store lock", "correct": "bound the call with a context deadline, do not hold the store lock across the network call, never freeze the till, and on outage fall back to the legal path (paper document + electronic invoice within 12 days)" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] },
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "no-lock-during-fiscalization"] },
   "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
   "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
 }

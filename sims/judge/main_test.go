@@ -81,6 +81,105 @@ func TestApiVersionCurrentNeedsHeaderAndDate(t *testing.T) {
 	}
 }
 
+func TestNoFiscalizationNoopRejectsNoopPaths(t *testing.T) {
+	r := ruleByID(t, "no-fiscalization-noop")
+	bad := []string{
+		`type NopFiscalizer struct{}
+		func (NopFiscalizer) Fiscalize(context.Context, *Order) error { return nil }`,
+		`func fiscalize(context.Context, *Order) error { return nil }`,
+		`func (s *Store) fiscalize(ctx context.Context, o *Order) error {
+			if s.fiskaly == nil { return nil }
+			return s.fiskaly.issueReceipt(ctx, o)
+		}`,
+	}
+	for _, src := range bad {
+		if r.pass(src) {
+			t.Errorf("no-fiscalization-noop passed bad source:\n%s", src)
+		}
+	}
+	good := `func (s *Store) fiscalize(ctx context.Context, o *Order) error {
+		if s.fiskaly == nil { return errors.New("fiskaly is not configured") }
+		return s.fiskaly.issueReceipt(ctx, o)
+	}`
+	if !r.pass(good) {
+		t.Error("no-fiscalization-noop failed a source that fails closed")
+	}
+}
+
+func TestNoLockDuringFiscalizationRejectsDeferredUnlockAroundNetworkCall(t *testing.T) {
+	r := ruleByID(t, "no-lock-during-fiscalization")
+	bad := `func (s *Store) CompleteOrder(ctx context.Context, o *Order) error {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		o.Status = StatusPaid
+		return s.fiscalize(ctx, o)
+	}`
+	if r.pass(bad) {
+		t.Error("no-lock-during-fiscalization passed a CompleteOrder that calls fiskaly under a deferred unlock")
+	}
+	good := `func (s *Store) CompleteOrder(ctx context.Context, o *Order) error {
+		s.mu.Lock()
+		o.Status = StatusPaid
+		s.mu.Unlock()
+		if err := s.fiscalize(ctx, o); err != nil { return err }
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		o.Status = StatusCompleted
+		return nil
+	}`
+	if !r.pass(good) {
+		t.Error("no-lock-during-fiscalization failed a source that releases the lock before fiskaly")
+	}
+}
+
+func TestNoSwallowedResponseErrorsRejectsIgnoredDecodeErrors(t *testing.T) {
+	r := ruleByID(t, "no-swallowed-response-errors")
+	bad := []string{
+		`data, _ := io.ReadAll(resp.Body)`,
+		`_ = json.Unmarshal(data, &out)`,
+		`_ = json.NewDecoder(resp.Body).Decode(&out)`,
+	}
+	for _, src := range bad {
+		if r.pass(src) {
+			t.Errorf("no-swallowed-response-errors passed bad source: %s", src)
+		}
+	}
+	good := `data, err := io.ReadAll(resp.Body)
+	if err != nil { return err }
+	if err := json.Unmarshal(data, &out); err != nil { return err }`
+	if !r.pass(good) {
+		t.Error("no-swallowed-response-errors failed checked response handling")
+	}
+}
+
+func TestTerminalRecordIDRequiresCheckAndNoIgnoredAssertion(t *testing.T) {
+	r := ruleByID(t, "terminal-record-id")
+	if r.pass(`intentionID, _ := intention["id"].(string)`) {
+		t.Error("terminal-record-id passed an ignored id assertion")
+	}
+	good := `intentionID, ok := intention["id"].(string)
+	if !ok || intentionID == "" { return errors.New("empty intention ID") }`
+	if !r.pass(good) {
+		t.Error("terminal-record-id failed checked id extraction")
+	}
+}
+
+func TestPollingRulesNeedFailureAndBounds(t *testing.T) {
+	if ruleByID(t, "terminal-failure").pass(`if mode == "FINISHED" { return nil }`) {
+		t.Error("terminal-failure passed without FAILED handling")
+	}
+	if !ruleByID(t, "terminal-failure").pass(`case "FAILED": return errors.New("fiskaly failed")`) {
+		t.Error("terminal-failure failed explicit FAILED handling")
+	}
+	r := ruleByID(t, "bounded-polling")
+	if r.pass(`for { if mode == "FINISHED" { return nil } }`) {
+		t.Error("bounded-polling passed an unbounded loop")
+	}
+	if !r.pass(`select { case <-ctx.Done(): return ctx.Err(); case <-time.After(interval): }`) {
+		t.Error("bounded-polling failed context-aware timer polling")
+	}
+}
+
 func TestDenyRuleFailsWhenForbiddenTokenAppears(t *testing.T) {
 	r := ruleByID(t, "no-invented-refunds") // deny /refunds
 	if !r.pass(`http.Post(base + "/records", ...)`) {
