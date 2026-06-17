@@ -13,10 +13,20 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 sims_root="$repo_root/sims"
-fixture="$sims_root/pos"
 image="fiskaly-eval"
 model="${RUN_MODEL:-claude-sonnet-4-6}"
 effort="${RUN_EFFORT:-medium}"
+
+# Which scenario to run (id under sims/scenarios/). Default keeps the original
+# behavior: Zero to Receipt. The dashboard triggers this script with no args.
+scenario="${1:-${SCENARIO:-01-zero-to-receipt}}"
+scenario_dir="$sims_root/scenarios/$scenario"
+fixture="$scenario_dir/fixture"
+scenario_json="$scenario_dir/scenario.json"
+task_file="$scenario_dir/task.md"
+[ -d "$fixture" ] || { echo "fixture not found: $fixture" >&2; exit 1; }
+[ -f "$scenario_json" ] || { echo "scenario.json not found: $scenario_json" >&2; exit 1; }
+[ -f "$task_file" ] || { echo "task not found: $task_file" >&2; exit 1; }
 
 # Pin to Docker Desktop. Another context (e.g. colima) may also exist on this machine;
 # being explicit keeps the eval on the intended engine. Override with DOCKER_CONTEXT.
@@ -41,14 +51,7 @@ oauth_token="$(sed -nE 's/^CLAUDE_CODE_OAUTH_TOKEN=//p' "$repo_root/.env" | head
   exit 1
 }
 
-read -r -d '' task <<'EOF' || true
-This is the checkout backend for an Italian point-of-sale system. By law an order
-cannot be completed until it has been fiscalized, and fiscalization is not
-implemented yet. Implement it using fiskaly as the fiscalization provider: make
-CompleteOrder fiscalize a paid order through fiskaly and only let the order reach
-the completed state once that has succeeded. Keep the existing tests green and add
-tests for the new behavior.
-EOF
+task="$(cat "$task_file")"
 
 echo "building image (cached after first build)..."
 docker build -f "$sims_root/evals/Dockerfile" -t "$image" "$repo_root"
@@ -65,8 +68,10 @@ git -C "$work" init -q
 git -C "$work" -c user.email=eval@local -c user.name=eval add -A
 git -C "$work" -c user.email=eval@local -c user.name=eval commit -qm baseline
 
-printf '{"harness":"docker","coder":"claude-code","model":"%s","effort":"%s"}\n' "$model" "$effort" >"$run_dir/meta.json"
+printf '{"harness":"docker","coder":"claude-code","model":"%s","effort":"%s","scenario":"%s"}\n' \
+  "$model" "$effort" "$scenario" >"$run_dir/meta.json"
 
+echo "scenario: $scenario"
 echo "run dir: $run_dir"
 echo "model: $model   effort: $effort"
 echo "running coder in docker (only the fixture is mounted)..."
@@ -84,7 +89,7 @@ docker run --rm \
 (cd "$work" && go test ./...) >"$run_dir/test.txt" 2>&1 && tests=PASS || tests=FAIL
 git -C "$work" add -A
 git -C "$work" diff --cached >"$run_dir/changes.diff"
-(cd "$sims_root/judge" && go run . "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
+(cd "$sims_root/judge" && go run . -scenario "$scenario_json" "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
 
 summary=""
 if command -v jq >/dev/null; then
@@ -94,7 +99,7 @@ if command -v jq >/dev/null; then
 fi
 
 echo
-echo "==== eval result (docker) ===="
+echo "==== eval result (docker): $scenario ===="
 echo "build: $build    tests: $tests    judge: $judge"
 [ -n "$summary" ] && echo "$summary"
 echo "judge:      $run_dir/judge.txt"

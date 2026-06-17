@@ -5,6 +5,7 @@ export interface Summary {
   id: string;
   created: string; // ISO timestamp
   status: RunStatus;
+  scenario: string; // scenario id from meta.json (e.g. 06-fire-and-forget)
   coder: string;
   harness: string;
   model: string;

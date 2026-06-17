@@ -68,8 +68,8 @@ fault-injecting sandbox, with a deterministic judge that runs both as an MCP too
 
 ### 2. build evals
 
-- [ ] scenarios
-- [ ] rubric
+- [x] scenarios — 10 code exercises in [`sims/scenarios/`](sims/scenarios/README.md), with seeded red herrings, false info, and dormant silent bugs
+- [x] rubric — per-scenario `SOLUTION.md` answer keys + the scenario-aware conformance judge (`sims/judge`, rule catalog selectable per scenario)
 - [ ] create subagent configurations
 - [ ]
 - [ ]

@@ -1,0 +1,13 @@
+{
+  "id": "09-calver-migration",
+  "title": "CalVer migration",
+  "tier": 2,
+  "capability": "migrate an integration off the renamed legacy resources and onto the current dated API",
+  "persona_ref": "OPPORTUNITIES.md #4 (entities/assets renamed to taxpayers/locations/organizations); NOTES.md current contract",
+  "traps": [
+    { "kind": "false-info", "where": "fixture/fiskaly.go", "detail": "the client pins X-Api-Version 2025-08-12 and provisions via the pre-rename /entities and /assets resources, which look authoritative", "correct": "pin the current 2026-02-03 version and use the current resources (/organizations, /taxpayers, /locations, /systems)" }
+  ],
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version-current", "records-flow", "no-legacy-resources"] },
+  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
+  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+}
