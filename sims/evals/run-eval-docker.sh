@@ -89,6 +89,11 @@ docker run --rm \
 (cd "$work" && go test ./...) >"$run_dir/test.txt" 2>&1 && tests=PASS || tests=FAIL
 git -C "$work" add -A
 git -C "$work" diff --cached >"$run_dir/changes.diff"
+
+# Grounded-in-docs check: did the agent search before writing integration code?
+"$sims_root/evals/assert-grounded.sh" "$run_dir/transcript.jsonl" >"$run_dir/grounded.txt" 2>&1 \
+  && grounded=GROUNDED || grounded="NOT-GROUNDED"
+
 (cd "$sims_root/judge" && go run . -scenario "$scenario_json" "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
 
 summary=""
@@ -100,9 +105,10 @@ fi
 
 echo
 echo "==== eval result (docker): $scenario ===="
-echo "build: $build    tests: $tests    judge: $judge"
+echo "build: $build    tests: $tests    judge: $judge    grounded: $grounded"
 [ -n "$summary" ] && echo "$summary"
 echo "judge:      $run_dir/judge.txt"
 echo "diff:       $run_dir/changes.diff"
 echo "transcript: $run_dir/transcript.jsonl"
+echo "grounding:  $run_dir/grounded.txt"
 echo "workdir:    $work"

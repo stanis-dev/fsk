@@ -5,6 +5,8 @@ import { runsDir } from "./paths";
 import { parseTranscript } from "./transcript";
 import { classifyDiff } from "./diff";
 
+type JSONRecord = Record<string, unknown>;
+
 export interface RunDetail {
   summary: Summary;
   judgeLog: string;
@@ -90,12 +92,13 @@ export function loadRun(dir: string, id: string): RunDetail | null {
 function parseResult(file: string): { turns: string; cost: string } {
   let turns = "", cost = "";
   for (const line of readLines(file)) {
-    let m: any;
+    let m: unknown;
     try {
       m = JSON.parse(line);
     } catch {
       continue;
     }
+    if (!isRecord(m)) continue;
     if (m.type !== "result") continue;
     if (typeof m.num_turns === "number") turns = String(Math.round(m.num_turns));
     if (typeof m.total_cost_usd === "number") cost = "$" + m.total_cost_usd.toFixed(2);
@@ -105,12 +108,13 @@ function parseResult(file: string): { turns: string; cost: string } {
 
 function logInfo(file: string): { model: string; cwd: string; ccver: string } {
   for (const line of readLines(file)) {
-    let m: any;
+    let m: unknown;
     try {
       m = JSON.parse(line);
     } catch {
       continue;
     }
+    if (!isRecord(m)) continue;
     if (m.type === "system") return { model: str(m.model), cwd: str(m.cwd), ccver: str(m.claude_code_version) };
   }
   return { model: "", cwd: "", ccver: "" };
@@ -118,7 +122,8 @@ function logInfo(file: string): { model: string; cwd: string; ccver: string } {
 
 function readMeta(dir: string): { harness: string; coder: string; model: string; effort: string; scenario: string } {
   try {
-    const m = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8"));
+    const m: unknown = JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8"));
+    if (!isRecord(m)) return { harness: "", coder: "", model: "", effort: "", scenario: "" };
     return { harness: str(m.harness), coder: str(m.coder), model: str(m.model), effort: str(m.effort), scenario: str(m.scenario) };
   } catch {
     return { harness: "", coder: "", model: "", effort: "", scenario: "" };
@@ -135,8 +140,11 @@ function readFile(p: string): string {
 function readLines(p: string): string[] {
   return readFile(p).split("\n").filter((l) => l.trim());
 }
-function str(v: any): string {
+function str(v: unknown): string {
   return typeof v === "string" ? v : "";
+}
+function isRecord(v: unknown): v is JSONRecord {
+  return typeof v === "object" && v !== null;
 }
 function safeMtime(dir: string): Date {
   try {
