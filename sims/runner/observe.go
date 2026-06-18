@@ -91,3 +91,16 @@ func checkGrounded(transcriptPath string) (bool, string) {
 	}
 }
 
+// gitDiffStaged stages all changes in work and returns the diff against the
+// baseline commit, the exact change set the agent produced.
+func gitDiffStaged(work string) (string, error) {
+	if out, err := exec.Command("git", "-C", work, "add", "-A").CombinedOutput(); err != nil {
+		return "", fmt.Errorf("git add: %w\n%s", err, out)
+	}
+	out, err := exec.Command("git", "-C", work, "diff", "--cached").Output()
+	if err != nil {
+		return "", fmt.Errorf("git diff: %w", err)
+	}
+	return string(out), nil
+}
+
