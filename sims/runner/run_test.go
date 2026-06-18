@@ -7,6 +7,11 @@ import (
 	"testing"
 )
 
+const (
+	evSearch = `{"type":"assistant","message":{"content":[{"type":"tool_use","name":"mcp__fiskaly__search_fiskaly_docs"}]}}`
+	evWrite  = `{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Write"}]}}`
+)
+
 // fakeAgent simulates the coder: it grounds, then mutates the work tree so the
 // post-agent observe has a real diff and transcript.
 type fakeAgent struct{}
@@ -72,7 +77,7 @@ func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}
-	for _, name := range []string{"meta.json", "build.txt", "test.txt", "judge.txt", "judge.json", "changes.diff", "grounded.txt", "transcript.jsonl"} {
+	for _, name := range []string{"meta.json", "build.txt", "test.txt", "judge.txt", "judge.json", "changes.diff", "transcript.jsonl"} {
 		if _, err := os.Stat(filepath.Join(res.runDir, name)); err != nil {
 			t.Errorf("missing artifact %s: %v", name, err)
 		}

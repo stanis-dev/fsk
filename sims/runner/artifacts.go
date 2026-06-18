@@ -17,9 +17,7 @@ type runDir struct {
 // observation is everything the post-agent observe phase produces.
 type observation struct {
 	Outcome
-	diff       string
-	grounded   string
-	groundedOK bool
+	diff string
 }
 
 // prepareRun creates an isolated run dir, copies the fixture, makes a baseline
@@ -103,9 +101,6 @@ func writeObserveArtifacts(runPath string, o observation) error {
 		"test.txt":     o.Test.Output,
 		"judge.txt":    o.Judge.Output,
 		"changes.diff": o.diff,
-		// grounded is a bare verdict line; terminate it so the file ends in a
-		// newline like the tool-output files above.
-		"grounded.txt": o.grounded + "\n",
 	}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(runPath, name), []byte(content), 0o644); err != nil {

@@ -16,9 +16,7 @@ func TestWriteObserveArtifacts_DashboardContract(t *testing.T) {
 			Test:  StepResult{OK: true, Output: "ok  \tpos\t0.1s\n"},
 			Judge: StepResult{OK: false, Output: "VERDICT: NON-COMPLIANT (5 failures). exit 1\n"},
 		},
-		diff:       "diff --git a/x b/x\n",
-		grounded:   "GROUNDED: searched before first code change",
-		groundedOK: true,
+		diff: "diff --git a/x b/x\n",
 	}
 	if err := writeObserveArtifacts(runPath, o); err != nil {
 		t.Fatalf("writeObserveArtifacts: %v", err)
@@ -39,9 +37,6 @@ func TestWriteObserveArtifacts_DashboardContract(t *testing.T) {
 	}
 	if d := readFileT(t, runPath, "changes.diff"); !strings.Contains(d, "diff --git") {
 		t.Errorf("changes.diff missing: %q", d)
-	}
-	if g := readFileT(t, runPath, "grounded.txt"); !strings.Contains(g, "GROUNDED") {
-		t.Errorf("grounded.txt missing: %q", g)
 	}
 }
 
