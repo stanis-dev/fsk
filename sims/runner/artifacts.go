@@ -47,7 +47,7 @@ func prepareRun(runsBase string, s scenario, cfg runConfig) (runDir, error) {
 func gitInitBaseline(work string) error {
 	steps := [][]string{
 		{"init", "-q"},
-		{"-c", "user.email=eval@local", "-c", "user.name=eval", "add", "-A"},
+		{"add", "-A"},
 		{"-c", "user.email=eval@local", "-c", "user.name=eval", "commit", "-qm", "baseline"},
 	}
 	for _, s := range steps {
@@ -82,6 +82,8 @@ func writeObserveArtifacts(runPath string, o observation) error {
 		"test.txt":     o.Test.Output,
 		"judge.txt":    o.Judge.Output,
 		"changes.diff": o.diff,
+		// grounded is a bare verdict line; terminate it so the file ends in a
+		// newline like the tool-output files above.
 		"grounded.txt": o.grounded + "\n",
 	}
 	for name, content := range files {
