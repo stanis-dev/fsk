@@ -53,6 +53,36 @@ func TestParseModelJSONHandlesBraceInString(t *testing.T) {
 	}
 }
 
+func TestCitationCheckDowngradesAbsentEvidence(t *testing.T) {
+	out := citationCheck([]verdict{{ID: "a", Verdict: "MET", EvidenceQuote: "o.VATRate"}}, "x := o.VATRate * 100")
+	if out[0].Verdict != "MET" {
+		t.Fatal("present evidence should stay MET")
+	}
+	out = citationCheck([]verdict{{ID: "b", Verdict: "MET", EvidenceQuote: "MenuVAT[item]"}}, "x := o.VATRate")
+	if out[0].Verdict != "UNMET" {
+		t.Fatal("absent evidence must downgrade to UNMET")
+	}
+	out = citationCheck([]verdict{{ID: "c", Verdict: "MET", EvidenceQuote: ""}}, "anything")
+	if out[0].Verdict != "UNMET" {
+		t.Fatal("empty evidence on a MET must downgrade to UNMET")
+	}
+}
+
+func TestConformant(t *testing.T) {
+	if !conformant([]verdict{{Verdict: "MET"}, {Verdict: "MET"}}) {
+		t.Fatal("all MET => conformant")
+	}
+	if conformant([]verdict{{Verdict: "MET"}, {Verdict: "UNMET"}}) {
+		t.Fatal("any UNMET => not conformant")
+	}
+	if conformant([]verdict{{Verdict: "CANNOT_ASSESS"}}) {
+		t.Fatal("CANNOT_ASSESS => not conformant")
+	}
+	if conformant(nil) {
+		t.Fatal("no criteria => not conformant")
+	}
+}
+
 func TestBuildRubricPrompt(t *testing.T) {
 	p := buildRubricPrompt("package main // src", []criterion{
 		{ID: "c1", Criterion: "check X", Where: "foo.go", Cite: "NOTES"},

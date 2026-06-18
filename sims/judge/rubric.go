@@ -107,6 +107,40 @@ func firstJSONObject(s string) (string, error) {
 	return "", fmt.Errorf("unbalanced JSON object")
 }
 
+// citationCheck enforces that every MET is backed by evidence that actually
+// appears in the (comment-stripped) source. A MET with an empty quote, or whose
+// quote is not present, is downgraded to UNMET. This is the anti-hallucination and
+// anti-gaming guard: a comment claiming correctness cannot satisfy a criterion
+// because the quote is matched against stripped source.
+func citationCheck(vs []verdict, strippedSource string) []verdict {
+	for i := range vs {
+		if vs[i].Verdict != "MET" {
+			continue
+		}
+		q := strings.TrimSpace(vs[i].EvidenceQuote)
+		if q == "" || !strings.Contains(strippedSource, q) {
+			vs[i].Verdict = "UNMET"
+			vs[i].Reasoning = strings.TrimSpace(vs[i].Reasoning + " [citation not found in source]")
+		}
+	}
+	return vs
+}
+
+// conformant is conservative to a false PASS: the integration is conformant only
+// if there is at least one verdict and every verdict is MET. Any UNMET or
+// CANNOT_ASSESS (abstention) blocks the pass.
+func conformant(vs []verdict) bool {
+	if len(vs) == 0 {
+		return false
+	}
+	for _, v := range vs {
+		if v.Verdict != "MET" {
+			return false
+		}
+	}
+	return true
+}
+
 // buildRubricPrompt frames a conservative conformance review of one fiskaly
 // integration. The source carries comments (the model reasons over them) but the
 // caller's citation check later validates every MET quote against the
