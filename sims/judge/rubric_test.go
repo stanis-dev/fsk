@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -53,6 +55,42 @@ func TestParseModelJSONHandlesBraceInString(t *testing.T) {
 	got, err := parseModelJSON(in)
 	if err != nil || len(got) != 1 || got[0].EvidenceQuote != "map[string]int{}" {
 		t.Fatalf("brace-in-string mishandled: %+v err=%v", got, err)
+	}
+}
+
+func TestClaudeArgs(t *testing.T) {
+	joined := strings.Join(claudeArgs("claude-opus-4-8", "high"), " ")
+	for _, w := range []string{"-p", "--model claude-opus-4-8", "--effort high", "--output-format json"} {
+		if !strings.Contains(joined, w) {
+			t.Errorf("args missing %q: %s", w, joined)
+		}
+	}
+}
+
+func TestReadSourceRawKeepsComments(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "x.go"), []byte("package p\n// keepme\nvar X = 1\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	src, err := readSourceRaw(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(src, "keepme") {
+		t.Fatal("raw reader must keep comments")
+	}
+}
+
+func TestReadSourceRawExcludesTests(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "a.go"), []byte("package p\nvar A=1\n"), 0o644)
+	os.WriteFile(filepath.Join(dir, "a_test.go"), []byte("package p\nvar TESTONLY=1\n"), 0o644)
+	src, err := readSourceRaw(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(src, "TESTONLY") {
+		t.Fatal("raw reader must exclude *_test.go (anti-gaming, like readSource)")
 	}
 }
 

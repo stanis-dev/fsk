@@ -313,6 +313,30 @@ func readSource(dir string) (string, error) {
 	return b.String(), err
 }
 
+// readSourceRaw concatenates non-test Go source under dir with comments retained,
+// for the LLM rubric layer (the model reasons over comments; the citation check
+// later validates evidence against the comment-stripped source). Tests are still
+// excluded, matching readSource's anti-gaming exclusion.
+func readSourceRaw(dir string) (string, error) {
+	var b strings.Builder
+	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		b.Write(data)
+		b.WriteByte('\n')
+		return nil
+	})
+	return b.String(), err
+}
+
 // stripComments returns the Go source with comment tokens removed. It lexes with
 // go/scanner so string literals are preserved intact — the // in
 // "https://test.api.fiskaly.com" is part of a STRING token, not a line comment,

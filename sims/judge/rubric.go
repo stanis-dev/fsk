@@ -6,11 +6,51 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
+
+// judgeModelID is the model the rubric layer judges with. It is a stronger,
+// different tier than the coder under test (claude-sonnet-4-6) to reduce
+// self-preference; both are still Claude (the harness auth is OAuth-only), so true
+// model-family diversity is not available — see the design spec's limitations.
+const judgeModelID = "claude-opus-4-8"
+
+const judgeEffort = "high"
+
+// claudeArgs are the CLI flags for a one-shot structured judgement. The prompt is
+// passed on stdin, not as an argument, to avoid arg-length limits.
+func claudeArgs(model, effort string) []string {
+	return []string{"-p", "--model", model, "--effort", effort, "--output-format", "json"}
+}
+
+// claudeModel shells the claude CLI once and returns the assistant's final text.
+// It is the real modelFn. There is no silent fallback: a missing binary, a non-zero
+// exit, or an unparseable envelope is a hard error (the caller exits non-zero).
+func claudeModel(prompt string) (string, error) {
+	cmd := exec.Command("claude", claudeArgs(judgeModelID, judgeEffort)...)
+	cmd.Stdin = strings.NewReader(prompt)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("running claude: %w: %s", err, strings.TrimSpace(stderr.String()))
+	}
+	var env struct {
+		Result string `json:"result"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &env); err != nil {
+		return "", fmt.Errorf("parsing claude --output-format json: %w", err)
+	}
+	if strings.TrimSpace(env.Result) == "" {
+		return "", fmt.Errorf("claude returned an empty result")
+	}
+	return env.Result, nil
+}
 
 // criterion is one atomic, binary rubric check, authored in scenario.json. It is
 // what the deterministic regex layer provably cannot see (e.g. which VAT rate fed
