@@ -45,6 +45,68 @@ func rubricFromScenario(path string) ([]criterion, error) {
 	return parseScenarioRubric(data)
 }
 
+// verdict is the model's judgement of one criterion, after the citation check.
+type verdict struct {
+	ID            string `json:"id"`
+	Verdict       string `json:"verdict"` // MET | UNMET | CANNOT_ASSESS
+	EvidenceQuote string `json:"evidence_quote"`
+	Reasoning     string `json:"reasoning"`
+	Cite          string `json:"cite,omitempty"`
+}
+
+// parseModelJSON extracts the verdict array from a model reply. The model is asked
+// for a bare JSON object, but tolerate a ```json fence and surrounding prose by
+// scanning for the first brace-balanced object (ignoring braces inside strings).
+func parseModelJSON(text string) ([]verdict, error) {
+	obj, err := firstJSONObject(text)
+	if err != nil {
+		return nil, err
+	}
+	var payload struct {
+		Criteria []verdict `json:"criteria"`
+	}
+	if err := json.Unmarshal([]byte(obj), &payload); err != nil {
+		return nil, fmt.Errorf("parsing model JSON: %w", err)
+	}
+	return payload.Criteria, nil
+}
+
+// firstJSONObject returns the first top-level brace-balanced {...} in s, tracking
+// string literals and escapes so a brace inside a quoted value does not end it.
+func firstJSONObject(s string) (string, error) {
+	start := strings.IndexByte(s, '{')
+	if start < 0 {
+		return "", fmt.Errorf("no JSON object found")
+	}
+	depth, inStr, esc := 0, false, false
+	for i := start; i < len(s); i++ {
+		c := s[i]
+		if inStr {
+			switch {
+			case esc:
+				esc = false
+			case c == '\\':
+				esc = true
+			case c == '"':
+				inStr = false
+			}
+			continue
+		}
+		switch c {
+		case '"':
+			inStr = true
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				return s[start : i+1], nil
+			}
+		}
+	}
+	return "", fmt.Errorf("unbalanced JSON object")
+}
+
 // buildRubricPrompt frames a conservative conformance review of one fiskaly
 // integration. The source carries comments (the model reasons over them) but the
 // caller's citation check later validates every MET quote against the
