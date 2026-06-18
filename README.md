@@ -110,7 +110,7 @@ Open `http://localhost:3000`. The dashboard reads
 `~/.cache/fiskaly-eval` by default. Override paths with:
 
 - `FISKALY_RUNS_DIR`: run artifact directory.
-- `FISKALY_EVAL_SCRIPT`: script invoked by the dashboard trigger button.
+- `FISKALY_RUNNER_DIR`: path to the Go runner module the trigger button invokes.
 
 ## Iterating
 

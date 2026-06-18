@@ -1,9 +1,9 @@
 import { afterEach, expect, test } from "vitest";
-import { runsDir, evalScript } from "./paths";
+import { runsDir, runnerDir } from "./paths";
 
 afterEach(() => {
   delete process.env.FISKALY_RUNS_DIR;
-  delete process.env.FISKALY_EVAL_SCRIPT;
+  delete process.env.FISKALY_RUNNER_DIR;
 });
 
 test("runsDir defaults under the home cache dir", () => {
@@ -15,7 +15,11 @@ test("runsDir honors the env override", () => {
   expect(runsDir()).toBe("/tmp/runs");
 });
 
-test("evalScript honors the env override", () => {
-  process.env.FISKALY_EVAL_SCRIPT = "/tmp/run.sh";
-  expect(evalScript()).toBe("/tmp/run.sh");
+test("runnerDir defaults to the sibling runner module", () => {
+  expect(runnerDir().endsWith("/runner")).toBe(true);
+});
+
+test("runnerDir honors the env override", () => {
+  process.env.FISKALY_RUNNER_DIR = "/tmp/runner";
+  expect(runnerDir()).toBe("/tmp/runner");
 });

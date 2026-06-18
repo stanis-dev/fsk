@@ -1,9 +1,8 @@
 # Eval dashboard
 
 The dashboard is the inspection surface for fiskaly eval runs. It reads run
-artifacts produced by `sims/evals/run-scenario.sh` and
-`sims/evals/run-eval-docker.sh`, then shows the signals needed to decide what to
-change next.
+artifacts produced by the Go runner (`sims/runner/`), then shows the signals
+needed to decide what to change next.
 
 ## Run locally
 
@@ -18,8 +17,8 @@ Open `http://localhost:3000`.
 
 - `FISKALY_RUNS_DIR`: directory containing `run.*` artifacts. Defaults to
   `~/.cache/fiskaly-eval`.
-- `FISKALY_EVAL_SCRIPT`: script invoked by the trigger button. Defaults to
-  `../evals/run-eval-docker.sh` from this package directory.
+- `FISKALY_RUNNER_DIR`: path to the Go runner module invoked by the trigger
+  button. Defaults to `../runner` from this package directory.
 
 ## What it reads
 
