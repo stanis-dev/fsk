@@ -8,7 +8,7 @@ import (
 
 // fakeAgent simulates the coder: it grounds, then mutates the work tree so the
 // post-agent observe has a real diff and transcript.
-type fakeAgent struct{ conformant bool }
+type fakeAgent struct{}
 
 func (f fakeAgent) run(rd runDir, task string, cfg runConfig) error {
 	tr := evSearch + "\n" + evWrite + "\n"
@@ -17,6 +17,7 @@ func (f fakeAgent) run(rd runDir, task string, cfg runConfig) error {
 	}
 	// Append a line so changes.diff is non-empty; keep the module building.
 	pos := filepath.Join(rd.work, "pos.go")
+	// start from empty if the fixture has no pos.go
 	b, _ := os.ReadFile(pos)
 	return os.WriteFile(pos, append(b, []byte("\n// touched by fake agent\n")...), 0o644)
 }

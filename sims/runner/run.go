@@ -24,7 +24,7 @@ type scenarioResult struct {
 }
 
 // runScenario is the single path: prepare an isolated run dir, assert the
-// baseline preflight on the pristine copy, run the agent in Docker, observe the
+// baseline preflight on the pristine copy, run the agent, observe the
 // result, and write the dashboard artifacts. A preflight violation skips the
 // agent: an unsound seed is a harness error, not an eval.
 func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig) (scenarioResult, error) {
@@ -35,7 +35,7 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 
 	rd, err := prepareRun(runsBase, s, cfg)
 	if err != nil {
-		return scenarioResult{}, err
+		return scenarioResult{}, fmt.Errorf("prepareRun: %w", err)
 	}
 
 	pre := observeCore(rd.work, judgeBin, s.scenarioJSON)
