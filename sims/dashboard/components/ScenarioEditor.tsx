@@ -30,7 +30,7 @@ function StringList({ label, items, onChange }: { label: string; items: string[]
       <span className={LABEL}>{label}</span>
       <div className="flex flex-wrap gap-1.5">
         {items.map((item, i) => (
-          <span key={i} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 font-mono text-xs">
+          <span key={item} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 font-mono text-xs">
             {item}
             <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-danger">
               <X className="size-3" />
