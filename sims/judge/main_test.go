@@ -18,6 +18,20 @@ func TestStripCommentsKeepLayout(t *testing.T) {
 	}
 }
 
+func TestStripCommentsKeepLayoutHandlesCRLF(t *testing.T) {
+	// go/scanner drops lone \r from the COMMENT literal, so start+len(lit) would
+	// undercount the span and leak trailing comment bytes. CR-padded comments are
+	// valid Go and could otherwise smuggle text into the citation source.
+	in := "package p\n/*" + strings.Repeat("\r", 5) + "LEAKCLAIM */ realCode\n"
+	out := stripCommentsKeepLayout(in)
+	if strings.Contains(out, "LEAKCLAIM") {
+		t.Fatalf("CR-padded comment leaked into citation source: %q", out)
+	}
+	if !strings.Contains(out, "realCode") {
+		t.Fatalf("code after the comment was dropped: %q", out)
+	}
+}
+
 func TestBuildReportVerdict(t *testing.T) {
 	r := buildReport("07-wrong-vat", []ruleResult{{ID: "x", Pass: true}}, true,
 		&rubricReport{Model: "claude-opus-4-8", Criteria: []verdict{{ID: "c1", Verdict: "UNMET"}}}, "NON-COMPLIANT")

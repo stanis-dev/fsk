@@ -309,14 +309,12 @@ func main() {
 	if *rubricFlag && *scenarioFlag != "" {
 		crits, err := rubricFromScenario(*scenarioFlag)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "judge:", err)
-			os.Exit(2)
+			failInfra(*jsonFlag, scenarioName, ruleResults, err)
 		}
 		if len(crits) > 0 {
 			raw, err := readSourceRaw(dir)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "judge:", err)
-				os.Exit(2)
+				failInfra(*jsonFlag, scenarioName, ruleResults, err)
 			}
 			// No silent fallback: a missing/failed model is a hard error, never a
 			// gate-only pass dressed up as conformant. The citation source keeps code
@@ -324,8 +322,7 @@ func main() {
 			// cannot satisfy a criterion); the gate's tokenized src is unsuitable here.
 			r, err := runRubric(raw, stripCommentsKeepLayout(raw), crits, claudeModel, judgeModelID)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "judge: rubric layer:", err)
-				os.Exit(2)
+				failInfra(*jsonFlag, scenarioName, ruleResults, fmt.Errorf("rubric layer: %w", err))
 			}
 			rep = &r
 			fmt.Print(renderRubric(r))
@@ -343,6 +340,18 @@ func main() {
 	}
 	writeReport(*jsonFlag, buildReport(scenarioName, ruleResults, true, rep, verdict))
 	os.Exit(exitCode)
+}
+
+// failInfra reports a rubric-layer infrastructure error: it still writes a
+// NON-COMPLIANT judge.json (so the dashboard never diverges from the harness, which
+// records the non-zero exit as FAIL) and exits 2. Conservative: an infra failure
+// cannot certify conformance.
+func failInfra(jsonPath, scenario string, gate []ruleResult, err error) {
+	fmt.Fprintln(os.Stderr, "judge:", err)
+	rep := buildReport(scenario, gate, true, nil, "NON-COMPLIANT")
+	rep.Note = "rubric layer infra error (no verdict computed): " + err.Error()
+	writeReport(jsonPath, rep)
+	os.Exit(2)
 }
 
 // writeReport marshals the structured verdict to path (no-op when path is empty).
@@ -466,6 +475,12 @@ func readSourceRaw(dir string) (string, error) {
 // citation check can match an evidence_quote the model copied from the real source,
 // while still excluding comment text so a comment cannot satisfy a criterion.
 func stripCommentsKeepLayout(src string) string {
+	// Normalize line endings first: go/scanner drops lone \r from a COMMENT
+	// literal, so start+len(lit) would undercount the span and leak trailing
+	// comment bytes (a CR-padded comment could otherwise smuggle text into the
+	// citation source — the input is untrusted).
+	src = strings.ReplaceAll(src, "\r\n", "\n")
+	src = strings.ReplaceAll(src, "\r", "\n")
 	var s scanner.Scanner
 	fset := token.NewFileSet()
 	file := fset.AddFile("", fset.Base(), len(src))
