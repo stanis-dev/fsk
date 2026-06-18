@@ -9,7 +9,6 @@
 
 | Path                                  | What                                                                               |
 | ------------------------------------- | ---------------------------------------------------------------------------------- |
-| `HANDOFF.md`                          | Vendor-blind build spec for the seed POS microservice (hand the builder this alone) |
 | `memo/OPPORTUNITIES.md`               | The exercise answer: the 4-opportunity map + why Zero-to-Receipt                   |
 | `research/RESEARCH.md`                | Synthesis: company, SIGN IT API, Italy regulation, DX benchmark, docs platforms    |
 | `research/PERSONA.md`                 | Who integrates fiskaly — the implementer persona, pain points, failure spectrum    |
@@ -21,5 +20,3 @@
 | `research/api-probes/transcript.json` | Raw happy-path request/response evidence behind NOTES.md                           |
 | `research/specs/`                     | Downloaded SIGN IT + unified OpenAPI specs (2025-08-12 and 2026-02-03)             |
 | `research/fiskaly_research.json`      | Raw, fact-checked research output (6 areas)                                        |
-
-## Decisions & current state

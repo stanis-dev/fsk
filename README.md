@@ -1,139 +1,140 @@
-# Fiskaly's "Agentic Backend Engineer (Golang)" interview exercise
+# Fiskaly SIGN IT eval workbench
 
-```md
-##The Challenge
+This repository is an end-to-end system for iterating on a coding agent that
+integrates fiskaly SIGN IT. The value is the loop, not a standalone MCP server:
+change the docs corpus, MCP behavior, judge, scenario, or harness; run the eval;
+inspect the result; decide whether the change improved the integration workflow.
 
-Fiskaly offers APIs for fiscalization, e-invoicing and digital receipts. Built for POS systems and omni-channel
-operators. Compliant and scalable. fiscaly’s mission is to enable customers to implement compliant solutions based on
-API provided by the fiskaly platform.
+The interview task asks for API documentation improvements that move fiskaly's
+mission forward, plus a functional prototype. This prototype answers that by
+making documentation changes measurable. It tests whether an agent can use
+grounded SIGN IT context to implement fiscalization correctly, avoid planted
+domain traps, and leave enough telemetry for a developer to understand what
+happened.
 
-One enabler for our customers is the API documentation - see https://developer.fiskaly.com/api/sign-it/2026-02-03
+## The loop
 
-##Your Tasks
+1. Pick a scenario from `sims/scenarios/`.
+2. The runner copies that fixture into an isolated run directory.
+3. The agent gets the business task and a strict docs MCP.
+4. The MCP serves curated SIGN IT facts and records each tool call as JSONL.
+5. The harness captures transcript, diff, build, tests, grounding, telemetry,
+   and deterministic judge output.
+6. The dashboard shows the run so the next change can be made deliberately.
 
-What opportunities do you see to drive the mission of Fiskaly to the next level? What improvements could be made to the
-API documentation that bring value to customers? We appreciate it if you want to go crazy. Fixing typos in the API
-documentation will not empower the mission of fiskaly.
+The current loop is intentionally local and inspectable. It is built to answer
+questions such as:
 
-For one of the opportunities, build a functional prototype. That we’ll discuss in the interview in depth.
+- Did the agent ground itself in the SIGN IT docs before editing code?
+- Which docs did it search and fetch?
+- Did the result still build and pass the seed tests?
+- Which fiskaly contract rules did the deterministic judge catch?
+- Did the code change fall for a red herring or silent compliance trap?
+- Is a proposed change to the MCP, corpus, or scenario making runs better or
+  worse?
+
+## Repository map
+
+| Path | Purpose |
+| --- | --- |
+| `memo/OPPORTUNITIES.md` | The opportunity map and strategic answer. |
+| `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
+| `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
+| `sims/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
+| `sims/judge/` | Deterministic source-level conformance gate for SIGN IT contract shape. |
+| `sims/evals/` | Local and Docker eval runners that execute scenarios and collect artifacts. |
+| `sims/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
+| `sims/pos/` | The base POS fixture used to build scenario seeds. |
+
+## Current prototype
+
+Implemented:
+
+- Curated local docs MCP with `search_fiskaly_docs` and `fetch_fiskaly_doc`.
+- Server-side MCP telemetry controlled by `FISKALY_MCP_TELEMETRY`.
+- Ten eval scenarios covering zero-to-receipt, provisioning, cancellation,
+  idempotency, outage behavior, polling, VAT, amount encoding, CalVer migration,
+  and credential expiry.
+- Scenario-aware deterministic judge with rule subsets selected from
+  `scenario.json`.
+- Local runner with clean HOME, strict MCP config, diff capture, transcript
+  capture, grounding check, telemetry capture, build/test gate, and judge gate.
+- Docker runner that mounts only the fixture plus the MCP binary.
+- Dashboard for listing runs and inspecting run details.
+
+Known limits:
+
+- Several scenarios still require human review of `SOLUTION.md`; the static judge
+  is necessary, not sufficient.
+- `vat-breakdown` proves the VAT fields are constructed, not that the selected
+  VAT rate is correct.
+- The judge checks source shape, not live SIGN IT behavior.
+- Baseline invariants are documented and can be checked with shell commands, but
+  there is not yet a first-class CI script for them.
+
+## Run the checks
+
+Fast package checks:
+
+```sh
+cd mcp && go test ./...
+cd ../sims/judge && go test ./...
+cd ../pos && go test ./...
+cd ../dashboard && pnpm test && pnpm lint && pnpm build
 ```
 
-Successful project completion will have two deliverables: "Opportunities" document and a functional prototype.
+Verify every scenario seed is green but non-compliant:
 
-Prototype: an MCP (docs + action + sandbox-control tools) wrapped by an integration Skill, running against a
-fault-injecting sandbox, with a deterministic judge that runs both as an MCP tool and as a CI gate
+```sh
+for s in sims/scenarios/[0-9]*; do
+  [ -d "$s/fixture" ] || continue
+  name="${s##*/}"
+  (cd "$s/fixture" && go build ./... && go test ./...)
+  (cd sims/judge && go run . -scenario "../scenarios/$name/scenario.json" "../scenarios/$name/fixture") || true
+done
+```
 
-**Critical guiding rule: prototype must address the largest impact through the smallest effort**
+Run one local eval:
 
-## Context
+```sh
+sims/evals/run-scenario.sh 06-fire-and-forget
+```
 
-- Functional prototype: MCP Server
-    - docs grounding tool: local files behind agentic retrieval tool
-    - action oriented tools for the API
-    - testing sandbox
-    - action oriented tools
-- Development Methodology: Evals based development.
-    - A set of scenarios for target development flows with success/failure rubric.
-    - Evals are executed through subagents with Sonnet-4.6 high effort.
-    - All prototype features are evaluated by running those scenarios and analyzing output for end result and session
-      for efficiency
-- Problems we want to solve:
-    - agent always grounded in docs
-    - telemetry: mcp use will provide insight into the actual work flows. Probably the highest value
-    - simplify integration test before hitting prod
+Run the Docker variant:
 
-## Observations
+```sh
+sims/evals/run-eval-docker.sh 06-fire-and-forget
+```
 
-- docs have gaps?
+Both runners write artifacts under `~/.cache/fiskaly-eval/run.*`.
 
-## TODO
+## Inspect runs
 
-### 1. build project context
+```sh
+cd sims/dashboard
+pnpm install
+pnpm dev
+```
 
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
+Open `http://localhost:3000`. The dashboard reads
+`~/.cache/fiskaly-eval` by default. Override paths with:
 
-### 2. build evals
+- `FISKALY_RUNS_DIR`: run artifact directory.
+- `FISKALY_EVAL_SCRIPT`: script invoked by the dashboard trigger button.
 
-- [x] scenarios — 10 code exercises in [`sims/scenarios/`](sims/scenarios/README.md), with seeded red herrings, false info, and dormant silent bugs
-- [x] rubric — per-scenario `SOLUTION.md` answer keys + the scenario-aware conformance judge (`sims/judge`, rule catalog selectable per scenario)
-- [ ] create subagent configurations
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
+## Iterating
 
-### 3. build prototype
+Use the scenario suite as the guardrail for every change:
 
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
+- Changing docs context: edit `mcp/corpus/index.json`, run MCP tests, then run one
+  or more scenarios that depend on that fact.
+- Changing MCP behavior: update `mcp/`, keep telemetry off by default, run MCP
+  tests, then run a scenario and inspect telemetry.
+- Changing the judge: add or update judge tests first, then verify the affected
+  scenario baseline still starts non-compliant and a correct fix would flip it.
+- Changing a scenario: keep the seed build/test green, keep the baseline judge
+  non-compliant, and update `SOLUTION.md` with the catching signal.
+- Changing the dashboard: run `pnpm test`, `pnpm lint`, and `pnpm build`.
 
-### 4. document prototype
-
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-
-### 5. document general opportunities
-
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
+The project rule is strict: a change is only done when the eval or test that
+exercises it has run in this iteration and passed.

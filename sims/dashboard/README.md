@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Eval dashboard
 
-## Getting Started
+The dashboard is the inspection surface for fiskaly eval runs. It reads run
+artifacts produced by `sims/evals/run-scenario.sh` and
+`sims/evals/run-eval-docker.sh`, then shows the signals needed to decide what to
+change next.
 
-First, run the development server:
+## Run locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+```sh
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `FISKALY_RUNS_DIR`: directory containing `run.*` artifacts. Defaults to
+  `~/.cache/fiskaly-eval`.
+- `FISKALY_EVAL_SCRIPT`: script invoked by the trigger button. Defaults to
+  `../evals/run-eval-docker.sh` from this package directory.
 
-## Learn More
+## What it reads
 
-To learn more about Next.js, take a look at the following resources:
+Each run directory may contain:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| File | Meaning |
+| --- | --- |
+| `meta.json` | Harness, model, effort, and scenario metadata. |
+| `transcript.jsonl` | Agent transcript in stream-json format. |
+| `changes.diff` | Diff from the fixture baseline after the agent run. |
+| `build.txt` | `go build ./...` output. |
+| `test.txt` | `go test ./...` output. |
+| `judge.txt` | Deterministic SIGN IT conformance verdict. |
+| `grounded.txt` | Search-before-edit grounding check from the local runner. |
+| `mcp-telemetry.jsonl` | One MCP tool-call event per line. |
+| `claude.err` | Agent stderr. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Older or partial runs may omit some files. Missing telemetry is shown as an empty
+telemetry summary, not as a dashboard error.
 
-## Deploy on Vercel
+## Views
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Run table: scenario, model, effort, build, tests, judge, turns, and cost.
+- Run detail: judge log, build/test logs, transcript, MCP telemetry summary, and
+  diff.
+- Telemetry: total MCP calls, per-tool calls and errors, latency percentiles,
+  search queries, and fetched document ids.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Checks
+
+```sh
+pnpm test
+pnpm lint
+pnpm build
+```
+
+`pnpm build` currently passes with a Next.js workspace-root warning on machines
+that also have a lockfile above this repository. The build still succeeds.
