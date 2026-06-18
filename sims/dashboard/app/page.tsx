@@ -1,6 +1,7 @@
 import { listRuns } from "@/lib/runs";
+import { listScenarios } from "@/lib/scenarios";
 import { RunTable } from "@/components/RunTable";
-import { TriggerButton } from "@/components/TriggerButton";
+import { RunMenu } from "@/components/RunMenu";
 import { AutoRefresh } from "@/components/AutoRefresh";
 
 // Parity with the Go dashboard's 10s refresh; a later plan replaces this with SWR.
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default function Home() {
   const runs = listRuns();
+  const scenarios = listScenarios();
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-12">
       <AutoRefresh />
@@ -18,7 +20,7 @@ export default function Home() {
             agentic coding eval workbench · {runs.length} runs
           </p>
         </div>
-        <TriggerButton />
+        <RunMenu scenarios={scenarios} />
       </header>
       <RunTable runs={runs} />
     </main>
