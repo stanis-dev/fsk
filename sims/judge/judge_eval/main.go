@@ -36,15 +36,6 @@ var cases = []goldCase{
 	{"10-credential-expiry", "bad", false},
 }
 
-// repsFor concentrates repetitions on the dangerous direction: a false-PASS on a
-// bad fixture is the cell we must keep empty, so re-run bad fixtures more often.
-func repsFor(c goldCase) int {
-	if c.expectConformant {
-		return 1
-	}
-	return 3
-}
-
 // evalReport mirrors the judge.json fields the meta-eval needs.
 type evalReport struct {
 	Verdict string `json:"verdict"`
@@ -93,7 +84,12 @@ func main() {
 	for _, c := range cases {
 		scenario := filepath.Join(scenariosDir, c.scenario, "scenario.json")
 		work := filepath.Join(goldDir, c.scenario, c.variant)
-		for r := 0; r < repsFor(c); r++ {
+		// Re-run bad fixtures more: a false-PASS is the cell we must keep empty.
+		reps := 1
+		if !c.expectConformant {
+			reps = 3
+		}
+		for r := 0; r < reps; r++ {
 			_ = os.Remove(reportPath)
 			cmd := exec.Command(bin, "-rubric", "-json", reportPath, "-scenario", scenario, work)
 			out, _ := cmd.CombinedOutput()
@@ -117,14 +113,14 @@ func main() {
 			}
 
 			actualConformant := code == 0
-			ei, ai := 0, 0
+			expectedIdx, actualIdx := 0, 0
 			if !c.expectConformant {
-				ei = 1
+				expectedIdx = 1
 			}
 			if !actualConformant {
-				ai = 1
+				actualIdx = 1
 			}
-			matrix[ei][ai]++
+			matrix[expectedIdx][actualIdx]++
 
 			label, mark := "conformant", "ok"
 			if !actualConformant {

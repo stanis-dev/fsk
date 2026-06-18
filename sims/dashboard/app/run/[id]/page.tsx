@@ -45,17 +45,17 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
             </span>
           </h2>
           <ul className="space-y-2">
-            {run.judgeReport.rubric.criteria.map((c) => (
-              <li key={c.id} className="rounded border p-2">
+            {run.judgeReport.rubric.criteria.map((criterion) => (
+              <li key={criterion.id} className="rounded border p-2">
                 <div className="flex items-center gap-2">
-                  <span className={chipClass(c.verdict)}>{c.verdict}</span>
-                  <span className="font-bold">{c.id}</span>
+                  <span className={chipClass(criterion.verdict)}>{criterion.verdict}</span>
+                  <span className="font-bold">{criterion.id}</span>
                 </div>
-                {c.reasoning && <p className="mt-1 text-xs">{c.reasoning}</p>}
-                {c.evidence_quote && (
-                  <pre className="mt-1 overflow-auto rounded bg-muted p-1 text-xs whitespace-pre-wrap">{c.evidence_quote}</pre>
+                {criterion.reasoning && <p className="mt-1 text-xs">{criterion.reasoning}</p>}
+                {criterion.evidence_quote && (
+                  <pre className="mt-1 overflow-auto rounded bg-muted p-1 text-xs whitespace-pre-wrap">{criterion.evidence_quote}</pre>
                 )}
-                {c.cite && <p className="mt-1 text-xs text-muted-foreground">cite: {c.cite}</p>}
+                {criterion.cite && <p className="mt-1 text-xs text-muted-foreground">cite: {criterion.cite}</p>}
               </li>
             ))}
           </ul>

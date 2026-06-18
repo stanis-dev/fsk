@@ -173,9 +173,8 @@ type ruleResult struct {
 	Pass bool   `json:"pass"`
 }
 
-// judgeReport is the structured verdict written to judge.json for the dashboard.
-// The exit code remains the harness's source of truth; judge.json is the dashboard's
-// authoritative verdict (preferred over scanning judge.txt).
+// judgeReport is the structured verdict written to judge.json. The process exit
+// code remains the authoritative pass/fail signal.
 type judgeReport struct {
 	Scenario string `json:"scenario"`
 	Gate     struct {
@@ -198,7 +197,6 @@ func buildReport(scenario string, gate []ruleResult, gatePassed bool, rep *rubri
 	return r
 }
 
-// renderRubric formats the rubric outcome for the human-readable judge.txt block.
 func renderRubric(rep rubricReport) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "\nRUBRIC (model: %s)\n", rep.Model)
@@ -316,10 +314,8 @@ func main() {
 			if err != nil {
 				failInfra(*jsonFlag, scenarioName, ruleResults, err)
 			}
-			// No silent fallback: a missing/failed model is a hard error, never a
-			// gate-only pass dressed up as conformant. The citation source keeps code
-			// layout (so verbatim quotes match) but drops comments (so a comment
-			// cannot satisfy a criterion); the gate's tokenized src is unsuitable here.
+			// The citation source keeps code layout (so verbatim quotes match) but
+			// drops comments (so a comment cannot satisfy a criterion).
 			r, err := runRubric(raw, stripCommentsKeepLayout(raw), crits, claudeModel, judgeModelID)
 			if err != nil {
 				failInfra(*jsonFlag, scenarioName, ruleResults, fmt.Errorf("rubric layer: %w", err))
@@ -342,10 +338,8 @@ func main() {
 	os.Exit(exitCode)
 }
 
-// failInfra reports a rubric-layer infrastructure error: it still writes a
-// NON-COMPLIANT judge.json (so the dashboard never diverges from the harness, which
-// records the non-zero exit as FAIL) and exits 2. Conservative: an infra failure
-// cannot certify conformance.
+// failInfra reports a rubric-layer infrastructure error: it writes a NON-COMPLIANT
+// judge.json and exits 2. Conservative: an infra failure cannot certify conformance.
 func failInfra(jsonPath, scenario string, gate []ruleResult, err error) {
 	fmt.Fprintln(os.Stderr, "judge:", err)
 	rep := buildReport(scenario, gate, true, nil, "NON-COMPLIANT")
@@ -355,7 +349,7 @@ func failInfra(jsonPath, scenario string, gate []ruleResult, err error) {
 }
 
 // writeReport marshals the structured verdict to path (no-op when path is empty).
-// A write failure is loud (exit 2) — the dashboard depends on this artifact.
+// A write failure is loud (exit 2).
 func writeReport(path string, report judgeReport) {
 	if path == "" {
 		return

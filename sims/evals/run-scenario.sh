@@ -105,9 +105,9 @@ git -C "$work" diff --cached >"$run_dir/changes.diff"
 "$sims_root/evals/assert-grounded.sh" "$run_dir/transcript.jsonl" >"$run_dir/grounded.txt" 2>&1 \
   && grounded=GROUNDED || grounded="NOT-GROUNDED"
 
-# Judge: deterministic gate, then (when the scenario declares judge.rubric) the LLM
-# rubric layer. judge.json carries the structured per-criterion verdict for the
-# dashboard; judge.txt keeps the conformant/NON-COMPLIANT token + exit code contract.
+# Judge: deterministic gate, then the LLM rubric layer when the scenario declares
+# judge.rubric. judge.json holds the per-criterion verdict; judge.txt keeps the
+# conformant/NON-COMPLIANT token + exit-code contract.
 (cd "$sims_root/judge" && go run . -rubric -json "$run_dir/judge.json" -scenario "$scenario_json" "$work") >"$run_dir/judge.txt" 2>&1 \
   && judge=PASS || judge=FAIL
 

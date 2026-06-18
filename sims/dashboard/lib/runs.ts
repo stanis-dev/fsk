@@ -18,17 +18,16 @@ export interface RunDetail {
   telemetry: TelemetrySummary;
 }
 
-// parseJudgeReport reads the structured judge.json verdict. Returns null on absent
-// or malformed input so the dashboard falls back to the judge.txt VERDICT line.
-// A non-null rubric must carry a criteria array, or the run page render would crash.
+// parseJudgeReport reads judge.json; returns null on absent or malformed input so
+// callers fall back to the judge.txt VERDICT line.
 export function parseJudgeReport(json: string): JudgeReport | null {
   if (!json.trim()) return null;
   try {
-    const r = JSON.parse(json) as JudgeReport;
-    if (!r || typeof r !== "object") return null;
-    if (r.verdict !== "conformant" && r.verdict !== "NON-COMPLIANT") return null;
-    if (r.rubric !== null && !(r.rubric && Array.isArray(r.rubric.criteria))) return null;
-    return r;
+    const report = JSON.parse(json) as JudgeReport;
+    if (!report || typeof report !== "object") return null;
+    if (report.verdict !== "conformant" && report.verdict !== "NON-COMPLIANT") return null;
+    if (report.rubric !== null && !(report.rubric && Array.isArray(report.rubric.criteria))) return null;
+    return report;
   } catch {
     return null;
   }

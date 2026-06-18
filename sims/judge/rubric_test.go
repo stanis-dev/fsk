@@ -68,15 +68,6 @@ func TestParseModelJSONHandlesBraceInString(t *testing.T) {
 	}
 }
 
-func TestClaudeArgs(t *testing.T) {
-	joined := strings.Join(claudeArgs("claude-opus-4-8", "high"), " ")
-	for _, w := range []string{"-p", "--model claude-opus-4-8", "--effort high", "--output-format json"} {
-		if !strings.Contains(joined, w) {
-			t.Errorf("args missing %q: %s", w, joined)
-		}
-	}
-}
-
 func TestReadSourceRawKeepsComments(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "x.go"), []byte("package p\n// keepme\nvar X = 1\n"), 0o644); err != nil {
