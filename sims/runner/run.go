@@ -42,7 +42,8 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 
 	pre := observeCore(rd.work, judgeBin, s.scenarioJSON, false, "")
 	if !baselineHolds(s, pre) {
-		return scenarioResult{id: s.id, runDir: rd.path, preflightViolated: true, preflight: pre}, nil
+		os.RemoveAll(rd.path) // a violated seed is a harness error; leave no phantom run dir
+		return scenarioResult{id: s.id, preflightViolated: true, preflight: pre}, nil
 	}
 
 	if err := ag.run(rd, string(taskBytes), cfg); err != nil {

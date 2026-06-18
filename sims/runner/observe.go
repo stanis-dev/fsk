@@ -47,6 +47,7 @@ func buildJudge(judgeDir, outDir string) (string, error) {
 // transcriptEvent is the minimal shape of one Claude stream-json line: a
 // tool_use block lives inside an assistant message's content array.
 type transcriptEvent struct {
+	Type    string `json:"type"`
 	Message struct {
 		Content []struct {
 			Type string `json:"type"`
@@ -72,6 +73,9 @@ func checkGrounded(transcriptPath string) (bool, string) {
 	for i := 0; sc.Scan(); i++ {
 		var ev transcriptEvent
 		if json.Unmarshal(sc.Bytes(), &ev) != nil {
+			continue
+		}
+		if ev.Type != "assistant" {
 			continue
 		}
 		for _, c := range ev.Message.Content {
