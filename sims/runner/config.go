@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -37,7 +38,7 @@ func readEnvToken(envPath string) (string, error) {
 }
 
 func loadConfig(repoRoot, model, effort string) (runConfig, error) {
-	token, err := readEnvToken(repoRoot + "/.env")
+	token, err := readEnvToken(filepath.Join(repoRoot, ".env"))
 	if err != nil {
 		return runConfig{}, err
 	}
