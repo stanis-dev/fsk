@@ -46,8 +46,8 @@ func TestCheckGrounded_NeverSearched(t *testing.T) {
 }
 
 func TestCheckGrounded_SearchedNeverWrote(t *testing.T) {
-	ok, _ := checkGrounded(writeTranscript(t, evSearch))
-	if ok {
-		t.Fatal("expected NOT grounded (inconclusive) when nothing was written")
+	ok, verdict := checkGrounded(writeTranscript(t, evSearch))
+	if ok || verdict == "" {
+		t.Fatalf("expected NOT grounded with a reason, got ok=%v %q", ok, verdict)
 	}
 }

@@ -74,6 +74,9 @@ func checkGrounded(transcriptPath string) (bool, string) {
 				mutateAt = i
 			}
 		}
+		if searchAt != -1 && mutateAt != -1 {
+			break
+		}
 	}
 
 	switch {
