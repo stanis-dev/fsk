@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Hanken_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { Nav } from "@/components/Nav";
 
 const sans = Hanken_Grotesk({
   variable: "--font-sans",
@@ -28,7 +29,10 @@ export default function RootLayout({
       lang="en"
       className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Nav />
+        {children}
+      </body>
     </html>
   );
 }
