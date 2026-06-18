@@ -3,12 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strings"
 )
 
 // StepResult is the outcome of one check (build, test, or judge): whether the
@@ -48,12 +46,6 @@ type scenario struct {
 	declaredBaseline baselineSpec
 }
 
-// checker runs the three checks against a scenario. The real implementation
-// shells out; tests inject a fake.
-type checker interface {
-	check(s scenario) (Outcome, error)
-}
-
 // observedBaseline expresses an Outcome in the same verdict words a scenario.json
 // baseline block uses, so the two compare directly.
 func observedBaseline(o Outcome) baselineSpec {
@@ -67,48 +59,6 @@ func observedBaseline(o Outcome) baselineSpec {
 // loudly here instead of being graded against the wrong expectation.
 func baselineHolds(s scenario, o Outcome) bool {
 	return observedBaseline(o) == canonicalBaseline && s.declaredBaseline == canonicalBaseline
-}
-
-// runBaselines runs every scenario through the checker, prints a compact
-// per-scenario line, and returns 0 only if all scenarios hold the invariant.
-func runBaselines(scenarios []scenario, c checker, w io.Writer) int {
-	held := 0
-	for _, s := range scenarios {
-		o, err := c.check(s)
-		if err != nil {
-			fmt.Fprintf(w, "%-22s ERROR: %v\n", s.id, err)
-			continue
-		}
-		ok := baselineHolds(s, o)
-		if ok {
-			held++
-		}
-		fmt.Fprintln(w, formatLine(s.id, o, ok))
-		if !ok {
-			writeDiagnostics(w, o)
-			if s.declaredBaseline != canonicalBaseline {
-				fmt.Fprintf(w, "  scenario.json declares baseline %+v, want %+v\n", s.declaredBaseline, canonicalBaseline)
-			}
-		}
-	}
-
-	total := len(scenarios)
-	fmt.Fprintln(w)
-	if held == total {
-		fmt.Fprintf(w, "%d/%d scenarios hold the baseline invariant (build PASS, tests PASS, judge NON-COMPLIANT).\n", held, total)
-		return 0
-	}
-	fmt.Fprintf(w, "%d/%d scenarios hold the baseline invariant; %d violated.\n", held, total, total-held)
-	return 1
-}
-
-func formatLine(id string, o Outcome, held bool) string {
-	baseline := "OK"
-	if !held {
-		baseline = "VIOLATED"
-	}
-	return fmt.Sprintf("%-22s build=%-4s test=%-4s judge=%-13s baseline=%s",
-		id, passFail(o.Build.OK), passFail(o.Test.OK), verdict(o.Judge.OK), baseline)
 }
 
 func passFail(ok bool) string {
@@ -125,32 +75,6 @@ func verdict(judgeOK bool) string {
 		return "conformant"
 	}
 	return "NON-COMPLIANT"
-}
-
-// writeDiagnostics surfaces the output of whichever check broke the invariant so
-// the failure is actionable without re-running by hand.
-func writeDiagnostics(w io.Writer, o Outcome) {
-	if !o.Build.OK {
-		fmt.Fprintf(w, "  build failed:\n%s\n", indent(o.Build.Output))
-	}
-	if !o.Test.OK {
-		fmt.Fprintf(w, "  tests failed:\n%s\n", indent(o.Test.Output))
-	}
-	if o.Judge.OK {
-		fmt.Fprintf(w, "  judge unexpectedly conformant:\n%s\n", indent(o.Judge.Output))
-	}
-}
-
-func indent(s string) string {
-	s = strings.TrimRight(s, "\n")
-	if s == "" {
-		return "    (no output)"
-	}
-	lines := strings.Split(s, "\n")
-	for i, l := range lines {
-		lines[i] = "    " + l
-	}
-	return strings.Join(lines, "\n")
 }
 
 var scenarioID = regexp.MustCompile(`^[0-9]`)
@@ -207,32 +131,6 @@ func readBaseline(path string) (baselineSpec, error) {
 		return baselineSpec{}, fmt.Errorf("parsing %s: %w", path, err)
 	}
 	return s.Baseline, nil
-}
-
-// check runs build, test, and judge against an isolated copy of the scenario's
-// fixture so the source tree is never touched and stray build files cannot dirty
-// the working tree.
-func (c execChecker) check(s scenario) (Outcome, error) {
-	work, err := os.MkdirTemp("", "runner-baseline-"+s.id+"-")
-	if err != nil {
-		return Outcome{}, fmt.Errorf("creating work dir: %w", err)
-	}
-	defer os.RemoveAll(work)
-
-	dst := filepath.Join(work, "pos")
-	if err := copyDir(s.fixtureDir, dst); err != nil {
-		return Outcome{}, fmt.Errorf("copying fixture: %w", err)
-	}
-
-	return Outcome{
-		Build: runGoCmd(dst, "build", "./..."),
-		Test:  runGoCmd(dst, "test", "./..."),
-		Judge: runJudge(c.judgeBin, s.scenarioJSON, dst),
-	}, nil
-}
-
-type execChecker struct {
-	judgeBin string
 }
 
 // copyDir recursively copies the tree at src into dst, preserving file modes.

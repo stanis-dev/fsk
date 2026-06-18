@@ -42,7 +42,8 @@ questions such as:
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
 | `sims/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
 | `sims/judge/` | Deterministic source-level conformance gate for SIGN IT contract shape. |
-| `sims/evals/` | Local and Docker eval runners that execute scenarios and collect artifacts. |
+| `sims/evals/` | Docker eval container (Dockerfile and entrypoint); scenario and judge assets. |
+| `sims/runner/` | Go CLI for the eval workbench; `runner run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
 | `sims/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
 | `sims/pos/` | The base POS fixture used to build scenario seeds. |
 
@@ -69,8 +70,8 @@ Known limits:
 - `vat-breakdown` proves the VAT fields are constructed, not that the selected
   VAT rate is correct.
 - The judge checks source shape, not live SIGN IT behavior.
-- Baseline invariants are documented and can be checked with shell commands, but
-  there is not yet a first-class CI script for them.
+- `runner run` is the single entrypoint; the Bash eval scripts are gone. Needs
+  Docker and a valid OAuth token in `.env`.
 
 ## Run the checks
 
@@ -80,33 +81,22 @@ Fast package checks:
 cd mcp && go test ./...
 cd ../sims/judge && go test ./...
 cd ../pos && go test ./...
+cd ../runner && go test ./...
 cd ../dashboard && pnpm test && pnpm lint && pnpm build
 ```
 
-Verify every scenario seed is green but non-compliant:
+Run the preflight + Docker eval for all scenarios or one:
 
 ```sh
-for s in sims/scenarios/[0-9]*; do
-  [ -d "$s/fixture" ] || continue
-  name="${s##*/}"
-  (cd "$s/fixture" && go build ./... && go test ./...)
-  (cd sims/judge && go run . -scenario "../scenarios/$name/scenario.json" "../scenarios/$name/fixture") || true
-done
+cd sims/runner && go run . run            # all scenarios
+cd sims/runner && go run . run 06         # one scenario
 ```
 
-Run one local eval:
-
-```sh
-sims/evals/run-scenario.sh 06-fire-and-forget
-```
-
-Run the Docker variant:
-
-```sh
-sims/evals/run-eval-docker.sh 06-fire-and-forget
-```
-
-Both runners write artifacts under `~/.cache/fiskaly-eval/run.*`.
+For each scenario the runner copies the fixture, asserts the baseline invariant
+(build PASS, tests PASS, judge NON-COMPLIANT) without Docker, then runs the
+agent inside Docker, collects the transcript, diff, and judge verdict, and
+writes dashboard artifacts under `~/.cache/fiskaly-eval/run.*`. Needs Docker
+and a valid OAuth token in `.env`.
 
 ## Inspect runs
 

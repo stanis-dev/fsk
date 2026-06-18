@@ -59,3 +59,22 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 	}
 	return scenarioResult{id: s.id, runDir: rd.path, obs: obs}, nil
 }
+
+// preflightAll runs the baseline preflight (no Docker) across scenarios and
+// returns the ids that violate the invariant. Empty means every seed is sound.
+func preflightAll(scenarios []scenario, judgeBin string) []string {
+	var violated []string
+	for _, s := range scenarios {
+		work, err := os.MkdirTemp("", "runner-preflight-"+s.id+"-")
+		if err != nil {
+			violated = append(violated, s.id)
+			continue
+		}
+		dst := filepath.Join(work, "pos")
+		if copyDir(s.fixtureDir, dst) != nil || !baselineHolds(s, observeCore(dst, judgeBin, s.scenarioJSON)) {
+			violated = append(violated, s.id)
+		}
+		os.RemoveAll(work)
+	}
+	return violated
+}

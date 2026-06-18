@@ -1,51 +1,33 @@
 package main
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
-// TestBaselines_RealScenarios runs the full baselines command against the real
-// scenario library: it builds the judge, copies each fixture, and runs
-// build/test/judge for real. This is the regression guard that the invariant
-// actually holds for every shipped scenario. Skipped under -short.
-func TestBaselines_RealScenarios(t *testing.T) {
+func TestPreflightAll_RealScenarios(t *testing.T) {
 	if testing.Short() {
-		t.Skip("skipping real-scenario integration run in -short mode")
+		t.Skip("skipping real-scenario preflight in -short mode")
 	}
 	simsRoot, err := filepath.Abs("..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	scenariosDir := filepath.Join(simsRoot, "scenarios")
 	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
 	if err != nil {
 		t.Fatalf("buildJudge: %v", err)
 	}
-
-	sc, err := discoverScenarios(scenariosDir)
+	sc, err := discoverScenarios(filepath.Join(simsRoot, "scenarios"))
 	if err != nil {
 		t.Fatalf("discoverScenarios: %v", err)
 	}
 	if len(sc) != 10 {
 		t.Fatalf("discovered %d scenarios, want 10", len(sc))
 	}
-
-	code := runBaselines(sc, execChecker{judgeBin: judgeBin}, io.Discard)
-	if code != 0 {
-		// Re-run to stdout so the failing scenario is visible in test output.
-		runBaselines(sc, execChecker{judgeBin: judgeBin}, testWriter{t})
-		t.Fatalf("baselines exit code = %d, want 0 (a scenario violates the invariant)", code)
+	if bad := preflightAll(sc, judgeBin); len(bad) != 0 {
+		t.Fatalf("scenarios violating the baseline: %v", bad)
 	}
-}
-
-type testWriter struct{ t *testing.T }
-
-func (w testWriter) Write(p []byte) (int, error) {
-	w.t.Logf("%s", p)
-	return len(p), nil
 }
 
 func TestRunScenario_RealDocker(t *testing.T) {
