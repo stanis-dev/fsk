@@ -89,7 +89,7 @@ export interface ScenarioConfig {
   tier: number;
   capability: string;
   persona_ref: string;
-  traps: string[];
+  traps: unknown[]; // structured trap docs; not edited in the UI, preserved on save
   judge: { checks: JudgeChecks; expectations: Expectation[] };
 }
 

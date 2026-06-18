@@ -44,10 +44,6 @@ export function loadScenario(id: string, dir = scenariosDir()): ScenarioDetail |
   return { config, task: read("task.md"), solution: read("SOLUTION.md") };
 }
 
-function isStrArray(v: unknown): v is string[] {
-  return Array.isArray(v) && v.every((x) => typeof x === "string");
-}
-
 function isExpectationArray(v: unknown): boolean {
   return Array.isArray(v) && (v as unknown[]).every(
     (x) => typeof x === "object" && x !== null && typeof (x as Record<string, unknown>).id === "string" && typeof (x as Record<string, unknown>).expectation === "string",
@@ -71,7 +67,7 @@ export function validateConfig(obj: unknown): string | null {
   if (typeof c.tier !== "number") return "tier must be a number";
   if (typeof c.capability !== "string") return "capability must be a string";
   if (typeof c.persona_ref !== "string") return "persona_ref must be a string";
-  if (!isStrArray(c.traps)) return "traps must be an array of strings";
+  if (!Array.isArray(c.traps)) return "traps must be an array";
   const judge = c.judge as Record<string, unknown> | undefined;
   if (typeof judge !== "object" || judge === null) return "judge must be an object";
   if (typeof judge.checks !== "object" || judge.checks === null) return "judge.checks must be an object";

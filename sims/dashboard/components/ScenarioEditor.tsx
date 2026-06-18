@@ -49,31 +49,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function StringList({ label, items, onChange }: { label: string; items: string[]; onChange: (v: string[]) => void }) {
-  const [draft, setDraft] = useState("");
-  return (
-    <div className="space-y-1.5">
-      <span className={LABEL}>{label}</span>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((item, i) => (
-          <span key={item} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 font-mono text-xs">
-            {item}
-            <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-danger">
-              <X className="size-3" />
-            </button>
-          </span>
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <input className={INPUT} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`add ${label}…`} />
-        <Button type="button" variant="outline" size="sm" onClick={() => { if (draft.trim()) { onChange([...items, draft.trim()]); setDraft(""); } }}>
-          <Plus className="size-3.5" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   const router = useRouter();
   const [config, setConfig] = useState(detail.config);
@@ -289,8 +264,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
           <Plus className="size-3.5 mr-1" /> add expectation
         </Button>
       </div>
-
-      <StringList label="traps" items={config.traps} onChange={(traps) => setConfig({ ...config, traps })} />
 
       <Field label="task.md">
         <textarea className={cn(INPUT, "min-h-40 font-mono text-xs leading-relaxed")} value={task} onChange={(e) => setTask(e.target.value)} />
