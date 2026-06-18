@@ -51,7 +51,6 @@ func claudeModel(prompt string) (string, error) {
 type expectation struct {
 	ID          string `json:"id"`
 	Expectation string `json:"expectation"`
-	Where       string `json:"where"`
 	Cite        string `json:"cite"`
 }
 
@@ -359,7 +358,7 @@ Reply with ONLY one JSON object and no prose, no markdown fences:
 EXPECTATIONS:
 `)
 	for _, e := range exps {
-		fmt.Fprintf(&b, "- id: %s\n  check: %s\n  where: %s\n  reference: %s\n", e.ID, e.Expectation, e.Where, e.Cite)
+		fmt.Fprintf(&b, "- id: %s\n  check: %s\n  reference: %s\n", e.ID, e.Expectation, e.Cite)
 	}
 
 	b.WriteString("\n" + trajectoryBeginMarker + "\n")

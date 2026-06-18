@@ -73,7 +73,7 @@ export interface JudgeChecks {
   docsFetched?: string[];
   maxMcpErrors?: number;
 }
-export interface Expectation { id: string; expectation: string; where?: string; cite?: string }
+export interface Expectation { id: string; expectation: string; cite?: string }
 
 export interface JudgeReport {
   scenario: string;

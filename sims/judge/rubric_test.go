@@ -12,7 +12,7 @@ var errStub = errors.New("stub")
 
 func TestParseScenarioExpectations(t *testing.T) {
 	data := []byte(`{"judge":{"rules":["fiskaly-host"],"expectations":[
-		{"id":"c1","expectation":"does X","where":"checkout.go","cite":"SOLUTION.md"}]}}`)
+		{"id":"c1","expectation":"does X","cite":"SOLUTION.md"}]}}`)
 	got, err := parseScenarioExpectations(data)
 	if err != nil {
 		t.Fatal(err)
@@ -166,7 +166,7 @@ func TestRunExpectations_CitesTranscript(t *testing.T) {
 		// model claims MET citing a transcript token
 		return `{"criteria":[{"id":"used-search","verdict":"MET","evidence_quote":"search_fiskaly_docs","reasoning":"called it"}]}`, nil
 	}
-	exps := []expectation{{ID: "used-search", Expectation: "calls the docs search", Where: "transcript"}}
+	exps := []expectation{{ID: "used-search", Expectation: "calls the docs search"}}
 	rep, err := runExpectations(traj, "package x", "package x", exps, stub, "stub")
 	if err != nil {
 		t.Fatal(err)
@@ -180,7 +180,7 @@ func TestRunExpectations_DowngradesUncitedQuote(t *testing.T) {
 	stub := func(string) (string, error) {
 		return `{"criteria":[{"id":"x","verdict":"MET","evidence_quote":"nowhere in evidence","reasoning":"r"}]}`, nil
 	}
-	exps := []expectation{{ID: "x", Expectation: "does y", Where: "source"}}
+	exps := []expectation{{ID: "x", Expectation: "does y"}}
 	rep, _ := runExpectations(Trajectory{}, "package x", "package x", exps, stub, "stub")
 	if rep.Criteria[0].Verdict != "UNMET" {
 		t.Errorf("uncited quote must downgrade to UNMET, got %s", rep.Criteria[0].Verdict)
@@ -259,9 +259,9 @@ func TestBuildExpectationPrompt(t *testing.T) {
 	p := buildExpectationPrompt(Trajectory{ToolUses: []string{"search_fiskaly_docs"}},
 		"package main // src",
 		[]expectation{
-			{ID: "c1", Expectation: "check X", Where: "foo.go", Cite: "NOTES"},
+			{ID: "c1", Expectation: "check X", Cite: "NOTES"},
 		})
-	for _, want := range []string{"c1", "check X", "foo.go", "NOTES", "package main // src", "MET", "UNMET", "CANNOT_ASSESS", "evidence_quote", "JSON", "search_fiskaly_docs"} {
+	for _, want := range []string{"c1", "check X", "NOTES", "package main // src", "MET", "UNMET", "CANNOT_ASSESS", "evidence_quote", "JSON", "search_fiskaly_docs"} {
 		if !strings.Contains(p, want) {
 			t.Errorf("prompt missing %q", want)
 		}

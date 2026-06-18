@@ -30,43 +30,36 @@
       {
         "id": "real-host",
         "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.",
-        "where": "source",
         "cite": "NOTES.md host"
       },
       {
         "id": "token-exchange",
         "expectation": "Exchanges credentials for a JWT at POST /tokens.",
-        "where": "source",
         "cite": "NOTES.md step 1"
       },
       {
         "id": "idempotency",
         "expectation": "Sets X-Idempotency-Key on every POST.",
-        "where": "source",
         "cite": "NOTES.md addendum"
       },
       {
         "id": "api-version",
         "expectation": "Sends the dated X-Api-Version header on all calls.",
-        "where": "source",
         "cite": "NOTES.md"
       },
       {
         "id": "records-flow",
         "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.",
-        "where": "source",
         "cite": "NOTES.md steps 10-11"
       },
       {
         "id": "cancellation-ref",
         "expectation": "Voids a sale via a CANCELLATION record (POST /records) that references the original record id, not a separate /refunds endpoint.",
-        "where": "source",
         "cite": "NOTES.md record-type taxonomy"
       },
       {
         "id": "no-invented-refunds",
         "expectation": "Does not invent or call a /refunds endpoint; the cancellation path uses only POST /records.",
-        "where": "source",
         "cite": "NOTES.md record-type taxonomy"
       }
     ]

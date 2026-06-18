@@ -31,37 +31,31 @@
       {
         "id": "real-host",
         "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.",
-        "where": "source",
         "cite": "NOTES.md host"
       },
       {
         "id": "token-exchange",
         "expectation": "Exchanges credentials for a JWT at POST /tokens.",
-        "where": "source",
         "cite": "NOTES.md step 1"
       },
       {
         "id": "idempotency",
         "expectation": "Sets X-Idempotency-Key on every POST.",
-        "where": "source",
         "cite": "NOTES.md addendum"
       },
       {
         "id": "api-version",
         "expectation": "Sends the dated X-Api-Version header on all calls.",
-        "where": "source",
         "cite": "NOTES.md"
       },
       {
         "id": "records-flow",
         "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.",
-        "where": "source",
         "cite": "NOTES.md steps 10-11"
       },
       {
         "id": "vat-breakdown",
         "expectation": "Sends every monetary amount as a decimal string (not a JSON float) and includes the full VatRateCategory breakdown (percentage, amount, exclusive, inclusive) per line, reconciling to the cent.",
-        "where": "source",
         "cite": "NOTES.md money-model"
       }
     ]

@@ -68,7 +68,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   }
 
   function addExpectation() {
-    setExpectations([...expectations, { id: "", expectation: "", where: undefined, cite: undefined }]);
+    setExpectations([...expectations, { id: "", expectation: "", cite: undefined }]);
   }
 
   function removeExpectation(i: number) {
@@ -223,18 +223,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
             >
               <X className="size-4" />
             </button>
-            <Field label="where">
-              <select
-                className={INPUT}
-                value={exp.where ?? ""}
-                onChange={(e) => patchExpectation(i, { where: e.target.value || undefined })}
-              >
-                <option value="">—</option>
-                <option value="source">source</option>
-                <option value="transcript">transcript</option>
-                <option value="telemetry">telemetry</option>
-              </select>
-            </Field>
             <Field label="expectation">
               <textarea
                 className={cn(INPUT, "min-h-16 font-mono text-xs leading-relaxed")}
