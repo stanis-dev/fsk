@@ -96,6 +96,9 @@ fi
 (cd "$work" && go test ./...) >"$run_dir/test.txt" 2>&1 && tests=PASS || tests=FAIL
 git -C "$work" add -A
 git -C "$work" diff --cached >"$run_dir/changes.diff"
+# MVP: gate-only here. The LLM rubric layer (-rubric) runs in run-scenario.sh; wiring
+# it into the hermetic Docker path needs the OAuth token + claude inside the observe
+# step, which is deferred. Baselines fail the gate first and never reach the rubric.
 (cd "$sims_root/judge" && go run . -scenario "$scenario_json" "$work") >"$run_dir/judge.txt" 2>&1 && judge=PASS || judge=FAIL
 
 summary=""
