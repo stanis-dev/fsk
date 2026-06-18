@@ -7,7 +7,7 @@ func traj() Trajectory {
 		ToolUses: []string{"search_fiskaly_docs", "Edit", "search_fiskaly_docs"},
 		Telemetry: []telemetryEntry{
 			{Tool: "search_fiskaly_docs", Args: map[string]any{"query": "records receipt"}, IsError: false},
-			{Tool: "fetch_fiskaly_doc", Args: map[string]any{"id": "tokens"}, IsError: true},
+			{Tool: "fetch_fiskaly_doc", Args: map[string]any{"id": "probe:records-flow"}, IsError: true},
 		},
 	}
 }
@@ -26,7 +26,7 @@ func TestRunChecks(t *testing.T) {
 	c := judgeChecks{
 		GroundedBeforeWrite: true,
 		ToolsCalled:         []toolReq{{Name: "search_fiskaly_docs", Min: 2}, {Name: "Bash", Min: 1}},
-		DocsFetched:         []string{"records", "tokens", "missing-doc"},
+		DocsFetched:         []string{"probe:records-flow", "probe:auth-and-headers", "missing-doc"},
 		MaxMcpErrors:        &max,
 	}
 	rs := runChecks(c, traj())
@@ -40,8 +40,12 @@ func TestRunChecks(t *testing.T) {
 	if resByID(rs, "toolsCalled:Bash").Pass {
 		t.Error("Bash never called should fail")
 	}
-	if !resByID(rs, "docsFetched:records").Pass || !resByID(rs, "docsFetched:tokens").Pass {
-		t.Error("records + tokens are in telemetry args")
+	// probe:records-flow was fetched (exact id match); probe:auth-and-headers was not
+	if !resByID(rs, "docsFetched:probe:records-flow").Pass {
+		t.Error("probe:records-flow fetched doc id should pass")
+	}
+	if resByID(rs, "docsFetched:probe:auth-and-headers").Pass {
+		t.Error("probe:auth-and-headers not fetched should fail")
 	}
 	if resByID(rs, "docsFetched:missing-doc").Pass {
 		t.Error("missing-doc not fetched should fail")
@@ -50,7 +54,7 @@ func TestRunChecks(t *testing.T) {
 		t.Error("1 error > max 0 should fail")
 	}
 	if checksPassed(rs) {
-		t.Error("overall should fail (Bash, missing-doc, maxMcpErrors failed)")
+		t.Error("overall should fail (Bash, probe:auth-and-headers, missing-doc, maxMcpErrors failed)")
 	}
 }
 
@@ -72,10 +76,14 @@ func TestGroundedFailsWhenWriteFirst(t *testing.T) {
 func TestMCPPrefixedToolNames(t *testing.T) {
 	tr := Trajectory{
 		ToolUses: []string{"mcp__fiskaly__search_fiskaly_docs", "Edit"},
+		Telemetry: []telemetryEntry{
+			{Tool: "mcp__fiskaly__fetch_fiskaly_doc", Args: map[string]any{"id": "probe:records-flow"}, IsError: false},
+		},
 	}
 	c := judgeChecks{
 		GroundedBeforeWrite: true,
 		ToolsCalled:         []toolReq{{Name: "search_fiskaly_docs", Min: 1}},
+		DocsFetched:         []string{"probe:records-flow"},
 	}
 	rs := runChecks(c, tr)
 	if !resByID(rs, "groundedBeforeWrite").Pass {
@@ -83,5 +91,25 @@ func TestMCPPrefixedToolNames(t *testing.T) {
 	}
 	if !resByID(rs, "toolsCalled:search_fiskaly_docs").Pass {
 		t.Error("mcp-prefixed search_fiskaly_docs should satisfy toolsCalled min:1")
+	}
+	if !resByID(rs, "docsFetched:probe:records-flow").Pass {
+		t.Error("mcp-prefixed fetch_fiskaly_doc should satisfy docsFetched")
+	}
+}
+
+func TestGroundedPassesWithSearchNoWrite(t *testing.T) {
+	tr := Trajectory{ToolUses: []string{"search_fiskaly_docs"}}
+	rs := runChecks(judgeChecks{GroundedBeforeWrite: true}, tr)
+	if !resByID(rs, "groundedBeforeWrite").Pass {
+		t.Error("search with no write tool should pass groundedBeforeWrite")
+	}
+}
+
+func TestToolsCalledMinZeroTreatedAsOne(t *testing.T) {
+	tr := Trajectory{ToolUses: []string{}}
+	c := judgeChecks{ToolsCalled: []toolReq{{Name: "search_fiskaly_docs", Min: 0}}}
+	rs := runChecks(c, tr)
+	if resByID(rs, "toolsCalled:search_fiskaly_docs").Pass {
+		t.Error("min:0 should be treated as min:1; tool never called should fail")
 	}
 }

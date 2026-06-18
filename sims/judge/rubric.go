@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -325,6 +326,7 @@ func telemetrySummary(traj Trajectory) string {
 	for tool, n := range counts {
 		parts = append(parts, fmt.Sprintf("%s×%d", tool, n))
 	}
+	sort.Strings(parts)
 	return fmt.Sprintf("%s; errors: %d", strings.Join(parts, ", "), errors)
 }
 

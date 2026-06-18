@@ -56,7 +56,7 @@ function isExpectationArray(v: unknown): boolean {
 
 function hasNonEmptyChecks(checks: Record<string, unknown>): boolean {
   return (
-    typeof checks.groundedBeforeWrite === "boolean" ||
+    checks.groundedBeforeWrite === true ||
     (Array.isArray(checks.toolsCalled) && (checks.toolsCalled as unknown[]).length > 0) ||
     (Array.isArray(checks.docsFetched) && (checks.docsFetched as unknown[]).length > 0) ||
     typeof checks.maxMcpErrors === "number"

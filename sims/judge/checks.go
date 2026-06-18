@@ -59,13 +59,29 @@ func runChecks(c judgeChecks, t Trajectory) []checkResult {
 	}
 
 	if len(c.DocsFetched) > 0 {
-		hay := telemetryArgsText(t.Telemetry)
+		var fetchedIDs []string
+		for _, e := range t.Telemetry {
+			if toolMatches(e.Tool, "fetch_fiskaly_doc") {
+				if id, ok := e.Args["id"].(string); ok {
+					fetchedIDs = append(fetchedIDs, id)
+				}
+			}
+		}
 		for _, want := range c.DocsFetched {
-			ok := strings.Contains(hay, want)
+			ok := false
+			matchedID := ""
+			for _, id := range fetchedIDs {
+				if id == want || strings.Contains(id, want) {
+					ok = true
+					matchedID = id
+					break
+				}
+			}
+			detail := ternary(ok, "fetched "+matchedID, "no fetched doc matching "+want)
 			out = append(out, checkResult{
 				ID:     "docsFetched:" + want,
 				Pass:   ok,
-				Detail: ternary(ok, "found in fetched docs/queries", "not found in any MCP call args"),
+				Detail: detail,
 			})
 		}
 	}
@@ -128,16 +144,6 @@ func countOccurrences(xs []string, name string) int {
 		}
 	}
 	return n
-}
-
-func telemetryArgsText(tel []telemetryEntry) string {
-	var b strings.Builder
-	for _, e := range tel {
-		for _, v := range e.Args {
-			fmt.Fprintf(&b, "%v ", v)
-		}
-	}
-	return b.String()
 }
 
 func ternary(cond bool, a, b string) string {
