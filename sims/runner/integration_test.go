@@ -37,6 +37,11 @@ func TestRunScenario_RealDocker(t *testing.T) {
 	if err := checkBinaries("docker"); err != nil {
 		t.Skip("docker not available")
 	}
+
+	if err := dockerReachable(dockerContext()); err != nil {
+		t.Skipf("docker daemon not reachable: %v", err)
+	}
+
 	simsRoot, err := filepath.Abs("..")
 	if err != nil {
 		t.Fatal(err)

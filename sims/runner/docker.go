@@ -70,6 +70,17 @@ func dockerEnv(context string) []string {
 	return append(os.Environ(), "DOCKER_CONTEXT="+context)
 }
 
+// dockerReachable verifies the Docker daemon is up on the given context, so a
+// run fails early with a clear message instead of deep inside the first build.
+func dockerReachable(context string) error {
+	cmd := exec.Command("docker", "info")
+	cmd.Env = dockerEnv(context)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("docker daemon not reachable on context %q: %w\n%s", context, err, out)
+	}
+	return nil
+}
+
 // checkBinaries verifies each named tool is on PATH.
 func checkBinaries(names ...string) error {
 	for _, n := range names {

@@ -49,6 +49,12 @@ func cmdRun(args []string) int {
 		fmt.Fprintln(os.Stderr, "runner:", err)
 		return 2
 	}
+
+	if err := dockerReachable(ctx); err != nil {
+		fmt.Fprintln(os.Stderr, "runner:", err)
+		return 2
+	}
+
 	cfg, err := loadConfig(repoRoot, *model, *effort)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "runner:", err)
