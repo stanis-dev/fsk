@@ -5,6 +5,7 @@ import { loadRun } from "@/lib/runs";
 import { JudgeBadge } from "@/components/JudgeBadge";
 import { TranscriptView } from "@/components/TranscriptView";
 import { DiffView } from "@/components/DiffView";
+import { TelemetryView } from "@/components/TelemetryView";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,11 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       <details className="my-2 rounded border p-2" open>
         <summary className="cursor-pointer font-bold">session transcript ({run.transcript.length} events)</summary>
         <div className="mt-2"><TranscriptView events={run.transcript} /></div>
+      </details>
+
+      <details className="my-2 rounded border p-2" open>
+        <summary className="cursor-pointer font-bold">MCP telemetry ({run.telemetry.total} calls)</summary>
+        <div className="mt-2"><TelemetryView summary={run.telemetry} /></div>
       </details>
 
       <details className="my-2 rounded border p-2">
