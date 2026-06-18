@@ -97,9 +97,9 @@ func gitDiffStaged(work string) (string, error) {
 	if out, err := exec.Command("git", "-C", work, "add", "-A").CombinedOutput(); err != nil {
 		return "", fmt.Errorf("git add: %w\n%s", err, out)
 	}
-	out, err := exec.Command("git", "-C", work, "diff", "--cached").Output()
+	out, err := exec.Command("git", "-C", work, "diff", "--cached").CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("git diff: %w", err)
+		return "", fmt.Errorf("git diff: %w\n%s", err, out)
 	}
 	return string(out), nil
 }
