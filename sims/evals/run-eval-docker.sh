@@ -85,6 +85,12 @@ docker run --rm \
   -v "$work:/work" \
   "$image" "$task" >"$run_dir/transcript.jsonl" 2>"$run_dir/claude.err" || true
 
+# Telemetry was written inside the mounted work dir; move it beside the other run
+# artifacts and out of the tree the diff is computed from.
+if [ -f "$work/mcp-telemetry.jsonl" ]; then
+  mv "$work/mcp-telemetry.jsonl" "$run_dir/mcp-telemetry.jsonl"
+fi
+
 # Observe on the host: build, test, judge, diff.
 (cd "$work" && go build ./...) >"$run_dir/build.txt" 2>&1 && build=PASS || build=FAIL
 (cd "$work" && go test ./...) >"$run_dir/test.txt" 2>&1 && tests=PASS || tests=FAIL
@@ -106,4 +112,5 @@ echo "build: $build    tests: $tests    judge: $judge"
 echo "judge:      $run_dir/judge.txt"
 echo "diff:       $run_dir/changes.diff"
 echo "transcript: $run_dir/transcript.jsonl"
+echo "telemetry:  $run_dir/mcp-telemetry.jsonl"
 echo "workdir:    $work"
