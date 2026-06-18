@@ -5,12 +5,8 @@ import type { ScenarioConfig, ScenarioDetail } from "./types";
 
 const NUMERIC_PREFIX = /^[0-9]/;
 
-function readConfig(dir: string): ScenarioConfig | null {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(dir, "scenario.json"), "utf8")) as ScenarioConfig;
-  } catch {
-    return null;
-  }
+function readConfig(dir: string): ScenarioConfig {
+  return JSON.parse(fs.readFileSync(path.join(dir, "scenario.json"), "utf8")) as ScenarioConfig;
 }
 
 export function listScenarios(dir = scenariosDir()): ScenarioConfig[] {
@@ -30,8 +26,7 @@ export function listScenarios(dir = scenariosDir()): ScenarioConfig[] {
       continue;
     }
     if (!fs.existsSync(path.join(d, "fixture")) || !fs.existsSync(path.join(d, "scenario.json"))) continue;
-    const cfg = readConfig(d);
-    if (cfg) out.push(cfg);
+    out.push(readConfig(d));
   }
   out.sort((a, b) => (a.id < b.id ? -1 : 1));
   return out;
@@ -45,14 +40,7 @@ export function loadScenario(id: string, dir = scenariosDir()): ScenarioDetail |
   if (!isKnownScenario(id, dir)) return null;
   const d = path.join(dir, id);
   const config = readConfig(d);
-  if (!config) return null;
-  const read = (f: string): string => {
-    try {
-      return fs.readFileSync(path.join(d, f), "utf8");
-    } catch {
-      return "";
-    }
-  };
+  const read = (f: string): string => fs.readFileSync(path.join(d, f), "utf8");
   return { config, task: read("task.md"), solution: read("SOLUTION.md") };
 }
 

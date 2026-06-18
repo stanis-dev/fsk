@@ -48,6 +48,14 @@ describe("scenarios", () => {
     expect(loadScenario("99-nope", dir)).toBeNull();
   });
 
+  it("listScenarios throws on malformed scenario.json", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "scenarios-bad-"));
+    const s = path.join(root, "02-broken");
+    fs.mkdirSync(path.join(s, "fixture"), { recursive: true });
+    fs.writeFileSync(path.join(s, "scenario.json"), "{ not json");
+    expect(() => listScenarios(root)).toThrow();
+  });
+
   it("validateConfig accepts a good config and rejects bad shapes", () => {
     const good = {
       id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
