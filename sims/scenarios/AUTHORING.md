@@ -18,16 +18,16 @@ success.** The dangerous failures are silent and compliance-shaped — a
 perfect-looking receipt that never reached the tax authority. So the suite mixes
 two kinds of trap on purpose:
 
-- **Gate-caught traps** — the deterministic judge flips a rule (e.g. an invented
-  `/refunds` endpoint, a missing poll to `FINISHED`, a leftover legacy `/assets`).
-- **Review-caught traps** — silent bugs the deterministic checks structurally
-  cannot see (idempotency-key reuse, a blocking checkout call, a wrong VAT rate
-  applied at scale, conflating the 24h JWT with the 90-day credential). These are
-  graded by the judge's `expectations` (an LLM rubric) against the source and
-  transcript.
+- **Loud traps** — an invented `/refunds` endpoint, a missing poll to `FINISHED`,
+  a leftover legacy `/assets`: a wrong contract that a careful read of the code
+  catches.
+- **Silent traps** — idempotency-key reuse, a blocking checkout call, a wrong VAT
+  rate at scale, conflating the 24h JWT with the 90-day credential: the build stays
+  green and the receipt still looks right.
 
-Every scenario encodes, in its `scenario.json` `checks`/`expectations`, **which
-signal catches its trap.**
+Both kinds are graded the same way (see [The judge](#the-judge)): a deterministic
+`checks` gate over the agent's trajectory, then an LLM `expectations` layer over the
+resulting source. Every scenario encodes both in its `scenario.json`.
 
 ## Layout
 
@@ -54,8 +54,8 @@ sims/scenarios/<NN-slug>/
   leave the existing tests green, so it is **not wired into `fiscalize`** in the
   seed (wiring a real HTTP call would break the offline happy-path test); the task
   asks the agent to finish wiring it.
-- The seed must judge as **NON-COMPLIANT**: at least one selected rule fails at
-  baseline and a correct solution flips it to pass.
+- The seed must judge as **NON-COMPLIANT**: with the trap unaddressed, at least one
+  expectation is UNMET at baseline, and a correct solution flips it.
 
 ## task.md
 
@@ -75,44 +75,57 @@ exercise. Keep it to the register a senior backend engineer would get in a ticke
       "detail": "what the trap is",
       "correct": "what a faithful agent does instead" }
   ],
-  "judge": { "rules": ["<rule-id>", "..."] },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target":   { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  "judge": {
+    "checks": {
+      "groundedBeforeWrite": true,
+      "toolsCalled": [{ "name": "search_fiskaly_docs", "min": 1 }],
+      "docsFetched": ["probe:records-flow"],
+      "maxMcpErrors": 0
+    },
+    "expectations": [
+      { "id": "records-flow", "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST." }
+    ]
+  }
 }
 ```
 
-## The judge rule catalog
+`traps` is documentation for the author; the judge reads only `judge`. Expectation
+`id`s are assigned automatically when absent.
 
-`cd sims/judge && go run . -list` prints every rule. Positive rules require a
-distinctive token the correct contract must contain; negative (`deny`) rules fire
-when a red-herring token appears. The judge reads code with **comments stripped**
-(via `go/scanner`, so string literals like `"https://test.api.fiskaly.com"` stay
-intact): a `deny` rule fires only on real request construction, never on an
-explanatory comment, and a `want` token that appears only in a comment does not
-count. Today's catalog:
+## The judge
 
-| rule | kind | what it asserts |
-| --- | --- | --- |
-| `fiskaly-host` | want | targets `test/live.api.fiskaly.com` |
-| `token-exchange` | want | `POST /tokens` for the JWT |
-| `idempotency-key` | want | `X-Idempotency-Key` on writes |
-| `api-version` | want | the `X-Api-Version` header |
-| `api-version-current` | want | the `X-Api-Version` header **and** the current `2026-02-03` date |
-| `records-flow` | want | issues via `/records` |
-| `scope-identifier` | want | `X-Scope-Identifier` (UNIT-scoped subject) |
-| `commissioning` | want | `COMMISSIONED` lifecycle PATCH |
-| `cancellation-ref` | want | a `CANCELLATION` record (voiding) |
-| `no-invented-refunds` | deny | fails if a `/refunds` endpoint appears |
-| `polling` | want | polls to the `FINISHED` terminal state |
-| `vat-breakdown` | want | constructs all four VatRateCategory keys (`percentage`/`amount`/`exclusive`/`inclusive`) |
-| `no-legacy-resources` | deny | fails if `/assets` or `/entities` appears |
+`sims/judge` runs two layers; conformance requires both.
+
+1. **Deterministic checks** (`judge.checks`) — trajectory signals from the agent's
+   run, evaluated programmatically. A failing check is a hard gate: the run is
+   NON-COMPLIANT and the LLM layer is skipped. Fields (all optional):
+   - `groundedBeforeWrite` — the agent called `search_fiskaly_docs` before its first
+     code write (`Write`/`Edit`/`MultiEdit`).
+   - `toolsCalled` — `[{ name, min }]`; each tool must be called at least `min` times.
+   - `docsFetched` — corpus doc ids (`mcp/corpus/index.json`) the agent must fetch
+     via `fetch_fiskaly_doc`.
+   - `maxMcpErrors` — caps the MCP error count.
+2. **LLM expectations** (`judge.expectations`) — natural-language conformance
+   criteria graded by a stronger model over the source **and** trajectory, run only
+   after the gate passes (`-expect`). Each MET must cite a verbatim `evidence_quote`
+   that actually appears in the source or trajectory; an uncited or absent quote is
+   downgraded to UNMET. Conformance requires every expectation to be a cited MET —
+   the judge is conservative to a false PASS.
+
+The judge reads non-test Go source only (a mock in `_test.go` cannot satisfy a
+criterion), and the citation surface is the comment-stripped source, so a claim
+that lives only in a comment is not evidence. Across the suite the checks are the
+same grounding gate (search the docs, fetch the relevant article, no MCP errors);
+the trap-specific conformance lives in each scenario's `expectations`.
 
 ## Run and verify a scenario
 
 ```sh
-# baseline judge verdict on the seed (no agent):
-cd sims/judge && go run . -scenario ../scenarios/<id>/scenario.json ../scenarios/<id>/fixture
+# source-only expectation grading of the seed (no trajectory, so the checks gate is
+# skipped; needs the claude CLI):
+cd sims/judge && go run . -scenario ../scenarios/<id>/scenario.json -expect ../scenarios/<id>/fixture
 
-# full run (needs a CLAUDE_CODE_OAUTH_TOKEN in repo .env and the claude CLI):
+# full run, including the trajectory checks gate (needs a CLAUDE_CODE_OAUTH_TOKEN in
+# repo .env and the claude CLI):
 sims/evals/run-scenario.sh <id>
 ```
