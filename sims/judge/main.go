@@ -305,18 +305,18 @@ func main() {
 	var rep *rubricReport
 
 	if *rubricFlag && *scenarioFlag != "" {
-		crits, err := rubricFromScenario(*scenarioFlag)
+		exps, err := expectationsFromScenario(*scenarioFlag)
 		if err != nil {
 			failInfra(*jsonFlag, scenarioName, ruleResults, err)
 		}
-		if len(crits) > 0 {
+		if len(exps) > 0 {
 			raw, err := readSourceRaw(dir)
 			if err != nil {
 				failInfra(*jsonFlag, scenarioName, ruleResults, err)
 			}
 			// The citation source keeps code layout (so verbatim quotes match) but
-			// drops comments (so a comment cannot satisfy a criterion).
-			r, err := runRubric(raw, stripCommentsKeepLayout(raw), crits, claudeModel, judgeModelID)
+			// drops comments (so a comment cannot satisfy an expectation).
+			r, err := runExpectations(Trajectory{}, raw, stripCommentsKeepLayout(raw), exps, claudeModel, judgeModelID)
 			if err != nil {
 				failInfra(*jsonFlag, scenarioName, ruleResults, fmt.Errorf("rubric layer: %w", err))
 			}
