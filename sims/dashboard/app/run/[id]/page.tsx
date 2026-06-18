@@ -98,9 +98,41 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </pre>
       </section>
 
+      {run.judgeReport?.checks && (
+        <section className="mt-8">
+          <h2 className={cn(LABEL, "mb-3")}>
+            checks · {run.judgeReport.checks.passed ? "all passed" : "failed"}
+          </h2>
+          <ul className="space-y-2">
+            {run.judgeReport.checks.results.map((result) => (
+              <li key={result.id} className="rounded-lg border border-border p-4">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 text-xs font-medium",
+                      result.pass ? "text-success" : "text-danger",
+                    )}
+                  >
+                    <span
+                      className={cn("size-1.5 rounded-full", result.pass ? "bg-success" : "bg-danger")}
+                      aria-hidden
+                    />
+                    {result.pass ? "pass" : "fail"}
+                  </span>
+                  <span className="font-mono text-sm font-medium">{result.id}</span>
+                </div>
+                {result.detail && (
+                  <p className="mt-2 text-sm text-muted-foreground">{result.detail}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {run.judgeReport?.expectations && (
         <section className="mt-8">
-          <h2 className={cn(LABEL, "mb-3")}>rubric · {run.judgeReport.expectations.model}</h2>
+          <h2 className={cn(LABEL, "mb-3")}>expectations · {run.judgeReport.expectations.model}</h2>
           <ul className="space-y-2">
             {run.judgeReport.expectations.criteria.map((criterion) => (
               <li key={criterion.id} className="rounded-lg border border-border p-4">
