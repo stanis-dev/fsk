@@ -7,7 +7,5 @@
   "traps": [
     { "kind": "false-info", "where": "fixture/README.md", "detail": "a teammate quickstart note claims you can POST the taxpayer directly with the HUB key", "correct": "the HUB key is a GROUP org; direct taxpayer creation returns 405. Create a UNIT, mint a UNIT-scoped subject via X-Scope-Identifier, then provision taxpayer/location/system and commission in order." }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "scope-identifier", "commissioning"] },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "scope-identifier", "commissioning"] }
 }

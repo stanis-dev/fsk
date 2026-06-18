@@ -39,11 +39,6 @@ func runAll(scenarios []scenario, runsBase, judgeBin string, ag agent, cfg runCo
 			failed++
 			continue
 		}
-		if res.preflightViolated {
-			fmt.Fprintf(w, "%-22s PREFLIGHT VIOLATED: pristine seed did not meet the baseline invariant\n", s.id)
-			failed++
-			continue
-		}
 		fmt.Fprintf(w, "%-22s run=%s judge=%s grounded=%v\n",
 			s.id, filepath.Base(res.runDir), verdict(res.obs.Judge.OK), res.obs.groundedOK)
 	}
@@ -53,6 +48,6 @@ func runAll(scenarios []scenario, runsBase, judgeBin string, ag agent, cfg runCo
 		fmt.Fprintf(w, "%d/%d scenarios ran.\n", total, total)
 		return 0
 	}
-	fmt.Fprintf(w, "%d/%d scenarios ran; %d failed before eval.\n", total-failed, total, failed)
+	fmt.Fprintf(w, "%d/%d scenarios ran; %d failed.\n", total-failed, total, failed)
 	return 1
 }

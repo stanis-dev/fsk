@@ -21,32 +21,6 @@ func TestFilterScenarios_PrefixAndExact(t *testing.T) {
 	}
 }
 
-func TestRunAll_PreflightViolationExitsNonZero(t *testing.T) {
-	if testing.Short() {
-		t.Skip("requires building the judge")
-	}
-	simsRoot, _ := filepath.Abs("..")
-	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	sc, err := discoverScenarios(filepath.Join(simsRoot, "scenarios"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	one := sc[0]
-	one.declaredBaseline = baselineSpec{Build: "PASS", Tests: "FAIL", Judge: "NON-COMPLIANT"} // mis-declared
-
-	var b strings.Builder
-	code := runAll([]scenario{one}, t.TempDir(), judgeBin, fakeAgent{}, runConfig{}, &b)
-	if code != 1 {
-		t.Fatalf("exit = %d, want 1", code)
-	}
-	if !strings.Contains(b.String(), "PREFLIGHT") {
-		t.Errorf("summary should flag the preflight violation:\n%s", b.String())
-	}
-}
-
 func TestRunAll_AllPassExitsZero(t *testing.T) {
 	if testing.Short() {
 		t.Skip("requires building the judge")

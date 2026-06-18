@@ -7,7 +7,5 @@
   "traps": [
     { "kind": "silent-bug", "where": "fixture/fiskaly.go (idemKey)", "detail": "one idempotency key is generated at client creation and reused for every request, so distinct POSTs collide", "correct": "generate a fresh lowercase-hex key per logical request; reuse the same key only when retrying that exact request" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] }
 }

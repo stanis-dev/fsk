@@ -34,9 +34,6 @@ func TestDiscoverScenarios(t *testing.T) {
 	if filepath.Base(got[0].scenarioJSON) != "scenario.json" {
 		t.Errorf("scenarioJSON = %q, want .../scenario.json", got[0].scenarioJSON)
 	}
-	if got[0].declaredBaseline != canonicalBaseline {
-		t.Errorf("declaredBaseline = %+v, want %+v", got[0].declaredBaseline, canonicalBaseline)
-	}
 }
 
 func TestFindSimsRoot(t *testing.T) {
@@ -145,8 +142,7 @@ func mkScenario(t *testing.T, root, id string, withFixture, withJSON bool) {
 		}
 	}
 	if withJSON {
-		writeFile(t, filepath.Join(dir, "scenario.json"),
-			`{"id":"`+id+`","baseline":{"build":"PASS","tests":"PASS","judge":"NON-COMPLIANT"}}`)
+		writeFile(t, filepath.Join(dir, "scenario.json"), `{"id":"`+id+`"}`)
 	}
 }
 

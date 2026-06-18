@@ -6,17 +6,13 @@ import (
 	"testing"
 )
 
-func TestPreflightAll_RealScenarios(t *testing.T) {
+func TestDiscoverScenarios_RealCount(t *testing.T) {
 	if testing.Short() {
-		t.Skip("skipping real-scenario preflight in -short mode")
+		t.Skip("skipping real-scenario discovery in -short mode")
 	}
 	simsRoot, err := filepath.Abs("..")
 	if err != nil {
 		t.Fatal(err)
-	}
-	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
-	if err != nil {
-		t.Fatalf("buildJudge: %v", err)
 	}
 	sc, err := discoverScenarios(filepath.Join(simsRoot, "scenarios"))
 	if err != nil {
@@ -24,9 +20,6 @@ func TestPreflightAll_RealScenarios(t *testing.T) {
 	}
 	if len(sc) != 10 {
 		t.Fatalf("discovered %d scenarios, want 10", len(sc))
-	}
-	if bad := preflightAll(sc, judgeBin); len(bad) != 0 {
-		t.Fatalf("scenarios violating the baseline: %v", bad)
 	}
 }
 

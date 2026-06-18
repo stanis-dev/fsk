@@ -17,7 +17,5 @@
         "cite": "SOLUTION.md 07: derive VAT from LineItem.VATRate, ignore/delete MenuVAT; NOTES.md money-model"
       }
     ]
-  },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  }
 }

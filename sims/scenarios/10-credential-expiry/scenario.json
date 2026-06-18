@@ -23,7 +23,5 @@
         "cite": "SOLUTION.md 10: alert ops ahead of the 90-day lapse"
       }
     ]
-  },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  }
 }

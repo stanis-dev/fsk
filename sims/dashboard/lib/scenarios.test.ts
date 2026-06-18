@@ -13,8 +13,6 @@ function fixtureDir(): string {
     JSON.stringify({
       id: "01-demo", title: "Demo", tier: 1, capability: "do x", persona_ref: "P",
       traps: [], judge: { rules: ["r1"] },
-      baseline: { build: "PASS", tests: "PASS", judge: "NON-COMPLIANT" },
-      target: { build: "PASS", tests: "PASS", judge: "conformant" },
     }),
   );
   fs.writeFileSync(path.join(s, "task.md"), "do the task");
@@ -60,8 +58,6 @@ describe("scenarios", () => {
     const good = {
       id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
       traps: [], judge: { rules: ["r1"] },
-      baseline: { build: "PASS", tests: "PASS", judge: "NON-COMPLIANT" },
-      target: { build: "PASS", tests: "PASS", judge: "conformant" },
     };
     expect(validateConfig(good)).toBeNull();
     expect(validateConfig({ ...good, tier: "1" })).toMatch(/tier/);

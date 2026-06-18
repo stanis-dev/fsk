@@ -48,15 +48,6 @@ function isStrArray(v: unknown): v is string[] {
   return Array.isArray(v) && v.every((x) => typeof x === "string");
 }
 
-function verdictsError(v: unknown, field: string): string | null {
-  if (typeof v !== "object" || v === null) return `${field} must be an object`;
-  const o = v as Record<string, unknown>;
-  for (const k of ["build", "tests", "judge"]) {
-    if (typeof o[k] !== "string") return `${field}.${k} must be a string`;
-  }
-  return null;
-}
-
 export function validateConfig(obj: unknown): string | null {
   if (typeof obj !== "object" || obj === null) return "config must be an object";
   const c = obj as Record<string, unknown>;
@@ -69,5 +60,5 @@ export function validateConfig(obj: unknown): string | null {
   const judge = c.judge as Record<string, unknown> | undefined;
   if (typeof judge !== "object" || judge === null || !isStrArray(judge.rules))
     return "judge.rules must be an array of strings";
-  return verdictsError(c.baseline, "baseline") ?? verdictsError(c.target, "target");
+  return null;
 }

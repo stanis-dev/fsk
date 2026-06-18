@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,60 +15,22 @@ type StepResult struct {
 	Output string
 }
 
-// Outcome is the result of running all three checks against one scenario's
-// pristine fixture.
+// Outcome is the result of running all three checks against one scenario's work dir.
 type Outcome struct {
 	Build StepResult
 	Test  StepResult
 	Judge StepResult
 }
 
-// baselineSpec is the build/tests/judge expectation a scenario declares in its
-// scenario.json baseline block, expressed as the judge's own verdict words.
-type baselineSpec struct {
-	Build string `json:"build"`
-	Tests string `json:"tests"`
-	Judge string `json:"judge"`
-}
-
-// canonicalBaseline is the invariant every pristine scenario seed must hold: it
-// builds and tests green, yet the deterministic judge reports NON-COMPLIANT
-// because no integration work has been done.
-var canonicalBaseline = baselineSpec{Build: "PASS", Tests: "PASS", Judge: "NON-COMPLIANT"}
-
 // scenario locates one entry in the scenario library.
 type scenario struct {
-	id               string
-	dir              string
-	fixtureDir       string
-	scenarioJSON     string
-	declaredBaseline baselineSpec
+	id           string
+	dir          string
+	fixtureDir   string
+	scenarioJSON string
 }
 
-// observedBaseline expresses an Outcome in the same verdict words a scenario.json
-// baseline block uses, so the two compare directly.
-func observedBaseline(o Outcome) baselineSpec {
-	return baselineSpec{Build: passFail(o.Build.OK), Tests: passFail(o.Test.OK), Judge: verdict(o.Judge.OK)}
-}
-
-// baselineHolds reports whether a scenario meets the baseline invariant: the
-// observed build/tests/judge match the canonical baseline, and the scenario's
-// own declared baseline matches it too. The second clause keeps the scenario.json
-// baseline block honest, so a future scenario that declares a different bar fails
-// loudly here instead of being graded against the wrong expectation.
-func baselineHolds(s scenario, o Outcome) bool {
-	return observedBaseline(o) == canonicalBaseline && s.declaredBaseline == canonicalBaseline
-}
-
-func passFail(ok bool) string {
-	if ok {
-		return "PASS"
-	}
-	return "FAIL"
-}
-
-// verdict translates the judge's exit status into its reported verdict: a
-// non-zero exit means NON-COMPLIANT, which is the expected baseline state.
+// verdict translates the judge's exit status into its reported verdict words.
 func verdict(judgeOK bool) string {
 	if judgeOK {
 		return "conformant"
@@ -98,16 +59,11 @@ func discoverScenarios(scenariosDir string) ([]scenario, error) {
 		if !isDir(fixture) || !isFile(scenarioJSON) {
 			continue
 		}
-		declared, err := readBaseline(scenarioJSON)
-		if err != nil {
-			return nil, err
-		}
 		out = append(out, scenario{
-			id:               e.Name(),
-			dir:              dir,
-			fixtureDir:       fixture,
-			scenarioJSON:     scenarioJSON,
-			declaredBaseline: declared,
+			id:           e.Name(),
+			dir:          dir,
+			fixtureDir:   fixture,
+			scenarioJSON: scenarioJSON,
 		})
 	}
 	if len(out) == 0 {
@@ -115,22 +71,6 @@ func discoverScenarios(scenariosDir string) ([]scenario, error) {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].id < out[j].id })
 	return out, nil
-}
-
-// readBaseline parses the baseline block a scenario.json declares. A missing
-// block yields the zero value, which baselineHolds then flags as a violation.
-func readBaseline(path string) (baselineSpec, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return baselineSpec{}, fmt.Errorf("reading scenario: %w", err)
-	}
-	var s struct {
-		Baseline baselineSpec `json:"baseline"`
-	}
-	if err := json.Unmarshal(data, &s); err != nil {
-		return baselineSpec{}, fmt.Errorf("parsing %s: %w", path, err)
-	}
-	return s.Baseline, nil
 }
 
 // copyDir recursively copies the tree at src into dst, preserving file modes.

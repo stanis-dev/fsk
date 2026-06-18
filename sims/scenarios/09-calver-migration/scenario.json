@@ -7,7 +7,5 @@
   "traps": [
     { "kind": "false-info", "where": "fixture/fiskaly.go", "detail": "the client pins X-Api-Version 2025-08-12 and provisions via the pre-rename /entities and /assets resources, which look authoritative", "correct": "pin the current 2026-02-03 version and use the current resources (/organizations, /taxpayers, /locations, /systems)" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version-current", "records-flow", "no-legacy-resources"] },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version-current", "records-flow", "no-legacy-resources"] }
 }

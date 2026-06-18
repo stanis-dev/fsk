@@ -6,13 +6,11 @@ import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { saveScenario } from "@/app/actions";
-import type { ScenarioDetail, Verdicts } from "@/lib/types";
+import type { ScenarioDetail } from "@/lib/types";
 
 const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
 const INPUT =
   "w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
-const BUILD_TESTS = ["PASS", "FAIL"];
-const JUDGE = ["conformant", "NON-COMPLIANT"];
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -43,24 +41,6 @@ function StringList({ label, items, onChange }: { label: string; items: string[]
         <Button type="button" variant="outline" size="sm" onClick={() => { if (draft.trim()) { onChange([...items, draft.trim()]); setDraft(""); } }}>
           <Plus className="size-3.5" />
         </Button>
-      </div>
-    </div>
-  );
-}
-
-function VerdictRow({ label, value, onChange }: { label: string; value: Verdicts; onChange: (v: Verdicts) => void }) {
-  const sel = (k: keyof Verdicts, opts: string[]) => (
-    <select className={INPUT} value={value[k]} onChange={(e) => onChange({ ...value, [k]: e.target.value })}>
-      {opts.map((o) => <option key={o} value={o}>{o}</option>)}
-    </select>
-  );
-  return (
-    <div className="space-y-1.5">
-      <span className={LABEL}>{label}</span>
-      <div className="grid grid-cols-3 gap-2">
-        {sel("build", BUILD_TESTS)}
-        {sel("tests", BUILD_TESTS)}
-        {sel("judge", JUDGE)}
       </div>
     </div>
   );
@@ -103,11 +83,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
 
       <StringList label="judge rules" items={config.judge.rules} onChange={(rules) => setConfig({ ...config, judge: { rules } })} />
       <StringList label="traps" items={config.traps} onChange={(traps) => setConfig({ ...config, traps })} />
-
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <VerdictRow label="baseline" value={config.baseline} onChange={(baseline) => setConfig({ ...config, baseline })} />
-        <VerdictRow label="target" value={config.target} onChange={(target) => setConfig({ ...config, target })} />
-      </div>
 
       <Field label="task.md">
         <textarea className={cn(INPUT, "min-h-40 font-mono text-xs leading-relaxed")} value={task} onChange={(e) => setTask(e.target.value)} />

@@ -74,12 +74,6 @@ export interface JudgeReport {
   note: string;
 }
 
-export interface Verdicts {
-  build: string;
-  tests: string;
-  judge: string;
-}
-
 export interface ScenarioConfig {
   id: string;
   title: string;
@@ -88,8 +82,6 @@ export interface ScenarioConfig {
   persona_ref: string;
   traps: string[];
   judge: { rules: string[] };
-  baseline: Verdicts;
-  target: Verdicts;
 }
 
 export interface ScenarioDetail {

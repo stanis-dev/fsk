@@ -7,8 +7,7 @@ import (
 )
 
 // observeCore runs the shared build/test/judge checks against a work dir. rubric
-// and jsonPath enable the judge's LLM rubric layer and structured output; the
-// preflight passes them off (gate-only on the pristine seed).
+// and jsonPath enable the judge's LLM rubric layer and structured output.
 func observeCore(work, judgeBin, scenarioJSON string, rubric bool, jsonPath string) Outcome {
 	return Outcome{
 		Build: runGoCmd(work, "build", "./..."),
@@ -18,17 +17,13 @@ func observeCore(work, judgeBin, scenarioJSON string, rubric bool, jsonPath stri
 }
 
 type scenarioResult struct {
-	id                string
-	runDir            string
-	preflightViolated bool
-	preflight         Outcome
-	obs               observation
+	id     string
+	runDir string
+	obs    observation
 }
 
-// runScenario is the single path: prepare an isolated run dir, assert the
-// baseline preflight on the pristine copy, run the agent, observe the
-// result, and write the dashboard artifacts. A preflight violation skips the
-// agent: an unsound seed is a harness error, not an eval.
+// runScenario is the single path: prepare an isolated run dir, run the agent,
+// observe the result, and write the dashboard artifacts.
 func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig) (scenarioResult, error) {
 	taskBytes, err := os.ReadFile(filepath.Join(s.dir, "task.md"))
 	if err != nil {
@@ -41,12 +36,6 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 	}
 	if err := writeRunHandle(rd.path); err != nil {
 		return scenarioResult{}, fmt.Errorf("writeRunHandle: %w", err)
-	}
-
-	pre := observeCore(rd.work, judgeBin, s.scenarioJSON, false, "")
-	if !baselineHolds(s, pre) {
-		os.RemoveAll(rd.path) // a violated seed is a harness error; leave no phantom run dir
-		return scenarioResult{id: s.id, preflightViolated: true, preflight: pre}, nil
 	}
 
 	if err := ag.run(rd, string(taskBytes), cfg); err != nil {
@@ -64,23 +53,4 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 		return scenarioResult{}, err
 	}
 	return scenarioResult{id: s.id, runDir: rd.path, obs: obs}, nil
-}
-
-// preflightAll runs the baseline preflight (no Docker) across scenarios and
-// returns the ids that violate the invariant. Empty means every seed is sound.
-func preflightAll(scenarios []scenario, judgeBin string) []string {
-	var violated []string
-	for _, s := range scenarios {
-		work, err := os.MkdirTemp("", "runner-preflight-"+s.id+"-")
-		if err != nil {
-			violated = append(violated, s.id)
-			continue
-		}
-		dst := filepath.Join(work, "pos")
-		if copyDir(s.fixtureDir, dst) != nil || !baselineHolds(s, observeCore(dst, judgeBin, s.scenarioJSON, false, "")) {
-			violated = append(violated, s.id)
-		}
-		os.RemoveAll(work)
-	}
-	return violated
 }

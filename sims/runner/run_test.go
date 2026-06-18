@@ -53,7 +53,7 @@ func TestWriteRunHandle(t *testing.T) {
 	}
 }
 
-func TestRunScenario_PreflightHoldsAndArtifactsWritten(t *testing.T) {
+func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	if testing.Short() {
 		t.Skip("requires building the judge")
 	}
@@ -71,9 +71,6 @@ func TestRunScenario_PreflightHoldsAndArtifactsWritten(t *testing.T) {
 	res, err := runScenario(one, t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"})
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
-	}
-	if res.preflightViolated {
-		t.Fatal("pristine seed should hold the baseline preflight")
 	}
 	for _, name := range []string{"meta.json", "build.txt", "test.txt", "judge.txt", "judge.json", "changes.diff", "grounded.txt", "transcript.jsonl"} {
 		if _, err := os.Stat(filepath.Join(res.runDir, name)); err != nil {

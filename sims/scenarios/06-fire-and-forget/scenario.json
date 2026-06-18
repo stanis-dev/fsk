@@ -7,7 +7,5 @@
   "traps": [
     { "kind": "silent-bug", "where": "fixture/fiskaly.go (issueReceipt)", "detail": "returns success on the accepted TRANSACTION (PROCESSING) and never polls to FINISHED; looks fine in TEST, silently fails on LIVE", "correct": "poll the record (GET /records/{id}) until state/mode FINISHED, fail the completion if it does not reach FINISHED" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "polling"] },
-  "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
-  "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
+  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "polling"] }
 }
