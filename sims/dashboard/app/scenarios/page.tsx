@@ -46,7 +46,7 @@ export default function ScenariosPage() {
               </TableCell>
               <TableCell className={cn(CELL, "font-medium")}>{s.title}</TableCell>
               <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.tier}</TableCell>
-              <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.judge.rules.length}</TableCell>
+              <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.judge.expectations.length}</TableCell>
               <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.traps.length}</TableCell>
             </TableRow>
           ))}

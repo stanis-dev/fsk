@@ -1,12 +1,12 @@
 {
   "scenario": "07-wrong-vat",
-  "gate": {
+  "checks": {
     "passed": true,
-    "rules": [
-      { "id": "vat-breakdown", "desc": "sends the full VatRateCategory breakdown", "pass": true }
+    "results": [
+      { "id": "vat-breakdown", "pass": true, "detail": "sends the full VatRateCategory breakdown" }
     ]
   },
-  "rubric": {
+  "expectations": {
     "model": "claude-opus-4-8",
     "criteria": [
       {

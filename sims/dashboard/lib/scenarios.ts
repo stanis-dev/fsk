@@ -48,6 +48,21 @@ function isStrArray(v: unknown): v is string[] {
   return Array.isArray(v) && v.every((x) => typeof x === "string");
 }
 
+function isExpectationArray(v: unknown): boolean {
+  return Array.isArray(v) && (v as unknown[]).every(
+    (x) => typeof x === "object" && x !== null && typeof (x as Record<string, unknown>).id === "string" && typeof (x as Record<string, unknown>).expectation === "string",
+  );
+}
+
+function hasNonEmptyChecks(checks: Record<string, unknown>): boolean {
+  return (
+    typeof checks.groundedBeforeWrite === "boolean" ||
+    (Array.isArray(checks.toolsCalled) && (checks.toolsCalled as unknown[]).length > 0) ||
+    (Array.isArray(checks.docsFetched) && (checks.docsFetched as unknown[]).length > 0) ||
+    typeof checks.maxMcpErrors === "number"
+  );
+}
+
 export function validateConfig(obj: unknown): string | null {
   if (typeof obj !== "object" || obj === null) return "config must be an object";
   const c = obj as Record<string, unknown>;
@@ -58,7 +73,12 @@ export function validateConfig(obj: unknown): string | null {
   if (typeof c.persona_ref !== "string") return "persona_ref must be a string";
   if (!isStrArray(c.traps)) return "traps must be an array of strings";
   const judge = c.judge as Record<string, unknown> | undefined;
-  if (typeof judge !== "object" || judge === null || !isStrArray(judge.rules))
-    return "judge.rules must be an array of strings";
+  if (typeof judge !== "object" || judge === null) return "judge must be an object";
+  if (typeof judge.checks !== "object" || judge.checks === null) return "judge.checks must be an object";
+  if (!Array.isArray(judge.expectations)) return "judge.expectations must be an array";
+  if (!isExpectationArray(judge.expectations)) return "judge.expectations must be an array of {id, expectation}";
+  const hasChecks = hasNonEmptyChecks(judge.checks as Record<string, unknown>);
+  const hasExpectations = (judge.expectations as unknown[]).length > 0;
+  if (!hasChecks && !hasExpectations) return "judge must have at least one non-empty checks field or a non-empty expectations array";
   return null;
 }

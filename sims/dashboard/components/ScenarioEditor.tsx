@@ -81,7 +81,11 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
         </Field>
       </div>
 
-      <StringList label="judge rules" items={config.judge.rules} onChange={(rules) => setConfig({ ...config, judge: { rules } })} />
+      <StringList
+        label="judge expectations"
+        items={config.judge.expectations.map((e) => e.id)}
+        onChange={(ids) => setConfig({ ...config, judge: { ...config.judge, expectations: ids.map((id) => ({ id, expectation: id })) } })}
+      />
       <StringList label="traps" items={config.traps} onChange={(traps) => setConfig({ ...config, traps })} />
 
       <Field label="task.md">

@@ -33,12 +33,31 @@ test("parseJudgeReport returns null for absent or garbage input", () => {
   expect(parseJudgeReport("not json")).toBeNull();
 });
 
-test("parseJudgeReport rejects a truthy rubric without a criteria array", () => {
-  expect(parseJudgeReport('{"verdict":"conformant","rubric":{"model":"m"}}')).toBeNull();
-  expect(parseJudgeReport('{"verdict":"conformant","rubric":{"model":"m","criteria":null}}')).toBeNull();
+test("parseJudgeReport rejects a truthy expectations without a criteria array", () => {
+  expect(parseJudgeReport('{"verdict":"conformant","expectations":{"model":"m"}}')).toBeNull();
+  expect(parseJudgeReport('{"verdict":"conformant","expectations":{"model":"m","criteria":null}}')).toBeNull();
   expect(
-    parseJudgeReport('{"verdict":"conformant","rubric":null,"gate":{"passed":true,"rules":[]},"scenario":"x","note":""}'),
+    parseJudgeReport('{"verdict":"conformant","expectations":null,"checks":{"passed":true,"results":[]},"scenario":"x","note":""}'),
   ).not.toBeNull();
+});
+
+test("parseJudgeReport reads checks.passed and expectations.criteria and returns the verdict", () => {
+  const json = JSON.stringify({
+    scenario: "07-wrong-vat",
+    verdict: "conformant",
+    checks: { passed: true, results: [{ id: "r1", pass: true, detail: "ok" }] },
+    expectations: {
+      model: "claude-opus-4-8",
+      criteria: [{ id: "vat-derived-from-line", verdict: "MET", evidence_quote: "pct := line.VATRate", reasoning: "ok", cite: "SOLUTION.md" }],
+    },
+    note: "",
+  });
+  const r = parseJudgeReport(json);
+  expect(r).not.toBeNull();
+  expect(r!.verdict).toBe("conformant");
+  expect(r!.checks.passed).toBe(true);
+  expect(r!.expectations).not.toBeNull();
+  expect(r!.expectations!.criteria[0].id).toBe("vat-derived-from-line");
 });
 
 test("verdictFromLog reads the VERDICT line, not model reasoning", () => {
@@ -52,9 +71,9 @@ test("loadRun parses the structured judge.json report", () => {
   expect(r).not.toBeNull();
   expect(r!.judgeReport).not.toBeNull();
   expect(r!.judgeReport!.verdict).toBe("conformant");
-  expect(r!.judgeReport!.rubric).not.toBeNull();
-  expect(r!.judgeReport!.rubric!.criteria[0].id).toBe("vat-derived-from-line");
-  expect(r!.judgeReport!.rubric!.criteria[0].verdict).toBe("MET");
+  expect(r!.judgeReport!.expectations).not.toBeNull();
+  expect(r!.judgeReport!.expectations!.criteria[0].id).toBe("vat-derived-from-line");
+  expect(r!.judgeReport!.expectations!.criteria[0].verdict).toBe("MET");
 });
 
 test("listRuns finds the fixture run", () => {

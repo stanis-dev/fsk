@@ -98,11 +98,11 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </pre>
       </section>
 
-      {run.judgeReport?.rubric && (
+      {run.judgeReport?.expectations && (
         <section className="mt-8">
-          <h2 className={cn(LABEL, "mb-3")}>rubric · {run.judgeReport.rubric.model}</h2>
+          <h2 className={cn(LABEL, "mb-3")}>rubric · {run.judgeReport.expectations.model}</h2>
           <ul className="space-y-2">
-            {run.judgeReport.rubric.criteria.map((criterion) => (
+            {run.judgeReport.expectations.criteria.map((criterion) => (
               <li key={criterion.id} className="rounded-lg border border-border p-4">
                 <div className="flex items-center gap-3">
                   <CritVerdict value={criterion.verdict} />

@@ -66,11 +66,20 @@ export interface JudgeCriterion {
   cite: string;
 }
 
+export interface ToolReq { name: string; min: number }
+export interface JudgeChecks {
+  groundedBeforeWrite?: boolean;
+  toolsCalled?: ToolReq[];
+  docsFetched?: string[];
+  maxMcpErrors?: number;
+}
+export interface Expectation { id: string; expectation: string; where?: string; cite?: string }
+
 export interface JudgeReport {
   scenario: string;
   verdict: "conformant" | "NON-COMPLIANT";
-  gate: { passed: boolean; rules: { id: string; desc: string; pass: boolean }[] };
-  rubric: { model: string; criteria: JudgeCriterion[] } | null;
+  checks: { passed: boolean; results: { id: string; pass: boolean; detail: string }[] };
+  expectations: { model: string; criteria: JudgeCriterion[] } | null;
   note: string;
 }
 
@@ -81,7 +90,7 @@ export interface ScenarioConfig {
   capability: string;
   persona_ref: string;
   traps: string[];
-  judge: { rules: string[] };
+  judge: { checks: JudgeChecks; expectations: Expectation[] };
 }
 
 export interface ScenarioDetail {

@@ -26,7 +26,7 @@ export function parseJudgeReport(json: string): JudgeReport | null {
     const report = JSON.parse(json) as JudgeReport;
     if (!report || typeof report !== "object") return null;
     if (report.verdict !== "conformant" && report.verdict !== "NON-COMPLIANT") return null;
-    if (report.rubric !== null && !(report.rubric && Array.isArray(report.rubric.criteria))) return null;
+    if (report.expectations !== null && !(report.expectations && Array.isArray(report.expectations.criteria))) return null;
     return report;
   } catch {
     return null;
