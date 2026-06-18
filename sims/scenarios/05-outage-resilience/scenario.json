@@ -1,9 +1,6 @@
 {
   "id": "05-outage-resilience",
   "title": "Outage / don't block the till",
-  "tier": 3,
-  "capability": "fiscalize without freezing checkout when fiskaly/AdE is slow or down; handle the outage per the legal fallback",
-  "persona_ref": "PERSONA.md priority #1 don't block the sale; week 4 resilience + the 12-day fallback",
   "traps": [
     {
       "kind": "false-info",

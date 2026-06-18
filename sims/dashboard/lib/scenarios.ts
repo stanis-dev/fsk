@@ -81,9 +81,6 @@ export function validateConfig(obj: unknown): string | null {
   const c = obj as Record<string, unknown>;
   if (typeof c.id !== "string") return "id must be a string";
   if (typeof c.title !== "string") return "title must be a string";
-  if (typeof c.tier !== "number") return "tier must be a number";
-  if (typeof c.capability !== "string") return "capability must be a string";
-  if (typeof c.persona_ref !== "string") return "persona_ref must be a string";
   if (!Array.isArray(c.traps)) return "traps must be an array";
   const judge = c.judge as Record<string, unknown> | undefined;
   if (typeof judge !== "object" || judge === null) return "judge must be an object";

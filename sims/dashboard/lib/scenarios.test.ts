@@ -12,7 +12,7 @@ function fixtureDir(): string {
   fs.writeFileSync(
     path.join(s, "scenario.json"),
     JSON.stringify({
-      id: "01-demo", title: "Demo", tier: 1, capability: "do x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [], judge: { checks: { groundedBeforeWrite: true }, expectations: [{ id: "x", expectation: "y" }] },
     }),
   );
@@ -55,11 +55,11 @@ describe("scenarios", () => {
 
   it("validateConfig accepts a good config and rejects bad shapes", () => {
     const good = {
-      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [], judge: { checks: { groundedBeforeWrite: true }, expectations: [{ id: "x", expectation: "y" }] },
     };
     expect(validateConfig(good)).toBeNull();
-    expect(validateConfig({ ...good, tier: "1" })).toMatch(/tier/);
+    expect(validateConfig({ ...good, title: 1 })).toMatch(/title/);
     expect(validateConfig({ ...good, judge: {} })).toMatch(/judge/);
     expect(validateConfig({ ...good, traps: "none" })).toMatch(/traps/);
     expect(validateConfig(null)).toMatch(/object/);
@@ -67,7 +67,7 @@ describe("scenarios", () => {
 
   it("validateConfig rejects non-array expectations", () => {
     const good = {
-      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [], judge: { checks: { groundedBeforeWrite: true }, expectations: [{ id: "x", expectation: "y" }] },
     };
     expect(validateConfig({ ...good, judge: { checks: { groundedBeforeWrite: true }, expectations: "not-array" } })).toMatch(/expectations/);
@@ -75,7 +75,7 @@ describe("scenarios", () => {
 
   it("validateConfig rejects judge with empty checks and empty expectations", () => {
     const good = {
-      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [], judge: { checks: {}, expectations: [] },
     };
     expect(validateConfig(good)).toMatch(/judge/);
@@ -83,7 +83,7 @@ describe("scenarios", () => {
 
   it("validateConfig accepts judge with only checks (no expectations)", () => {
     const good = {
-      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [], judge: { checks: { groundedBeforeWrite: true }, expectations: [] },
     };
     expect(validateConfig(good)).toBeNull();
@@ -91,7 +91,7 @@ describe("scenarios", () => {
 
   it("validateConfig accepts judge with only expectations (empty checks)", () => {
     const good = {
-      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [], judge: { checks: {}, expectations: [{ id: "x", expectation: "y" }] },
     };
     expect(validateConfig(good)).toBeNull();
@@ -99,7 +99,7 @@ describe("scenarios", () => {
 
   it("assignExpectationIds preserves existing ids and fills empty ones without collision", () => {
     const config = {
-      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      id: "01-demo", title: "Demo",
       traps: [],
       judge: {
         checks: {},

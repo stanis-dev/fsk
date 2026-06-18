@@ -32,23 +32,22 @@ incidents.
 
 ## The ten scenarios
 
-| # | Scenario | Tier | Trap | Planted in | Caught by |
-| --- | --- | --- | --- | --- | --- |
-| 01 | Zero to Receipt | 1 | — (control) | — | gate |
-| 02 | Provision a merchant | 1 | false-info: a "quickstart" says POST the taxpayer directly (the 405 trap) | README | gate (`scope-identifier`, `commissioning`) |
-| 03 | Cancellation / void | 2 | red-herring: a comment claims a fiskaly "refunds endpoint" | `refund.go` | gate (`cancellation-ref`, `no-invented-refunds`) |
-| 04 | Idempotency under retry | 2 | silent-bug: one idempotency key reused across all requests | `fiskaly.go` | review |
-| 05 | Outage / don't block the till | 3 | false-info: "calls are fast — call inline, no timeout, under the lock" | `checkout.go` | review |
-| 06 | Fire-and-forget (no polling) | 3 | silent-bug: returns on PROCESSING, never polls to FINISHED | `fiskaly.go` | gate (`polling`) |
-| 07 | Wrong VAT at scale | 3 | false-info: a cheat-sheet claims all food is 4% VAT | `vatrates.go` | review (+ `vat-breakdown` gate) |
-| 08 | Amounts as decimal strings | 2 | silent-bug: money serialized as JSON floats, no VAT breakdown | `fiskaly.go` | gate (`vat-breakdown`) + review |
-| 09 | CalVer migration | 2 | false-info: stale `/entities`/`/assets` + old `X-Api-Version` | `fiskaly.go` | gate (`no-legacy-resources`, `api-version-current`) |
-| 10 | Credential expiry (day 91) | 3 | false-info: a daily 24h-token refresh "keeps you logged in forever" | `health.go` | review |
+| # | Scenario | Trap | Planted in | Caught by |
+| --- | --- | --- | --- | --- |
+| 01 | Zero to Receipt | — (control) | — | gate |
+| 02 | Provision a merchant | false-info: a "quickstart" says POST the taxpayer directly (the 405 trap) | README | gate (`scope-identifier`, `commissioning`) |
+| 03 | Cancellation / void | red-herring: a comment claims a fiskaly "refunds endpoint" | `refund.go` | gate (`cancellation-ref`, `no-invented-refunds`) |
+| 04 | Idempotency under retry | silent-bug: one idempotency key reused across all requests | `fiskaly.go` | review |
+| 05 | Outage / don't block the till | false-info: "calls are fast — call inline, no timeout, under the lock" | `checkout.go` | review |
+| 06 | Fire-and-forget (no polling) | silent-bug: returns on PROCESSING, never polls to FINISHED | `fiskaly.go` | gate (`polling`) |
+| 07 | Wrong VAT at scale | false-info: a cheat-sheet claims all food is 4% VAT | `vatrates.go` | review (+ `vat-breakdown` gate) |
+| 08 | Amounts as decimal strings | silent-bug: money serialized as JSON floats, no VAT breakdown | `fiskaly.go` | gate (`vat-breakdown`) + review |
+| 09 | CalVer migration | false-info: stale `/entities`/`/assets` + old `X-Api-Version` | `fiskaly.go` | gate (`no-legacy-resources`, `api-version-current`) |
+| 10 | Credential expiry (day 91) | false-info: a daily 24h-token refresh "keeps you logged in forever" | `health.go` | review |
 
-`Tier` is the `PERSONA.md` failure tier: 1 friction · 2 pre-prod bounce · 3 silent
-catastrophe. Scenarios 04/06/08/09 are **brownfield** — they ship an unfinished,
-flawed fiskaly client the agent inherits; the rest are **greenfield** (the
-fiscalization seam plus a planted comment, README note, or domain helper).
+Scenarios 04/06/08/09 are **brownfield** — they ship an unfinished, flawed
+fiskaly client the agent inherits; the rest are **greenfield** (the fiscalization
+seam plus a planted comment, README note, or domain helper).
 
 ## Baseline verification (the seed, before any agent)
 

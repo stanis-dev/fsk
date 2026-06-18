@@ -85,9 +85,6 @@ export interface JudgeReport {
 export interface ScenarioConfig {
   id: string;
   title: string;
-  tier: number;
-  capability: string;
-  persona_ref: string;
   traps: unknown[]; // structured trap docs; not edited in the UI, preserved on save
   judge: { checks: JudgeChecks; expectations: Expectation[] };
 }

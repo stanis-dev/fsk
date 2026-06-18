@@ -21,7 +21,6 @@ export default function ScenariosPage() {
           <TableRow className="border-border hover:bg-transparent">
             <TableHead className={HEAD}>id</TableHead>
             <TableHead className={HEAD}>title</TableHead>
-            <TableHead className={cn(HEAD, "text-right")}>tier</TableHead>
             <TableHead className={cn(HEAD, "text-right")}>expectations</TableHead>
             <TableHead className={cn(HEAD, "text-right")}>traps</TableHead>
           </TableRow>
@@ -29,7 +28,7 @@ export default function ScenariosPage() {
         <TableBody>
           {scenarios.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                 no scenarios found
               </TableCell>
             </TableRow>
@@ -45,7 +44,6 @@ export default function ScenariosPage() {
                 </Link>
               </TableCell>
               <TableCell className={cn(CELL, "font-medium")}>{s.title}</TableCell>
-              <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.tier}</TableCell>
               <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.judge.expectations.length}</TableCell>
               <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{s.traps.length}</TableCell>
             </TableRow>

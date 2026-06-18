@@ -1,9 +1,6 @@
 {
   "id": "08-amounts-as-strings",
   "title": "Amounts as decimal strings",
-  "tier": 2,
-  "capability": "represent money as decimal strings and send the full per-line VAT breakdown that reconciles to the cent",
-  "persona_ref": "PERSONA.md week 2 model impedance; NOTES.md money-model (amounts are strings; VatRateCategory needs all four fields)",
   "traps": [
     {
       "kind": "silent-bug",

@@ -1,9 +1,6 @@
 {
   "id": "06-fire-and-forget",
   "title": "Fire-and-forget (no polling)",
-  "tier": 3,
-  "capability": "poll the record to FINISHED before treating a receipt as issued",
-  "persona_ref": "PERSONA.md Tier 3 silent catastrophe (fire-and-forget never reaches the authority); NOTES.md step 11 (LIVE is async, poll to FINISHED)",
   "traps": [
     {
       "kind": "silent-bug",

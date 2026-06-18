@@ -1,9 +1,6 @@
 {
   "id": "10-credential-expiry",
   "title": "Credential expiry (day 91)",
-  "tier": 3,
-  "capability": "survive the 90-day Fisconline credential expiry; alert ops before a merchant can no longer sell",
-  "persona_ref": "PERSONA.md week 4 ops reality (90-day expiry, manual first login) + Tier 3 silent catastrophe",
   "traps": [
     {
       "kind": "false-info",

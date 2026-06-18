@@ -1,9 +1,6 @@
 {
   "id": "09-calver-migration",
   "title": "CalVer migration",
-  "tier": 2,
-  "capability": "migrate an integration off the renamed legacy resources and onto the current dated API",
-  "persona_ref": "OPPORTUNITIES.md #4 (entities/assets renamed to taxpayers/locations/organizations); NOTES.md current contract",
   "traps": [
     {
       "kind": "false-info",

@@ -69,9 +69,6 @@ exercise. Keep it to the register a senior backend engineer would get in a ticke
 {
   "id": "NN-slug",
   "title": "Human Title",
-  "tier": 1,
-  "capability": "one line: what integration capability this exercises",
-  "persona_ref": "where in PERSONA.md / OPPORTUNITIES.md this failure lives",
   "traps": [
     { "kind": "red-herring | false-info | silent-bug",
       "where": "fixture/<file>",
@@ -83,10 +80,6 @@ exercise. Keep it to the register a senior backend engineer would get in a ticke
   "target":   { "build": "PASS", "tests": "PASS", "judge": "conformant" }
 }
 ```
-
-`tier` is the `PERSONA.md` failure tier (1 friction · 2 pre-prod bounce · 3 silent
-catastrophe). The runner reads only `judge.rules`; the rest is the answer key for
-humans and the dashboard.
 
 ## The judge rule catalog
 

@@ -1,9 +1,6 @@
 {
   "id": "07-wrong-vat",
   "title": "Wrong VAT at scale",
-  "tier": 3,
-  "capability": "compute the per-line VAT breakdown fiskaly needs from the order's real rates",
-  "persona_ref": "PERSONA.md week 1 (which rate?) + Tier 3 wrong VAT at scale; NOTES.md money-model",
   "traps": [
     {
       "kind": "false-info",

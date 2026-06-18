@@ -1,9 +1,6 @@
 {
   "id": "03-cancellation",
   "title": "Cancellation / void",
-  "tier": 2,
-  "capability": "void a completed sale via a CANCELLATION record referencing the original",
-  "persona_ref": "PERSONA.md week 3 long tail (a returned cornetto = CANCELLATION); NOTES.md record-type taxonomy",
   "traps": [
     {
       "kind": "red-herring",

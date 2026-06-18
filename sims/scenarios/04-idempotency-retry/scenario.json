@@ -1,9 +1,6 @@
 {
   "id": "04-idempotency-retry",
   "title": "Idempotency under retry",
-  "tier": 2,
-  "capability": "use a fresh idempotency key per logical request, reused only across retries of that same request",
-  "persona_ref": "PERSONA.md Tier 2 (idempotency key reused under load) / Tier 3 (never double-issue); NOTES.md addendum (X-Idempotency-Key)",
   "traps": [
     {
       "kind": "silent-bug",

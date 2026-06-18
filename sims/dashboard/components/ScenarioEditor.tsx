@@ -37,9 +37,6 @@ const DOC_IDS = [
   "probe:money-model",
 ];
 
-// The scenario tiers in use.
-const TIERS = [1, 2, 3];
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
@@ -103,30 +100,9 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Field label="title">
-          <input className={INPUT} value={config.title} onChange={(e) => setConfig({ ...config, title: e.target.value })} />
-        </Field>
-        <Field label="tier">
-          <select
-            className={INPUT}
-            value={config.tier}
-            onChange={(e) => setConfig({ ...config, tier: Number(e.target.value) })}
-          >
-            {(TIERS.includes(config.tier) ? TIERS : [config.tier, ...TIERS]).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="capability">
-          <input className={INPUT} value={config.capability} onChange={(e) => setConfig({ ...config, capability: e.target.value })} />
-        </Field>
-        <Field label="persona_ref">
-          <input className={INPUT} value={config.persona_ref} onChange={(e) => setConfig({ ...config, persona_ref: e.target.value })} />
-        </Field>
-      </div>
+      <Field label="title">
+        <input className={INPUT} value={config.title} onChange={(e) => setConfig({ ...config, title: e.target.value })} />
+      </Field>
 
       {/* checks */}
       <div className="space-y-4 rounded-lg border border-border p-4">

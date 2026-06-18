@@ -1,9 +1,6 @@
 {
   "id": "01-zero-to-receipt",
   "title": "Zero to Receipt",
-  "tier": 1,
-  "capability": "implement core fiscalization in CompleteOrder via the SIGN IT records flow",
-  "persona_ref": "PERSONA.md: the end-to-end scenario; OPPORTUNITIES.md #1 Zero to Receipt",
   "traps": [],
   "judge": {
     "checks": {
