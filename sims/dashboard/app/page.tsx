@@ -9,12 +9,17 @@ export const dynamic = "force-dynamic";
 export default function Home() {
   const runs = listRuns();
   return (
-    <main className="mx-auto max-w-5xl p-8">
+    <main className="mx-auto w-full max-w-6xl px-8 py-12">
       <AutoRefresh />
-      <div className="mb-4 flex items-center gap-4">
-        <h1 className="text-xl font-bold">fiskaly eval runs</h1>
+      <header className="mb-8 flex items-end justify-between gap-4 border-b border-border pb-5">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">fiskaly eval runs</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            agentic coding eval workbench · {runs.length} runs
+          </p>
+        </div>
         <TriggerButton />
-      </div>
+      </header>
       <RunTable runs={runs} />
     </main>
   );
