@@ -52,7 +52,11 @@ func (r *FileRecorder) Record(e Event) {
 	}
 }
 
-func (r *FileRecorder) Close() error { return r.f.Close() }
+func (r *FileRecorder) Close() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.f.Close()
+}
 
 type nopRecorder struct{}
 
