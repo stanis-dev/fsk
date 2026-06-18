@@ -58,6 +58,8 @@ func parseToolUses(path string) ([]string, error) {
 	sc.Buffer(make([]byte, 1024*1024), 16*1024*1024)
 	for sc.Scan() {
 		var ev transcriptEvent
+		// Transcript is heterogeneous — many valid line shapes don't match
+		// transcriptEvent; skip non-matching lines intentionally.
 		if json.Unmarshal(sc.Bytes(), &ev) != nil || ev.Type != "assistant" {
 			continue
 		}
@@ -89,8 +91,8 @@ func parseTelemetry(path string) ([]telemetryEntry, error) {
 			continue
 		}
 		var e telemetryEntry
-		if json.Unmarshal(sc.Bytes(), &e) != nil {
-			continue
+		if err := json.Unmarshal(sc.Bytes(), &e); err != nil {
+			return nil, fmt.Errorf("malformed telemetry line: %w", err)
 		}
 		out = append(out, e)
 	}

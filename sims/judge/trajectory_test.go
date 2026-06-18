@@ -54,3 +54,15 @@ func TestParseTrajectory_MissingTranscriptErrors(t *testing.T) {
 		t.Fatal("expected error when transcript.jsonl is absent")
 	}
 }
+
+func TestParseTrajectory_MalformedTelemetryErrors(t *testing.T) {
+	dir := t.TempDir()
+	writeFileT(t, filepath.Join(dir, "transcript.jsonl"),
+		`{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Write"}]}}`+"\n")
+	writeFileT(t, filepath.Join(dir, "mcp-telemetry.jsonl"),
+		`{"tool":"search_fiskaly_docs","args":{},"is_error":false}`+"\n"+
+			`{ not json`+"\n")
+	if _, err := parseTrajectory(dir); err == nil {
+		t.Fatal("expected error for malformed telemetry line")
+	}
+}
