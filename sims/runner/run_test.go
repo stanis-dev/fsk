@@ -44,7 +44,7 @@ func TestRunScenario_PreflightHoldsAndArtifactsWritten(t *testing.T) {
 	if res.preflightViolated {
 		t.Fatal("pristine seed should hold the baseline preflight")
 	}
-	for _, name := range []string{"meta.json", "build.txt", "test.txt", "judge.txt", "changes.diff", "grounded.txt", "transcript.jsonl"} {
+	for _, name := range []string{"meta.json", "build.txt", "test.txt", "judge.txt", "judge.json", "changes.diff", "grounded.txt", "transcript.jsonl"} {
 		if _, err := os.Stat(filepath.Join(res.runDir, name)); err != nil {
 			t.Errorf("missing artifact %s: %v", name, err)
 		}

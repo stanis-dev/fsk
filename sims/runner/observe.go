@@ -17,8 +17,19 @@ func runGoCmd(dir string, args ...string) StepResult {
 	return StepResult{OK: err == nil, Output: string(out)}
 }
 
-func runJudge(judgeBin, scenarioJSON, dir string) StepResult {
-	cmd := exec.Command(judgeBin, "-scenario", scenarioJSON, dir)
+// runJudge runs the judge against dir. With rubric set (and a scenario that
+// declares judge.rubric), the judge adds its LLM rubric layer behind the gate and,
+// when jsonPath is given, writes the structured verdict there.
+func runJudge(judgeBin, scenarioJSON, dir string, rubric bool, jsonPath string) StepResult {
+	args := []string{"-scenario", scenarioJSON}
+	if rubric {
+		args = append(args, "-rubric")
+	}
+	if jsonPath != "" {
+		args = append(args, "-json", jsonPath)
+	}
+	args = append(args, dir)
+	cmd := exec.Command(judgeBin, args...)
 	out, err := cmd.CombinedOutput()
 	return StepResult{OK: err == nil, Output: string(out)}
 }

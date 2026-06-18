@@ -6,12 +6,14 @@ import (
 	"path/filepath"
 )
 
-// observeCore runs the shared build/test/judge checks against a work dir.
-func observeCore(work, judgeBin, scenarioJSON string) Outcome {
+// observeCore runs the shared build/test/judge checks against a work dir. rubric
+// and jsonPath enable the judge's LLM rubric layer and structured output; the
+// preflight passes them off (gate-only on the pristine seed).
+func observeCore(work, judgeBin, scenarioJSON string, rubric bool, jsonPath string) Outcome {
 	return Outcome{
 		Build: runGoCmd(work, "build", "./..."),
 		Test:  runGoCmd(work, "test", "./..."),
-		Judge: runJudge(judgeBin, scenarioJSON, work),
+		Judge: runJudge(judgeBin, scenarioJSON, work, rubric, jsonPath),
 	}
 }
 
@@ -38,7 +40,7 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 		return scenarioResult{}, fmt.Errorf("prepareRun: %w", err)
 	}
 
-	pre := observeCore(rd.work, judgeBin, s.scenarioJSON)
+	pre := observeCore(rd.work, judgeBin, s.scenarioJSON, false, "")
 	if !baselineHolds(s, pre) {
 		return scenarioResult{id: s.id, runDir: rd.path, preflightViolated: true, preflight: pre}, nil
 	}
@@ -47,7 +49,7 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 		return scenarioResult{}, fmt.Errorf("agent: %w", err)
 	}
 
-	core := observeCore(rd.work, judgeBin, s.scenarioJSON)
+	core := observeCore(rd.work, judgeBin, s.scenarioJSON, true, filepath.Join(rd.path, "judge.json"))
 	diff, err := gitDiffStaged(rd.work)
 	if err != nil {
 		return scenarioResult{}, err
@@ -71,7 +73,7 @@ func preflightAll(scenarios []scenario, judgeBin string) []string {
 			continue
 		}
 		dst := filepath.Join(work, "pos")
-		if copyDir(s.fixtureDir, dst) != nil || !baselineHolds(s, observeCore(dst, judgeBin, s.scenarioJSON)) {
+		if copyDir(s.fixtureDir, dst) != nil || !baselineHolds(s, observeCore(dst, judgeBin, s.scenarioJSON, false, "")) {
 			violated = append(violated, s.id)
 		}
 		os.RemoveAll(work)
