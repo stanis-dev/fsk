@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
+
+var errStub = errors.New("stub")
 
 func TestParseScenarioRubric(t *testing.T) {
 	data := []byte(`{"judge":{"rules":["fiskaly-host"],"rubric":[
@@ -50,6 +53,50 @@ func TestParseModelJSONHandlesBraceInString(t *testing.T) {
 	got, err := parseModelJSON(in)
 	if err != nil || len(got) != 1 || got[0].EvidenceQuote != "map[string]int{}" {
 		t.Fatalf("brace-in-string mishandled: %+v err=%v", got, err)
+	}
+}
+
+func TestRunRubricStub(t *testing.T) {
+	crits := []criterion{{ID: "c1", Criterion: "x", Cite: "CITE1"}}
+	stub := func(string) (string, error) {
+		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
+	}
+	rep, err := runRubric("keep this", "keep this", crits, stub, "claude-opus-4-8")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rep.Model != "claude-opus-4-8" || len(rep.Criteria) != 1 {
+		t.Fatalf("bad report %+v", rep)
+	}
+	if rep.Criteria[0].Cite != "CITE1" {
+		t.Fatal("cite must be copied from criterion")
+	}
+	if !conformant(rep.Criteria) {
+		t.Fatal("should be conformant")
+	}
+}
+
+func TestRunRubricMissingCriterionIsCannotAssess(t *testing.T) {
+	crits := []criterion{{ID: "c1"}, {ID: "c2"}}
+	stub := func(string) (string, error) {
+		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
+	}
+	rep, err := runRubric("keep", "keep", crits, stub, "m")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rep.Criteria) != 2 {
+		t.Fatalf("want 2 verdicts (synthetic for missing), got %d", len(rep.Criteria))
+	}
+	if conformant(rep.Criteria) {
+		t.Fatal("a criterion the model skipped must be CANNOT_ASSESS, blocking the pass")
+	}
+}
+
+func TestRunRubricModelError(t *testing.T) {
+	stub := func(string) (string, error) { return "", errStub }
+	if _, err := runRubric("s", "s", []criterion{{ID: "c1"}}, stub, "m"); err == nil {
+		t.Fatal("model error must propagate")
 	}
 }
 

@@ -107,6 +107,52 @@ func firstJSONObject(s string) (string, error) {
 	return "", fmt.Errorf("unbalanced JSON object")
 }
 
+// modelFn invokes a judge model with a prompt and returns its raw text reply.
+// Injecting it keeps the pipeline unit-testable with a stub; claudeModel is the
+// real implementation.
+type modelFn func(prompt string) (string, error)
+
+// rubricReport is the structured outcome of the rubric layer.
+type rubricReport struct {
+	Model    string    `json:"model"`
+	Criteria []verdict `json:"criteria"`
+}
+
+// runRubric ties prompt -> model -> parse -> cite-fill -> citation check together.
+// Source carries comments (for the model); stripped is the comment-stripped source
+// the citation check validates against. Any criterion the model did not return is
+// added as CANNOT_ASSESS so a skipped check can never silently pass.
+func runRubric(source, stripped string, crits []criterion, model modelFn, modelName string) (rubricReport, error) {
+	raw, err := model(buildRubricPrompt(source, crits))
+	if err != nil {
+		return rubricReport{}, fmt.Errorf("judge model: %w", err)
+	}
+	vs, err := parseModelJSON(raw)
+	if err != nil {
+		return rubricReport{}, err
+	}
+	byID := map[string]*verdict{}
+	for i := range vs {
+		byID[vs[i].ID] = &vs[i]
+	}
+	out := make([]verdict, 0, len(crits))
+	for _, c := range crits {
+		if v, ok := byID[c.ID]; ok {
+			v.Cite = c.Cite
+			out = append(out, *v)
+			continue
+		}
+		out = append(out, verdict{
+			ID:        c.ID,
+			Verdict:   "CANNOT_ASSESS",
+			Reasoning: "model returned no verdict for this criterion",
+			Cite:      c.Cite,
+		})
+	}
+	out = citationCheck(out, stripped)
+	return rubricReport{Model: modelName, Criteria: out}, nil
+}
+
 // citationCheck enforces that every MET is backed by evidence that actually
 // appears in the (comment-stripped) source. A MET with an empty quote, or whose
 // quote is not present, is downgraded to UNMET. This is the anti-hallucination and
