@@ -3,8 +3,28 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
+
+func TestBuildReportVerdict(t *testing.T) {
+	r := buildReport("07-wrong-vat", []ruleResult{{ID: "x", Pass: true}}, true,
+		&rubricReport{Model: "claude-opus-4-8", Criteria: []verdict{{ID: "c1", Verdict: "UNMET"}}}, "NON-COMPLIANT")
+	if r.Verdict != "NON-COMPLIANT" || r.Rubric == nil || r.Gate.Passed != true || r.Scenario != "07-wrong-vat" {
+		t.Fatalf("bad report: %+v", r)
+	}
+}
+
+func TestRenderRubricContainsFields(t *testing.T) {
+	s := renderRubric(rubricReport{Model: "claude-opus-4-8", Criteria: []verdict{
+		{ID: "c1", Verdict: "UNMET", Reasoning: "because", EvidenceQuote: "MenuVAT[x]", Cite: "SOLUTION"},
+	}})
+	for _, w := range []string{"UNMET", "c1", "because", "MenuVAT[x]", "SOLUTION", "claude-opus-4-8"} {
+		if !strings.Contains(s, w) {
+			t.Errorf("render missing %q", w)
+		}
+	}
+}
 
 func ruleByID(t *testing.T, id string) rule {
 	t.Helper()

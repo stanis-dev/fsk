@@ -166,11 +166,64 @@ var catalog = []rule{
 // that `judge <dir>` keeps behaving exactly as it did before scenarios existed.
 var defaultRules = []string{"fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"}
 
+// ruleResult is one deterministic gate rule's outcome, for the structured report.
+type ruleResult struct {
+	ID   string `json:"id"`
+	Desc string `json:"desc"`
+	Pass bool   `json:"pass"`
+}
+
+// judgeReport is the structured verdict written to judge.json for the dashboard.
+// The exit code remains the harness's source of truth; judge.json is the dashboard's
+// authoritative verdict (preferred over scanning judge.txt).
+type judgeReport struct {
+	Scenario string `json:"scenario"`
+	Gate     struct {
+		Passed bool         `json:"passed"`
+		Rules  []ruleResult `json:"rules"`
+	} `json:"gate"`
+	Rubric  *rubricReport `json:"rubric"`
+	Verdict string        `json:"verdict"` // conformant | NON-COMPLIANT
+	Note    string        `json:"note"`
+}
+
+func buildReport(scenario string, gate []ruleResult, gatePassed bool, rep *rubricReport, verdict string) judgeReport {
+	var r judgeReport
+	r.Scenario = scenario
+	r.Gate.Passed = gatePassed
+	r.Gate.Rules = gate
+	r.Rubric = rep
+	r.Verdict = verdict
+	r.Note = "LLM rubric layer is nondeterministic; conformance requires the deterministic gate to pass AND every rubric criterion to be a cited MET"
+	return r
+}
+
+// renderRubric formats the rubric outcome for the human-readable judge.txt block.
+func renderRubric(rep rubricReport) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "\nRUBRIC (model: %s)\n", rep.Model)
+	for _, v := range rep.Criteria {
+		fmt.Fprintf(&b, "%-13s %s\n", v.Verdict, v.ID)
+		if v.Reasoning != "" {
+			fmt.Fprintf(&b, "      %s\n", v.Reasoning)
+		}
+		if v.EvidenceQuote != "" {
+			fmt.Fprintf(&b, "      evidence: %s\n", v.EvidenceQuote)
+		}
+		if v.Cite != "" {
+			fmt.Fprintf(&b, "      cite: %s\n", v.Cite)
+		}
+	}
+	return b.String()
+}
+
 func main() {
 	var (
 		rulesFlag    = flag.String("rules", "", "comma-separated rule ids to run (default: the five base rules)")
 		scenarioFlag = flag.String("scenario", "", "path to a scenario.json; uses its judge.rules (overrides -rules)")
 		list         = flag.Bool("list", false, "list every rule id in the catalog and exit")
+		rubricFlag   = flag.Bool("rubric", false, "after the gate passes, run the LLM rubric layer (requires the scenario to declare judge.rubric and the claude CLI)")
+		jsonFlag     = flag.String("json", "", "write the structured verdict to this path as JSON")
 	)
 	flag.Parse()
 
@@ -220,8 +273,11 @@ func main() {
 
 	fmt.Printf("fiskaly contract conformance: %s\n\n", dir)
 	fails := 0
+	ruleResults := make([]ruleResult, 0, len(selected))
 	for _, r := range selected {
-		if r.pass(src) {
+		ok := r.pass(src)
+		ruleResults = append(ruleResults, ruleResult{ID: r.id, Desc: r.desc, Pass: ok})
+		if ok {
 			fmt.Printf("PASS  %-20s %s\n", r.id, r.desc)
 			continue
 		}
@@ -230,13 +286,78 @@ func main() {
 		fmt.Printf("      cite: %s\n", r.cite)
 		fmt.Printf("      hint: %s\n", r.hint)
 	}
-
 	fmt.Printf("\n%d/%d rules passed.\n", len(selected)-fails, len(selected))
-	if fails > 0 {
-		fmt.Printf("VERDICT: NON-COMPLIANT (%d failures). exit 1\n", fails)
+
+	scenarioName := ""
+	if *scenarioFlag != "" {
+		scenarioName = filepath.Base(filepath.Dir(*scenarioFlag))
+	}
+	gatePassed := fails == 0
+
+	// Gate is the hard pre-gate: any deterministic failure is NON-COMPLIANT and the
+	// LLM layer never runs (it can only add FAILs, never override a gate FAIL).
+	if !gatePassed {
+		fmt.Printf("VERDICT: NON-COMPLIANT (%d gate failures). exit 1\n", fails)
+		writeReport(*jsonFlag, buildReport(scenarioName, ruleResults, false, nil, "NON-COMPLIANT"))
 		os.Exit(1)
 	}
-	fmt.Println("VERDICT: conformant. exit 0")
+
+	verdict := "conformant"
+	exitCode := 0
+	var rep *rubricReport
+
+	if *rubricFlag && *scenarioFlag != "" {
+		crits, err := rubricFromScenario(*scenarioFlag)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "judge:", err)
+			os.Exit(2)
+		}
+		if len(crits) > 0 {
+			raw, err := readSourceRaw(dir)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "judge:", err)
+				os.Exit(2)
+			}
+			// No silent fallback: a missing/failed model is a hard error, never a
+			// gate-only pass dressed up as conformant.
+			r, err := runRubric(raw, src, crits, claudeModel, judgeModelID)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "judge: rubric layer:", err)
+				os.Exit(2)
+			}
+			rep = &r
+			fmt.Print(renderRubric(r))
+			if !conformant(r.Criteria) {
+				verdict = "NON-COMPLIANT"
+				exitCode = 1
+			}
+		}
+	}
+
+	if exitCode == 0 {
+		fmt.Println("VERDICT: conformant. exit 0")
+	} else {
+		fmt.Println("VERDICT: NON-COMPLIANT (rubric). exit 1")
+	}
+	writeReport(*jsonFlag, buildReport(scenarioName, ruleResults, true, rep, verdict))
+	os.Exit(exitCode)
+}
+
+// writeReport marshals the structured verdict to path (no-op when path is empty).
+// A write failure is loud (exit 2) — the dashboard depends on this artifact.
+func writeReport(path string, report judgeReport) {
+	if path == "" {
+		return
+	}
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "judge: marshaling report:", err)
+		os.Exit(2)
+	}
+	if err := os.WriteFile(path, append(data, '\n'), 0o644); err != nil {
+		fmt.Fprintln(os.Stderr, "judge: writing report:", err)
+		os.Exit(2)
+	}
 }
 
 // rulesFromScenario reads a scenario.json and returns its judge.rules as the
