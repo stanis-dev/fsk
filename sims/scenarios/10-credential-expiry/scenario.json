@@ -7,7 +7,23 @@
   "traps": [
     { "kind": "false-info", "where": "fixture/health.go", "detail": "a comment claims a daily 24h-JWT refresh keeps a merchant logged in forever", "correct": "the 24h JWT and the ~90-day Fisconline credential are different lifetimes; refreshing the JWT does nothing for the 90-day expiry, which must be tracked and alerted before it lapses" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] },
+  "judge": {
+    "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"],
+    "rubric": [
+      {
+        "id": "two-distinct-lifetimes",
+        "criterion": "The code treats the 24h JWT and the ~90-day Fisconline credential as different lifetimes. A daily/JWT refresh is NOT used as the answer to the 90-day expiry.",
+        "where": "health.go (CredentialHealth) and the auth/token path",
+        "cite": "SOLUTION.md 10: 24h JWT vs ~90-day Fisconline are different clocks"
+      },
+      {
+        "id": "expiry-alerting",
+        "criterion": "CredentialHealth tracks each taxpayer's ~90-day Fisconline credential age/expiry and surfaces an actionable signal (returns/flags at-risk taxpayers with lead time) BEFORE the credential lapses. It is not a no-op and is not wired to 'is the JWT fresh?'.",
+        "where": "CredentialHealth in health.go",
+        "cite": "SOLUTION.md 10: alert ops ahead of the 90-day lapse"
+      }
+    ]
+  },
   "baseline": { "build": "PASS", "tests": "PASS", "judge": "NON-COMPLIANT" },
   "target": { "build": "PASS", "tests": "PASS", "judge": "conformant" }
 }
