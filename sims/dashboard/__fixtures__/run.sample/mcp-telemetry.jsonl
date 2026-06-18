@@ -1,0 +1,2 @@
+{"ts":"2026-06-18T10:00:00Z","tool":"search_fiskaly_docs","args":{"query":"records flow"},"result_count":4,"is_error":false,"latency_ms":12}
+{"ts":"2026-06-18T10:00:01Z","tool":"fetch_fiskaly_doc","args":{"id":"probe:records-flow"},"result_count":1,"is_error":false,"latency_ms":5}

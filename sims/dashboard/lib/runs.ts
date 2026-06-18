@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Summary, TranscriptEvent, DiffLine } from "./types";
+import type { Summary, TranscriptEvent, DiffLine, TelemetrySummary } from "./types";
 import { runsDir } from "./paths";
 import { parseTranscript } from "./transcript";
 import { classifyDiff } from "./diff";
+import { parseTelemetry, summarizeTelemetry } from "./telemetry";
 
 export interface RunDetail {
   summary: Summary;
@@ -13,6 +14,7 @@ export interface RunDetail {
   err: string;
   transcript: TranscriptEvent[];
   diff: DiffLine[];
+  telemetry: TelemetrySummary;
 }
 
 export function listRuns(dir = runsDir()): Summary[] {
@@ -84,6 +86,7 @@ export function loadRun(dir: string, id: string): RunDetail | null {
     err: readFile(path.join(d, "claude.err")),
     transcript: parseTranscript(readFile(path.join(d, "transcript.jsonl"))),
     diff: classifyDiff(readFile(path.join(d, "changes.diff"))),
+    telemetry: summarizeTelemetry(parseTelemetry(readFile(path.join(d, "mcp-telemetry.jsonl")))),
   };
 }
 
