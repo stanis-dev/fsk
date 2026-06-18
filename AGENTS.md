@@ -16,6 +16,7 @@
 | `research/PUBLIC-FEEDBACK.md`         | Real-world signal: GitHub issues, the 242-article Zendesk KB, status incidents     |
 | `research/GITHUB-INTEL.md`            | fiskaly's engineering profile (stack, culture, hiring) inferred from public GitHub |
 | `research/DECISIONS.md`               | Design decisions — **ADR-001: docs context = local + agentic search**              |
+| `research/EVAL-CHECKS.md`             | Eval-check taxonomy (standard + fiskaly), application architecture, gap analysis    |
 | `research/api-probes/NOTES.md`        | The SIGN IT API contract learned by live probing (the undocumented gotchas)        |
 | `research/api-probes/transcript.json` | Raw happy-path request/response evidence behind NOTES.md                           |
 | `research/specs/`                     | Downloaded SIGN IT + unified OpenAPI specs (2025-08-12 and 2026-02-03)             |
