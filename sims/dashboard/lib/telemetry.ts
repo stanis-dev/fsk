@@ -5,21 +5,23 @@ export function parseTelemetry(jsonl: string): TelemetryEvent[] {
   for (const line of jsonl.split("\n")) {
     const s = line.trim();
     if (!s) continue;
-    let m: any;
+    let m: unknown;
     try {
       m = JSON.parse(s);
     } catch {
       continue;
     }
+    if (typeof m !== "object" || m === null) continue;
+    const r = m as Record<string, unknown>;
     out.push({
-      ts: str(m.ts),
-      sessionId: str(m.session_id),
-      tool: str(m.tool),
-      args: m.args && typeof m.args === "object" ? m.args : {},
-      resultCount: typeof m.result_count === "number" ? m.result_count : 0,
-      isError: m.is_error === true,
-      error: str(m.error),
-      latencyMs: typeof m.latency_ms === "number" ? m.latency_ms : 0,
+      ts: str(r.ts),
+      sessionId: str(r.session_id),
+      tool: str(r.tool),
+      args: r.args && typeof r.args === "object" ? (r.args as Record<string, unknown>) : {},
+      resultCount: typeof r.result_count === "number" ? r.result_count : 0,
+      isError: r.is_error === true,
+      error: str(r.error),
+      latencyMs: typeof r.latency_ms === "number" ? r.latency_ms : 0,
     });
   }
   return out;
@@ -63,6 +65,6 @@ function percentile(sorted: number[], p: number): number {
   return sorted[idx];
 }
 
-function str(v: any): string {
+function str(v: unknown): string {
   return typeof v === "string" ? v : "";
 }

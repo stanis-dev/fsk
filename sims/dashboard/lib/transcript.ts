@@ -5,22 +5,24 @@ export function parseTranscript(jsonl: string): TranscriptEvent[] {
   for (const line of jsonl.split("\n")) {
     const s = line.trim();
     if (!s) continue;
-    let m: any;
+    let m: unknown;
     try {
       m = JSON.parse(s);
     } catch {
       continue;
     }
-    switch (m.type) {
+    if (typeof m !== "object" || m === null) continue;
+    const r = m as { type?: unknown; result?: unknown; message?: { content?: unknown[] } };
+    switch (r.type) {
       case "assistant":
-        for (const c of content(m)) {
+        for (const c of content(r)) {
           if (c?.type === "thinking" && c.thinking?.trim()) events.push({ kind: "thinking", text: c.thinking });
           else if (c?.type === "text" && c.text?.trim()) events.push({ kind: "assistant", text: c.text });
-          else if (c?.type === "tool_use") events.push({ kind: "tool", text: summarizeTool(c.name, c.input ?? {}) });
+          else if (c?.type === "tool_use") events.push({ kind: "tool", text: summarizeTool(c.name ?? "", c.input ?? {}) });
         }
         break;
       case "user":
-        for (const c of content(m)) {
+        for (const c of content(r)) {
           if (c?.type === "tool_result") {
             let txt = flatten(c.content);
             if (c.is_error) txt = "error: " + txt;
@@ -29,14 +31,14 @@ export function parseTranscript(jsonl: string): TranscriptEvent[] {
         }
         break;
       case "result":
-        if (typeof m.result === "string" && m.result) events.push({ kind: "final", text: m.result });
+        if (typeof r.result === "string" && r.result) events.push({ kind: "final", text: r.result });
         break;
     }
   }
   return events;
 }
 
-export function summarizeTool(name: string, input: Record<string, any>): string {
+export function summarizeTool(name: string, input: Record<string, unknown>): string {
   const sv = (k: string) => (typeof input[k] === "string" ? input[k] : "");
   switch (name) {
     case "Bash":
@@ -72,13 +74,13 @@ export function summarizeTool(name: string, input: Record<string, any>): string 
   }
 }
 
-function content(m: any): any[] {
-  return m?.message?.content ?? [];
+function content(m: { message?: { content?: unknown[] } }): Array<{ type?: string; thinking?: string; text?: string; name?: string; input?: Record<string, unknown>; is_error?: boolean; content?: unknown }> {
+  return (m?.message?.content ?? []) as Array<{ type?: string; thinking?: string; text?: string; name?: string; input?: Record<string, unknown>; is_error?: boolean; content?: unknown }>;
 }
 
-function flatten(v: any): string {
+function flatten(v: unknown): string {
   if (typeof v === "string") return v;
-  if (Array.isArray(v)) return v.map((e) => (typeof e?.text === "string" ? e.text : "")).join("");
+  if (Array.isArray(v)) return v.map((e) => (typeof (e as { text?: unknown })?.text === "string" ? (e as { text: string }).text : "")).join("");
   return "";
 }
 

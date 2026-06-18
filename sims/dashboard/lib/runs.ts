@@ -93,28 +93,32 @@ export function loadRun(dir: string, id: string): RunDetail | null {
 function parseResult(file: string): { turns: string; cost: string } {
   let turns = "", cost = "";
   for (const line of readLines(file)) {
-    let m: any;
+    let m: unknown;
     try {
       m = JSON.parse(line);
     } catch {
       continue;
     }
-    if (m.type !== "result") continue;
-    if (typeof m.num_turns === "number") turns = String(Math.round(m.num_turns));
-    if (typeof m.total_cost_usd === "number") cost = "$" + m.total_cost_usd.toFixed(2);
+    if (typeof m !== "object" || m === null) continue;
+    const r = m as Record<string, unknown>;
+    if (r.type !== "result") continue;
+    if (typeof r.num_turns === "number") turns = String(Math.round(r.num_turns));
+    if (typeof r.total_cost_usd === "number") cost = "$" + r.total_cost_usd.toFixed(2);
   }
   return { turns, cost };
 }
 
 function logInfo(file: string): { model: string; cwd: string; ccver: string } {
   for (const line of readLines(file)) {
-    let m: any;
+    let m: unknown;
     try {
       m = JSON.parse(line);
     } catch {
       continue;
     }
-    if (m.type === "system") return { model: str(m.model), cwd: str(m.cwd), ccver: str(m.claude_code_version) };
+    if (typeof m !== "object" || m === null) continue;
+    const r = m as Record<string, unknown>;
+    if (r.type === "system") return { model: str(r.model), cwd: str(r.cwd), ccver: str(r.claude_code_version) };
   }
   return { model: "", cwd: "", ccver: "" };
 }
@@ -138,7 +142,7 @@ function readFile(p: string): string {
 function readLines(p: string): string[] {
   return readFile(p).split("\n").filter((l) => l.trim());
 }
-function str(v: any): string {
+function str(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
 function safeMtime(dir: string): Date {
