@@ -198,18 +198,27 @@ func runRubric(source, stripped string, crits []criterion, model modelFn, modelN
 // quote is not present, is downgraded to UNMET. This is the anti-hallucination and
 // anti-gaming guard: a comment claiming correctness cannot satisfy a criterion
 // because the quote is matched against stripped source.
-func citationCheck(vs []verdict, strippedSource string) []verdict {
+func citationCheck(vs []verdict, citationSource string) []verdict {
+	normSrc := normalizeWS(citationSource)
 	for i := range vs {
 		if vs[i].Verdict != "MET" {
 			continue
 		}
 		q := strings.TrimSpace(vs[i].EvidenceQuote)
-		if q == "" || !strings.Contains(strippedSource, q) {
+		// Match whitespace-insensitively: the model copies from raw source, which
+		// differs from the citation source only in indentation/line breaks.
+		if q == "" || !strings.Contains(normSrc, normalizeWS(q)) {
 			vs[i].Verdict = "UNMET"
 			vs[i].Reasoning = strings.TrimSpace(vs[i].Reasoning + " [citation not found in source]")
 		}
 	}
 	return vs
+}
+
+// normalizeWS collapses every run of whitespace (spaces, tabs, newlines) to a
+// single space and trims, so a quote and the source match despite reflowing.
+func normalizeWS(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
 
 // conformant is conservative to a false PASS: the integration is conformant only

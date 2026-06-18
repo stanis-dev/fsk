@@ -319,8 +319,10 @@ func main() {
 				os.Exit(2)
 			}
 			// No silent fallback: a missing/failed model is a hard error, never a
-			// gate-only pass dressed up as conformant.
-			r, err := runRubric(raw, src, crits, claudeModel, judgeModelID)
+			// gate-only pass dressed up as conformant. The citation source keeps code
+			// layout (so verbatim quotes match) but drops comments (so a comment
+			// cannot satisfy a criterion); the gate's tokenized src is unsuitable here.
+			r, err := runRubric(raw, stripCommentsKeepLayout(raw), crits, claudeModel, judgeModelID)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "judge: rubric layer:", err)
 				os.Exit(2)
@@ -456,6 +458,45 @@ func readSourceRaw(dir string) (string, error) {
 		return nil
 	})
 	return b.String(), err
+}
+
+// stripCommentsKeepLayout removes comment spans from src while preserving the rest
+// of the code byte-for-byte. Unlike stripComments (which re-emits space-separated
+// tokens for the gate's regexes), this keeps verbatim code intact so the rubric's
+// citation check can match an evidence_quote the model copied from the real source,
+// while still excluding comment text so a comment cannot satisfy a criterion.
+func stripCommentsKeepLayout(src string) string {
+	var s scanner.Scanner
+	fset := token.NewFileSet()
+	file := fset.AddFile("", fset.Base(), len(src))
+	s.Init(file, []byte(src), nil, scanner.ScanComments)
+	type span struct{ start, end int }
+	var spans []span
+	for {
+		pos, tok, lit := s.Scan()
+		if tok == token.EOF {
+			break
+		}
+		if tok == token.COMMENT {
+			start := fset.Position(pos).Offset
+			spans = append(spans, span{start, start + len(lit)})
+		}
+	}
+	if len(spans) == 0 {
+		return src
+	}
+	var b strings.Builder
+	prev := 0
+	for _, sp := range spans {
+		if sp.start < prev || sp.end > len(src) {
+			continue
+		}
+		b.WriteString(src[prev:sp.start])
+		b.WriteByte(' ') // keep tokens from gluing across a removed comment
+		prev = sp.end
+	}
+	b.WriteString(src[prev:])
+	return b.String()
 }
 
 // stripComments returns the Go source with comment tokens removed. It lexes with

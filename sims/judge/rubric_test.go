@@ -153,6 +153,18 @@ func TestCitationCheckDowngradesAbsentEvidence(t *testing.T) {
 	}
 }
 
+func TestCitationCheckMatchesAcrossWhitespace(t *testing.T) {
+	// The model quotes from raw source; the citation source differs in indentation
+	// and line breaks. Matching must be whitespace-insensitive so a legitimate MET
+	// is not wrongly downgraded.
+	src := "func f() {\n\ts.mu.Unlock()\n\n\tctx, cancel := context.WithTimeout(ctx, 3*time.Second)\n}"
+	quote := "s.mu.Unlock()\n    ctx, cancel := context.WithTimeout(ctx, 3*time.Second)"
+	out := citationCheck([]verdict{{ID: "a", Verdict: "MET", EvidenceQuote: quote}}, src)
+	if out[0].Verdict != "MET" {
+		t.Fatalf("multi-line quote should match after whitespace normalize, got %s", out[0].Verdict)
+	}
+}
+
 func TestConformant(t *testing.T) {
 	if !conformant([]verdict{{Verdict: "MET"}, {Verdict: "MET"}}) {
 		t.Fatal("all MET => conformant")

@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func TestStripCommentsKeepLayout(t *testing.T) {
+	in := "package p\nx := 1 // inline\n/* block */ y := 2\n"
+	out := stripCommentsKeepLayout(in)
+	if !strings.Contains(out, "x := 1") || !strings.Contains(out, "y := 2") {
+		t.Fatalf("code not preserved verbatim: %q", out)
+	}
+	if strings.Contains(out, "inline") || strings.Contains(out, "block") {
+		t.Fatalf("comments not removed: %q", out)
+	}
+}
+
 func TestBuildReportVerdict(t *testing.T) {
 	r := buildReport("07-wrong-vat", []ruleResult{{ID: "x", Pass: true}}, true,
 		&rubricReport{Model: "claude-opus-4-8", Criteria: []verdict{{ID: "c1", Verdict: "UNMET"}}}, "NON-COMPLIANT")
