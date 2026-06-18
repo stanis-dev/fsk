@@ -4,7 +4,11 @@
 // The gate is hard: any failing check marks the run NON-COMPLIANT and skips the
 // LLM entirely.
 //
-// Usage: judge -scenario <path> -run <runDir> [-expect] [-json <out>]
+// Usage: judge -scenario <path> [-run <runDir>] [-expect] [-json <out>] <integrationDir>
+//
+// integrationDir (positional) is the root of the Go integration source.
+// -run is optional: when omitted the trajectory gate is skipped (source-only
+// evaluation mode, used by judge_eval where transcript files are not present).
 package main
 
 import (
@@ -65,7 +69,7 @@ func renderExpectations(rep rubricReport) string {
 func main() {
 	var (
 		scenarioFlag = flag.String("scenario", "", "path to a scenario.json (required)")
-		runFlag      = flag.String("run", "", "path to a run dir containing transcript.jsonl (required)")
+		runFlag      = flag.String("run", "", "path to a run dir with transcript.jsonl + mcp-telemetry.jsonl; omit for source-only evaluation")
 		expectFlag   = flag.Bool("expect", false, "after the gate passes, run the LLM expectation layer (requires the scenario to declare judge.expectations and the claude CLI)")
 		jsonFlag     = flag.String("json", "", "write the structured verdict to this path as JSON")
 	)
@@ -75,35 +79,46 @@ func main() {
 		fmt.Fprintln(os.Stderr, "judge: -scenario is required")
 		os.Exit(2)
 	}
-	if *runFlag == "" {
-		fmt.Fprintln(os.Stderr, "judge: -run is required")
+	if flag.NArg() < 1 {
+		fmt.Fprintln(os.Stderr, "judge: missing integration dir")
 		os.Exit(2)
 	}
+	integrationDir := flag.Arg(0)
 
 	scenarioName := filepath.Base(filepath.Dir(*scenarioFlag))
 
-	traj, err := parseTrajectory(*runFlag)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "judge:", err)
-		os.Exit(2)
-	}
-
-	checks, err := parseScenarioChecks(*scenarioFlag)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "judge:", err)
-		os.Exit(2)
-	}
-
-	results := runChecks(checks, traj)
-	for _, r := range results {
-		status := "PASS"
-		if !r.Pass {
-			status = "FAIL"
+	// Parse trajectory only when a run dir is provided. Without it we operate in
+	// source-only mode: the trajectory gate is skipped entirely (an empty
+	// trajectory would falsely fail groundedBeforeWrite and similar checks).
+	var traj Trajectory
+	var results []checkResult
+	gatePassed := true
+	if *runFlag != "" {
+		var err error
+		traj, err = parseTrajectory(*runFlag)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "judge:", err)
+			os.Exit(2)
 		}
-		fmt.Printf("%-4s  %-30s %s\n", status, r.ID, r.Detail)
+
+		checks, err := parseScenarioChecks(*scenarioFlag)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "judge:", err)
+			os.Exit(2)
+		}
+
+		results = runChecks(checks, traj)
+		for _, r := range results {
+			status := "PASS"
+			if !r.Pass {
+				status = "FAIL"
+			}
+			fmt.Printf("%-4s  %-30s %s\n", status, r.ID, r.Detail)
+		}
+
+		gatePassed = checksPassed(results)
 	}
 
-	gatePassed := checksPassed(results)
 	cr := checksReport{Passed: gatePassed, Results: results}
 
 	if !gatePassed {
@@ -118,13 +133,13 @@ func main() {
 	var exps []expectation
 
 	if *expectFlag {
+		var err error
 		exps, err = expectationsFromScenario(*scenarioFlag)
 		if err != nil {
 			failInfra(*jsonFlag, scenarioName, cr, err)
 		}
 		if len(exps) > 0 {
-			dir := *runFlag
-			raw, err := readSourceRaw(dir)
+			raw, err := readSourceRaw(integrationDir)
 			if err != nil {
 				failInfra(*jsonFlag, scenarioName, cr, err)
 			}

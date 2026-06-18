@@ -91,7 +91,7 @@ func main() {
 		}
 		for r := 0; r < reps; r++ {
 			_ = os.Remove(reportPath)
-			cmd := exec.Command(bin, "-expect", "-json", reportPath, "-scenario", scenario, "-run", work)
+			cmd := exec.Command(bin, "-expect", "-json", reportPath, "-scenario", scenario, work)
 			out, _ := cmd.CombinedOutput()
 			code := cmd.ProcessState.ExitCode()
 
