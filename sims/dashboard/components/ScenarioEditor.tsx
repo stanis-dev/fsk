@@ -28,6 +28,18 @@ const TOOL_NAMES = [
   "Task",
 ];
 
+// The corpus doc IDs (mcp/corpus/index.json) a docsFetched check can require.
+const DOC_IDS = [
+  "probe:auth-and-headers",
+  "probe:scoped-subject",
+  "probe:provisioning",
+  "probe:records-flow",
+  "probe:money-model",
+];
+
+// The scenario tiers in use.
+const TIERS = [1, 2, 3];
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
@@ -122,7 +134,17 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
           <input className={INPUT} value={config.title} onChange={(e) => setConfig({ ...config, title: e.target.value })} />
         </Field>
         <Field label="tier">
-          <input className={INPUT} type="number" value={config.tier} onChange={(e) => setConfig({ ...config, tier: Number(e.target.value) })} />
+          <select
+            className={INPUT}
+            value={config.tier}
+            onChange={(e) => setConfig({ ...config, tier: Number(e.target.value) })}
+          >
+            {(TIERS.includes(config.tier) ? TIERS : [config.tier, ...TIERS]).map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label="capability">
           <input className={INPUT} value={config.capability} onChange={(e) => setConfig({ ...config, capability: e.target.value })} />
@@ -179,11 +201,28 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
           </Button>
         </div>
 
-        <StringList
-          label="docs fetched"
-          items={checks.docsFetched ?? []}
-          onChange={(v) => setChecks({ docsFetched: v.length ? v : undefined })}
-        />
+        <div className="space-y-1.5">
+          <span className={LABEL}>docs fetched</span>
+          <div className="flex flex-col gap-1.5">
+            {[...DOC_IDS, ...(checks.docsFetched ?? []).filter((d) => !DOC_IDS.includes(d))].map((id) => {
+              const list = checks.docsFetched ?? [];
+              return (
+                <label key={id} className="flex items-center gap-2.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={list.includes(id)}
+                    onChange={(e) => {
+                      const next = e.target.checked ? [...list, id] : list.filter((x) => x !== id);
+                      setChecks({ docsFetched: next.length ? next : undefined });
+                    }}
+                    className="rounded border-border"
+                  />
+                  <span className="font-mono text-xs">{id}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
 
         <Field label="max mcp errors">
           <input
