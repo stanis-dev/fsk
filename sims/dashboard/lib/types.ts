@@ -95,5 +95,4 @@ export interface ScenarioConfig {
 export interface ScenarioDetail {
   config: ScenarioConfig;
   task: string;
-  solution: string;
 }

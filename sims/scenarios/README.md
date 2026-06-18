@@ -22,8 +22,8 @@ looks like success.** So the traps split into two kinds, on purpose:
   breakdown).
 - **Review-caught** — silent bugs the static judge structurally cannot see
   (idempotency-key reuse, a blocking checkout call, a wrong VAT rate at scale,
-  conflating the 24h JWT with the 90-day credential). These are graded against
-  each scenario's `SOLUTION.md` rubric using the diff and transcript.
+  conflating the 24h JWT with the 90-day credential). These are graded by the
+  judge's `expectations` (an LLM rubric) over the source and transcript.
 
 A capable agent that grounds itself in the docs and reasons about the domain
 should pass the gate scenarios and avoid the review traps. An agent that pattern-
@@ -87,7 +87,6 @@ cd sims/judge && go run . -scenario ../scenarios/06-fire-and-forget/scenario.jso
 cd sims/judge && go run . -list             # the rule catalog
 ```
 
-Each scenario directory holds `task.md` (the prompt), `fixture/` (the seed),
-`scenario.json` (metadata + the judge rule set), and `SOLUTION.md` (the answer
-key: the trap, the correct handling, the failure mode, and which signal catches
-it). To author a new scenario, follow [AUTHORING.md](AUTHORING.md).
+Each scenario directory holds `task.md` (the prompt), `fixture/` (the seed), and
+`scenario.json` (metadata + the judge's `checks` and `expectations`). To author a
+new scenario, follow [AUTHORING.md](AUTHORING.md).

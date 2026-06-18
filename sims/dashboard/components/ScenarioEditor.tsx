@@ -53,7 +53,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   const router = useRouter();
   const [config, setConfig] = useState(detail.config);
   const [task, setTask] = useState(detail.task);
-  const [solution, setSolution] = useState(detail.solution);
   const [state, setState] = useState<{ kind: "idle" | "saving" | "saved" | "error"; msg?: string }>({ kind: "idle" });
 
   const checks = config.judge.checks;
@@ -94,7 +93,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   async function save() {
     setState({ kind: "saving" });
     try {
-      await saveScenario(config.id, { config, task, solution });
+      await saveScenario(config.id, { config, task });
       setState({ kind: "saved" });
       router.refresh();
     } catch (e) {
@@ -237,9 +236,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
 
       <Field label="task.md">
         <textarea className={cn(INPUT, "min-h-40 font-mono text-xs leading-relaxed")} value={task} onChange={(e) => setTask(e.target.value)} />
-      </Field>
-      <Field label="SOLUTION.md">
-        <textarea className={cn(INPUT, "min-h-40 font-mono text-xs leading-relaxed")} value={solution} onChange={(e) => setSolution(e.target.value)} />
       </Field>
 
       <div className="flex items-center gap-4 border-t border-border pt-5">

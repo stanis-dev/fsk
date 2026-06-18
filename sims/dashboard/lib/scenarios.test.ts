@@ -17,7 +17,6 @@ function fixtureDir(): string {
     }),
   );
   fs.writeFileSync(path.join(s, "task.md"), "do the task");
-  fs.writeFileSync(path.join(s, "SOLUTION.md"), "the solution");
   // a non-scenario dir that must be ignored (no numeric prefix)
   fs.mkdirSync(path.join(root, "notes"));
   return root;
@@ -38,11 +37,10 @@ describe("scenarios", () => {
     expect(isKnownScenario("../etc", dir)).toBe(false);
   });
 
-  it("loadScenario returns config + task + solution, null for unknown", () => {
+  it("loadScenario returns config + task, null for unknown", () => {
     const dir = fixtureDir();
     const d = loadScenario("01-demo", dir);
     expect(d?.task).toBe("do the task");
-    expect(d?.solution).toBe("the solution");
     expect(d?.config.title).toBe("Demo");
     expect(loadScenario("99-nope", dir)).toBeNull();
   });

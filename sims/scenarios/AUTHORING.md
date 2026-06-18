@@ -20,20 +20,21 @@ two kinds of trap on purpose:
 
 - **Gate-caught traps** — the deterministic judge flips a rule (e.g. an invented
   `/refunds` endpoint, a missing poll to `FINISHED`, a leftover legacy `/assets`).
-- **Review-caught traps** — silent bugs the static judge structurally cannot see
-  (idempotency-key reuse, a blocking checkout call, a wrong VAT rate applied at
-  scale, conflating the 24h JWT with the 90-day credential). These are graded by
-  the scenario's `SOLUTION.md` rubric against the diff and transcript.
+- **Review-caught traps** — silent bugs the deterministic checks structurally
+  cannot see (idempotency-key reuse, a blocking checkout call, a wrong VAT rate
+  applied at scale, conflating the 24h JWT with the 90-day credential). These are
+  graded by the judge's `expectations` (an LLM rubric) against the source and
+  transcript.
 
-Every scenario states, in its `SOLUTION.md`, **which signal catches its trap.**
+Every scenario encodes, in its `scenario.json` `checks`/`expectations`, **which
+signal catches its trap.**
 
 ## Layout
 
 ```
 sims/scenarios/<NN-slug>/
-  scenario.json   # metadata + the judge rule set for this scenario
+  scenario.json   # metadata + the judge's checks and expectations
   task.md         # the business-framed prompt handed to the agent
-  SOLUTION.md     # answer key: the trap, correct handling, fail modes, catching signal
   fixture/        # a self-contained Go module (module `pos`), the seed codebase
 ```
 
@@ -43,7 +44,7 @@ sims/scenarios/<NN-slug>/
   offline, hermetically).
 - `go build ./...` and `go test ./...` are **green at baseline.** A silent bug is
   silent: no seed test reveals it. Where a trap needs a coverage gap, the gap is
-  the point — document it in `SOLUTION.md`.
+  the point — it is intentional, not an oversight.
 - The fiscalization seam is `fiscalize(ctx, *Order) error` in `checkout.go`,
   called by `CompleteOrder`, a no-op in greenfield seeds.
 - **Greenfield** seeds (seam only) stay vendor-blind in code; the trap lives in a

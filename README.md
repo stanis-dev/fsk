@@ -65,8 +65,8 @@ Implemented:
 
 Known limits:
 
-- Several scenarios still require human review of `SOLUTION.md`; the static judge
-  is necessary, not sufficient.
+- The deterministic checks are necessary, not sufficient; the LLM expectation
+  layer that grades the rest is nondeterministic and conservative to a false PASS.
 - `vat-breakdown` proves the VAT fields are constructed, not that the selected
   VAT rate is correct.
 - The judge checks source shape, not live SIGN IT behavior.
@@ -123,7 +123,7 @@ Use the scenario suite as the guardrail for every change:
 - Changing the judge: add or update judge tests first, then verify the affected
   scenario baseline still starts non-compliant and a correct fix would flip it.
 - Changing a scenario: keep the seed build/test green, keep the baseline judge
-  non-compliant, and update `SOLUTION.md` with the catching signal.
+  non-compliant, and encode the catching signal in `judge.checks`/`expectations`.
 - Changing the dashboard: run `pnpm test`, `pnpm lint`, and `pnpm build`.
 
 The project rule is strict: a change is only done when the eval or test that

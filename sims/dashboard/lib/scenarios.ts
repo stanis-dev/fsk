@@ -40,8 +40,7 @@ export function loadScenario(id: string, dir = scenariosDir()): ScenarioDetail |
   if (!isKnownScenario(id, dir)) return null;
   const d = path.join(dir, id);
   const config = readConfig(d);
-  const read = (f: string): string => fs.readFileSync(path.join(d, f), "utf8");
-  return { config, task: read("task.md"), solution: read("SOLUTION.md") };
+  return { config, task: fs.readFileSync(path.join(d, "task.md"), "utf8") };
 }
 
 function isExpectationArray(v: unknown): boolean {

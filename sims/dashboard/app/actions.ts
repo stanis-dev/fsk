@@ -54,7 +54,7 @@ export async function cancelRun(runId: string): Promise<void> {
 
 export async function saveScenario(
   id: string,
-  data: { config: ScenarioConfig; task: string; solution: string },
+  data: { config: ScenarioConfig; task: string },
 ): Promise<void> {
   if (!isKnownScenario(id)) throw new Error(`unknown scenario: ${id}`);
   if (data.config.id !== id) throw new Error(`scenario id mismatch: ${data.config.id} !== ${id}`);
@@ -64,5 +64,4 @@ export async function saveScenario(
   const dir = path.join(scenariosDir(), id);
   fs.writeFileSync(path.join(dir, "scenario.json"), JSON.stringify(config, null, 2) + "\n");
   fs.writeFileSync(path.join(dir, "task.md"), data.task);
-  fs.writeFileSync(path.join(dir, "SOLUTION.md"), data.solution);
 }
