@@ -9,6 +9,13 @@ import { TelemetryView } from "@/components/TelemetryView";
 
 export const dynamic = "force-dynamic";
 
+function chipClass(verdict: string): string {
+  const base = "rounded px-1.5 py-0.5 text-xs font-bold ";
+  if (verdict === "MET") return base + "bg-green-100 text-green-800";
+  if (verdict === "UNMET") return base + "bg-red-100 text-red-800";
+  return base + "bg-yellow-100 text-yellow-800"; // CANNOT_ASSESS
+}
+
 export default async function RunPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const run = loadRun(runsDir(), id);
@@ -28,6 +35,32 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
 
       <h2 className="mb-1 mt-4 font-bold">judge verdict</h2>
       <pre className="overflow-auto rounded bg-muted p-2 text-xs whitespace-pre-wrap">{run.judgeLog || "—"}</pre>
+
+      {run.judgeReport?.rubric && (
+        <section className="mt-4">
+          <h2 className="mb-1 font-bold">
+            rubric ({run.judgeReport.rubric.model}) —{" "}
+            <span className={run.judgeReport.verdict === "conformant" ? "text-green-700" : "text-red-700"}>
+              {run.judgeReport.verdict}
+            </span>
+          </h2>
+          <ul className="space-y-2">
+            {run.judgeReport.rubric.criteria.map((c) => (
+              <li key={c.id} className="rounded border p-2">
+                <div className="flex items-center gap-2">
+                  <span className={chipClass(c.verdict)}>{c.verdict}</span>
+                  <span className="font-bold">{c.id}</span>
+                </div>
+                {c.reasoning && <p className="mt-1 text-xs">{c.reasoning}</p>}
+                {c.evidence_quote && (
+                  <pre className="mt-1 overflow-auto rounded bg-muted p-1 text-xs whitespace-pre-wrap">{c.evidence_quote}</pre>
+                )}
+                {c.cite && <p className="mt-1 text-xs text-muted-foreground">cite: {c.cite}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <details className="my-2 rounded border p-2">
         <summary className="cursor-pointer font-bold">build · tests{run.err ? " · stderr" : ""}</summary>

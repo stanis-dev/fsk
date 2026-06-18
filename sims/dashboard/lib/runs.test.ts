@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect, test } from "vitest";
-import { summarizeRun, loadRun, listRuns } from "./runs";
+import { summarizeRun, loadRun, listRuns, parseJudgeReport } from "./runs";
 
 const fixtures = path.resolve(__dirname, "../__fixtures__");
 const sample = path.join(fixtures, "run.sample");
@@ -24,6 +24,21 @@ test("loadRun returns parsed transcript and diff", () => {
   expect(r!.transcript.some((e) => e.kind === "tool")).toBe(true);
   expect(r!.diff.some((l) => l.cls === "add")).toBe(true);
   expect(r!.judgeLog).toContain("conformant");
+});
+
+test("parseJudgeReport returns null for absent or garbage input", () => {
+  expect(parseJudgeReport("")).toBeNull();
+  expect(parseJudgeReport("not json")).toBeNull();
+});
+
+test("loadRun parses the structured judge.json report", () => {
+  const r = loadRun(fixtures, "run.sample");
+  expect(r).not.toBeNull();
+  expect(r!.judgeReport).not.toBeNull();
+  expect(r!.judgeReport!.verdict).toBe("conformant");
+  expect(r!.judgeReport!.rubric).not.toBeNull();
+  expect(r!.judgeReport!.rubric!.criteria[0].id).toBe("vat-derived-from-line");
+  expect(r!.judgeReport!.rubric!.criteria[0].verdict).toBe("MET");
 });
 
 test("listRuns finds the fixture run", () => {

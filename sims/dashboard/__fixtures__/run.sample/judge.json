@@ -1,0 +1,23 @@
+{
+  "scenario": "07-wrong-vat",
+  "gate": {
+    "passed": true,
+    "rules": [
+      { "id": "vat-breakdown", "desc": "sends the full VatRateCategory breakdown", "pass": true }
+    ]
+  },
+  "rubric": {
+    "model": "claude-opus-4-8",
+    "criteria": [
+      {
+        "id": "vat-derived-from-line",
+        "verdict": "MET",
+        "evidence_quote": "pct := line.VATRate",
+        "reasoning": "VAT percentage is taken from the order line's own rate.",
+        "cite": "SOLUTION.md 07: derive VAT from LineItem.VATRate"
+      }
+    ]
+  },
+  "verdict": "conformant",
+  "note": "LLM rubric layer is nondeterministic; conformance requires the deterministic gate to pass AND every rubric criterion to be a cited MET"
+}

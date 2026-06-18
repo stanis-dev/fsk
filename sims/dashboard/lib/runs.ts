@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Summary, TranscriptEvent, DiffLine, TelemetrySummary } from "./types";
+import type { Summary, TranscriptEvent, DiffLine, TelemetrySummary, JudgeReport } from "./types";
 import { runsDir } from "./paths";
 import { parseTranscript } from "./transcript";
 import { classifyDiff } from "./diff";
@@ -9,12 +9,28 @@ import { parseTelemetry, summarizeTelemetry } from "./telemetry";
 export interface RunDetail {
   summary: Summary;
   judgeLog: string;
+  judgeReport: JudgeReport | null;
   buildLog: string;
   testLog: string;
   err: string;
   transcript: TranscriptEvent[];
   diff: DiffLine[];
   telemetry: TelemetrySummary;
+}
+
+// parseJudgeReport reads the structured judge.json verdict. Returns null on absent
+// or malformed input so the dashboard falls back to the judge.txt token scan.
+export function parseJudgeReport(json: string): JudgeReport | null {
+  if (!json.trim()) return null;
+  try {
+    const r = JSON.parse(json) as JudgeReport;
+    if (r && typeof r === "object" && (r.verdict === "conformant" || r.verdict === "NON-COMPLIANT")) {
+      return r;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export function listRuns(dir = runsDir()): Summary[] {
@@ -57,7 +73,11 @@ export function summarizeRun(dir: string, created = safeMtime(dir)): Summary {
   const judge = readFile(path.join(dir, "judge.txt"));
   if (!judge) return s; // judge.txt is the last step; absent means still running
   s.status = "done";
-  if (judge.includes("conformant")) s.judge = "PASS";
+  // Prefer the structured verdict (authoritative, unambiguous); fall back to the
+  // judge.txt token scan for runs that predate judge.json.
+  const report = parseJudgeReport(readFile(path.join(dir, "judge.json")));
+  if (report) s.judge = report.verdict === "conformant" ? "PASS" : "FAIL";
+  else if (judge.includes("conformant")) s.judge = "PASS";
   else if (judge.includes("NON-COMPLIANT")) s.judge = "FAIL";
 
   s.build = readFile(path.join(dir, "build.txt")).trim() === "" ? "PASS" : "FAIL";
@@ -81,6 +101,7 @@ export function loadRun(dir: string, id: string): RunDetail | null {
   return {
     summary: summarizeRun(d),
     judgeLog: readFile(path.join(d, "judge.txt")),
+    judgeReport: parseJudgeReport(readFile(path.join(d, "judge.json"))),
     buildLog: readFile(path.join(d, "build.txt")),
     testLog: readFile(path.join(d, "test.txt")),
     err: readFile(path.join(d, "claude.err")),

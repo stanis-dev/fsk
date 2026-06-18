@@ -55,3 +55,21 @@ export interface TelemetrySummary {
   queries: string[];
   docsFetched: string[];
 }
+
+export type CriterionVerdict = "MET" | "UNMET" | "CANNOT_ASSESS";
+
+export interface JudgeCriterion {
+  id: string;
+  verdict: CriterionVerdict;
+  evidence_quote: string;
+  reasoning: string;
+  cite: string;
+}
+
+export interface JudgeReport {
+  scenario: string;
+  verdict: "conformant" | "NON-COMPLIANT";
+  gate: { passed: boolean; rules: { id: string; desc: string; pass: boolean }[] };
+  rubric: { model: string; criteria: JudgeCriterion[] } | null;
+  note: string;
+}
