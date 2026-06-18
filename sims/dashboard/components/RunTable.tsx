@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { JudgeBadge } from "@/components/JudgeBadge";
+import { CancelButton } from "@/components/CancelButton";
 import { cn } from "@/lib/utils";
 import type { Summary } from "@/lib/types";
 
@@ -59,9 +60,19 @@ export function RunTable({ runs }: { runs: Summary[] }) {
             <TableCell className={cn(CELL, "font-mono text-xs text-muted-foreground")}>{r.model}</TableCell>
             {r.status === "running" ? (
               <TableCell colSpan={5} className={CELL}>
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-warning">
-                  <span className="size-1.5 animate-pulse rounded-full bg-warning" aria-hidden />
-                  running
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-warning">
+                    <span className="size-1.5 animate-pulse rounded-full bg-warning" aria-hidden />
+                    running
+                  </span>
+                  <CancelButton runId={r.id} />
+                </div>
+              </TableCell>
+            ) : r.status === "cancelled" ? (
+              <TableCell colSpan={5} className={CELL}>
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <span className="size-1.5 rounded-full bg-muted-foreground/50" aria-hidden />
+                  cancelled
                 </span>
               </TableCell>
             ) : (
@@ -69,9 +80,7 @@ export function RunTable({ runs }: { runs: Summary[] }) {
                 <TableCell className={CELL}><JudgeBadge value={r.build} /></TableCell>
                 <TableCell className={CELL}><JudgeBadge value={r.tests} /></TableCell>
                 <TableCell className={CELL}><JudgeBadge value={r.judge} /></TableCell>
-                <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>
-                  {r.turns}
-                </TableCell>
+                <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{r.turns}</TableCell>
                 <TableCell className={cn(CELL, "text-right font-mono tabular-nums")}>{r.cost}</TableCell>
               </>
             )}

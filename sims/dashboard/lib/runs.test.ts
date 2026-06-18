@@ -1,5 +1,7 @@
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
-import { expect, test } from "vitest";
+import { describe, it, expect, test } from "vitest";
 import { summarizeRun, loadRun, listRuns, parseJudgeReport, verdictFromLog } from "./runs";
 
 const fixtures = path.resolve(__dirname, "../__fixtures__");
@@ -58,4 +60,14 @@ test("loadRun parses the structured judge.json report", () => {
 test("listRuns finds the fixture run", () => {
   const ids = listRuns(fixtures).map((s) => s.id);
   expect(ids).toContain("run.sample");
+});
+
+describe("summarizeRun cancelled", () => {
+  it("reports cancelled when the marker exists, even with judge.txt", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "run."));
+    fs.writeFileSync(path.join(dir, "meta.json"), JSON.stringify({ scenario: "01-demo", harness: "docker" }));
+    fs.writeFileSync(path.join(dir, "judge.txt"), "VERDICT: conformant\n");
+    fs.writeFileSync(path.join(dir, "cancelled"), "2026-06-18T00:00:00Z\n");
+    expect(summarizeRun(dir).status).toBe("cancelled");
+  });
 });

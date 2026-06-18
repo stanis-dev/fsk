@@ -82,6 +82,10 @@ export function summarizeRun(dir: string, created = safeMtime(dir)): Summary {
   s.coder = (log.ccver ? "claude-code" : "") || meta.coder || "?";
   s.harness = log.cwd === "/work" ? "docker" : log.cwd ? "local" : meta.harness || "?";
 
+  if (fs.existsSync(path.join(dir, "cancelled"))) {
+    s.status = "cancelled";
+    return s;
+  }
   const judge = readFile(path.join(dir, "judge.txt"));
   if (!judge) return s; // judge.txt is the last step; absent means still running
   s.status = "done";

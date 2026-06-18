@@ -1,9 +1,9 @@
 "use server";
 
-import { spawn } from "node:child_process";
+import { spawn, execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { runnerDir, scenariosDir } from "@/lib/paths";
+import { runnerDir, runsDir, scenariosDir } from "@/lib/paths";
 import { isKnownScenario, validateConfig } from "@/lib/scenarios";
 import type { ScenarioConfig } from "@/lib/types";
 
@@ -17,6 +17,34 @@ export async function runScenario(scenarioId: string): Promise<void> {
     stdio: "ignore",
   });
   child.unref();
+}
+
+const RUN_ID = /^run\.[A-Za-z0-9.]+$/;
+
+export async function cancelRun(runId: string): Promise<void> {
+  if (!RUN_ID.test(runId)) throw new Error(`invalid run id: ${runId}`);
+  const dir = path.join(runsDir(), runId);
+  if (!fs.existsSync(dir)) throw new Error(`no such run: ${runId}`);
+  // Marker first: the UI flips to cancelled even if a kill below fails.
+  fs.writeFileSync(path.join(dir, "cancelled"), new Date().toISOString() + "\n");
+  let handle: { pgid?: number; container?: string };
+  try {
+    handle = JSON.parse(fs.readFileSync(path.join(dir, "run.json"), "utf8"));
+  } catch {
+    return; // pre-existing/zombie run with no handle: marker only.
+  }
+  if (typeof handle.pgid === "number" && handle.pgid > 1) {
+    for (const sig of ["SIGTERM", "SIGKILL"] as const) {
+      try {
+        process.kill(-handle.pgid, sig); // negative pid = process group
+      } catch {
+        // already gone
+      }
+    }
+  }
+  if (handle.container) {
+    execFile("docker", ["kill", handle.container], () => {}); // best-effort
+  }
 }
 
 export async function saveScenario(
