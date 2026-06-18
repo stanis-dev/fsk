@@ -68,3 +68,20 @@ func TestGroundedFailsWhenWriteFirst(t *testing.T) {
 		t.Error("write before search should fail grounded")
 	}
 }
+
+func TestMCPPrefixedToolNames(t *testing.T) {
+	tr := Trajectory{
+		ToolUses: []string{"mcp__fiskaly__search_fiskaly_docs", "Edit"},
+	}
+	c := judgeChecks{
+		GroundedBeforeWrite: true,
+		ToolsCalled:         []toolReq{{Name: "search_fiskaly_docs", Min: 1}},
+	}
+	rs := runChecks(c, tr)
+	if !resByID(rs, "groundedBeforeWrite").Pass {
+		t.Error("mcp-prefixed search before Edit should pass groundedBeforeWrite")
+	}
+	if !resByID(rs, "toolsCalled:search_fiskaly_docs").Pass {
+		t.Error("mcp-prefixed search_fiskaly_docs should satisfy toolsCalled min:1")
+	}
+}

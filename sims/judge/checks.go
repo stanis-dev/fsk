@@ -29,11 +29,18 @@ type checkResult struct {
 
 var writeTools = map[string]bool{"Write": true, "Edit": true, "MultiEdit": true}
 
+// toolMatches reports whether a transcript tool_use name refers to the given
+// tool, accepting both the bare name (built-in tools like Write) and the
+// MCP-prefixed form mcp__<server>__<name> (e.g. mcp__fiskaly__search_fiskaly_docs).
+func toolMatches(transcriptName, name string) bool {
+	return transcriptName == name || strings.HasSuffix(transcriptName, "__"+name)
+}
+
 func runChecks(c judgeChecks, t Trajectory) []checkResult {
 	var out []checkResult
 
 	if c.GroundedBeforeWrite {
-		searchAt := indexOf(t.ToolUses, func(n string) bool { return n == "search_fiskaly_docs" })
+		searchAt := indexOf(t.ToolUses, func(n string) bool { return toolMatches(n, "search_fiskaly_docs") })
 		writeAt := indexOf(t.ToolUses, func(n string) bool { return writeTools[n] })
 		out = append(out, groundedResult(searchAt, writeAt))
 	}
@@ -116,7 +123,7 @@ func indexOf(xs []string, pred func(string) bool) int {
 func countOccurrences(xs []string, name string) int {
 	n := 0
 	for _, x := range xs {
-		if x == name {
+		if toolMatches(x, name) {
 			n++
 		}
 	}
