@@ -73,7 +73,6 @@ func discoverScenarios(scenariosDir string) ([]scenario, error) {
 	return out, nil
 }
 
-// copyDir recursively copies the tree at src into dst, preserving file modes.
 func copyDir(src, dst string) error {
 	return filepath.WalkDir(src, func(path string, d os.DirEntry, err error) error {
 		if err != nil {

@@ -88,7 +88,6 @@ func dockerReachable(context string) error {
 	return nil
 }
 
-// checkBinaries verifies each named tool is on PATH.
 func checkBinaries(names ...string) error {
 	for _, n := range names {
 		if _, err := exec.LookPath(n); err != nil {

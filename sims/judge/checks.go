@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -12,8 +13,7 @@ type toolReq struct {
 	Min  int    `json:"min"`
 }
 
-// judgeChecks is the deterministic gate declared in scenario.json judge.checks.
-// All fields are optional; an unset field asserts nothing.
+// judgeChecks is scenario.json's judge.checks; an unset field asserts nothing.
 type judgeChecks struct {
 	GroundedBeforeWrite bool      `json:"groundedBeforeWrite"`
 	ToolsCalled         []toolReq `json:"toolsCalled"`
@@ -29,9 +29,8 @@ type checkResult struct {
 
 var writeTools = map[string]bool{"Write": true, "Edit": true, "MultiEdit": true}
 
-// toolMatches reports whether a transcript tool_use name refers to the given
-// tool, accepting both the bare name (built-in tools like Write) and the
-// MCP-prefixed form mcp__<server>__<name> (e.g. mcp__fiskaly__search_fiskaly_docs).
+// toolMatches accepts both the bare name (Write) and the MCP-prefixed form
+// (mcp__server__name, e.g. mcp__fiskaly__search_fiskaly_docs).
 func toolMatches(transcriptName, name string) bool {
 	return transcriptName == name || strings.HasSuffix(transcriptName, "__"+name)
 }
@@ -40,8 +39,8 @@ func runChecks(c judgeChecks, t Trajectory) []checkResult {
 	var out []checkResult
 
 	if c.GroundedBeforeWrite {
-		searchAt := indexOf(t.ToolUses, func(n string) bool { return toolMatches(n, "search_fiskaly_docs") })
-		writeAt := indexOf(t.ToolUses, func(n string) bool { return writeTools[n] })
+		searchAt := slices.IndexFunc(t.ToolUses, func(n string) bool { return toolMatches(n, "search_fiskaly_docs") })
+		writeAt := slices.IndexFunc(t.ToolUses, func(n string) bool { return writeTools[n] })
 		out = append(out, groundedResult(searchAt, writeAt))
 	}
 
@@ -130,15 +129,6 @@ func groundedResult(searchAt, writeAt int) checkResult {
 	return r
 }
 
-func indexOf(xs []string, pred func(string) bool) int {
-	for i, x := range xs {
-		if pred(x) {
-			return i
-		}
-	}
-	return -1
-}
-
 func countOccurrences(xs []string, name string) int {
 	n := 0
 	for _, x := range xs {
@@ -149,8 +139,6 @@ func countOccurrences(xs []string, name string) int {
 	return n
 }
 
-// parseScenarioChecks reads a scenario.json and returns its judge.checks block.
-// A missing or empty checks block returns a zero judgeChecks (no assertions).
 func parseScenarioChecks(path string) (judgeChecks, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

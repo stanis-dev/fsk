@@ -19,7 +19,7 @@ type runConfig struct {
 }
 
 // readEnvToken extracts CLAUDE_CODE_OAUTH_TOKEN from a .env file, stripping
-// optional surrounding quotes. It is the only secret the runner reads.
+// optional surrounding quotes.
 func readEnvToken(envPath string) (string, error) {
 	data, err := os.ReadFile(envPath)
 	if err != nil {

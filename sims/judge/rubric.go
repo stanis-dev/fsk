@@ -22,9 +22,8 @@ const judgeModelID = "claude-opus-4-8"
 
 const judgeEffort = "high"
 
-// claudeModel shells the claude CLI once and returns the assistant's final text.
-// The prompt goes on stdin to avoid arg-length limits. A missing binary, non-zero
-// exit, or unparseable envelope is a hard error — no silent fallback.
+// claudeModel runs the claude CLI and returns its result. The prompt goes on stdin
+// to avoid arg-length limits; any failure is a hard error, never a silent fallback.
 func claudeModel(prompt string) (string, error) {
 	cmd := exec.Command("claude", "-p", "--model", judgeModelID, "--effort", judgeEffort, "--output-format", "json")
 	cmd.Stdin = strings.NewReader(prompt)
@@ -46,15 +45,12 @@ func claudeModel(prompt string) (string, error) {
 	return env.Result, nil
 }
 
-// expectation is one atomic, binary rubric check authored in scenario.json —
-// something the deterministic checks cannot infer.
 type expectation struct {
 	ID          string `json:"id"`
 	Expectation string `json:"expectation"`
 }
 
-// parseScenarioExpectations extracts judge.expectations from scenario.json bytes;
-// returns nil when absent.
+// parseScenarioExpectations extracts judge.expectations from scenario.json bytes.
 func parseScenarioExpectations(data []byte) ([]expectation, error) {
 	var s struct {
 		Judge struct {
@@ -67,7 +63,6 @@ func parseScenarioExpectations(data []byte) ([]expectation, error) {
 	return s.Judge.Expectations, nil
 }
 
-// expectationsFromScenario reads a scenario.json and returns its judge.expectations.
 func expectationsFromScenario(path string) ([]expectation, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -76,7 +71,6 @@ func expectationsFromScenario(path string) ([]expectation, error) {
 	return parseScenarioExpectations(data)
 }
 
-// verdict is the model's judgement of one expectation, after the citation check.
 type verdict struct {
 	ID            string `json:"id"`
 	Verdict       string `json:"verdict"` // MET | UNMET | CANNOT_ASSESS
@@ -154,12 +148,9 @@ func balancedFrom(s string, start int) string {
 	return ""
 }
 
-// modelFn invokes a judge model with a prompt and returns its raw text reply.
-// Injecting it keeps the pipeline unit-testable with a stub; claudeModel is the
-// real implementation.
+// modelFn is injected so tests can stub the model; claudeModel is the real impl.
 type modelFn func(prompt string) (string, error)
 
-// rubricReport is the structured outcome of the rubric layer.
 type rubricReport struct {
 	Model    string    `json:"model"`
 	Criteria []verdict `json:"criteria"`
@@ -268,9 +259,8 @@ func hasAlnum(s string) bool {
 	return false
 }
 
-// conformant is conservative to a false PASS: the integration is conformant only
-// if there is at least one verdict and every verdict is MET. Any UNMET or
-// CANNOT_ASSESS (abstention) blocks the pass.
+// conformant is conservative to a false PASS: it passes only when there is at
+// least one verdict and all are MET.
 func conformant(vs []verdict) bool {
 	if len(vs) == 0 {
 		return false
@@ -304,7 +294,6 @@ func neutralizeSource(source string) string {
 	return source
 }
 
-// telemetrySummary returns a one-line count of calls per tool and total errors.
 func telemetrySummary(traj Trajectory) string {
 	if len(traj.Telemetry) == 0 {
 		return "no telemetry"

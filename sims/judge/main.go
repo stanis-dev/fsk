@@ -22,14 +22,13 @@ import (
 	"strings"
 )
 
-// checksReport is the structured outcome of the deterministic gate layer.
 type checksReport struct {
 	Passed  bool          `json:"passed"`
 	Results []checkResult `json:"results"`
 }
 
-// judgeReport is the structured verdict written to judge.json. The process exit
-// code remains the authoritative pass/fail signal.
+// judgeReport is written to judge.json; the process exit code stays the
+// authoritative pass/fail signal.
 type judgeReport struct {
 	Scenario     string        `json:"scenario"`
 	Verdict      string        `json:"verdict"`
@@ -84,9 +83,8 @@ func main() {
 
 	scenarioName := filepath.Base(filepath.Dir(*scenarioFlag))
 
-	// Parse trajectory only when a run dir is provided. Without it we operate in
-	// source-only mode: the trajectory gate is skipped entirely (an empty
-	// trajectory would falsely fail groundedBeforeWrite and similar checks).
+	// Parse trajectory only when a run dir is given; source-only mode skips the
+	// gate (an empty trajectory would falsely fail groundedBeforeWrite).
 	var traj Trajectory
 	var results []checkResult
 	gatePassed := true

@@ -92,9 +92,8 @@ func writeMeta(runPath, scenario string, cfg runConfig) error {
 	return os.WriteFile(filepath.Join(runPath, "meta.json"), append(data, '\n'), 0o644)
 }
 
-// writeObserveArtifacts writes the dashboard-read files. build.txt is the raw
-// build output (empty on success, which the dashboard reads as PASS); the others
-// follow the same passthrough rule.
+// writeObserveArtifacts writes the dashboard-read files; empty build/test output
+// is how the dashboard reads PASS.
 func writeObserveArtifacts(runPath string, o observation) error {
 	files := map[string]string{
 		"build.txt":    o.Build.Output,

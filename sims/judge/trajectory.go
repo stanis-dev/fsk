@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 )
 
-// transcriptEvent is one line of transcript.jsonl (the agent session).
 type transcriptEvent struct {
 	Type    string `json:"type"`
 	Message struct {
@@ -19,14 +18,12 @@ type transcriptEvent struct {
 	} `json:"message"`
 }
 
-// telemetryEntry is one MCP tool call from mcp-telemetry.jsonl.
 type telemetryEntry struct {
 	Tool    string         `json:"tool"`
 	Args    map[string]any `json:"args"`
 	IsError bool           `json:"is_error"`
 }
 
-// Trajectory is the parsed run signal set the deterministic checks evaluate.
 type Trajectory struct {
 	ToolUses  []string // tool_use names from assistant events, in order
 	Telemetry []telemetryEntry
@@ -72,8 +69,7 @@ func parseToolUses(path string) ([]string, error) {
 	return out, sc.Err()
 }
 
-// parseTelemetry returns the MCP calls. A missing file is not an error: a run
-// with no MCP calls legitimately has none.
+// parseTelemetry tolerates a missing file — a run may legitimately have no MCP calls.
 func parseTelemetry(path string) ([]telemetryEntry, error) {
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {

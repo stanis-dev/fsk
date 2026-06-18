@@ -85,9 +85,8 @@ func cmdRun(args []string) int {
 	return runAll(scenarios, runsBase, judgeBin, ag, cfg, os.Stdout)
 }
 
-// findSimsRoot locates the sims directory by walking up from start. It accepts
-// either being inside sims (a dir with scenarios/ and judge/ siblings) or above
-// it (a dir containing sims/).
+// findSimsRoot locates the sims directory by walking up from start, accepting
+// either being inside sims or above it.
 func findSimsRoot(start string) (string, error) {
 	dir := start
 	for {

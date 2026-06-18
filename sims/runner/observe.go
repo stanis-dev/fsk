@@ -42,7 +42,7 @@ func buildJudge(judgeDir, outDir string) (string, error) {
 }
 
 // gitDiffStaged stages all changes in work and returns the diff against the
-// baseline commit, the exact change set the agent produced.
+// baseline commit.
 func gitDiffStaged(work string) (string, error) {
 	if out, err := exec.Command("git", "-C", work, "add", "-A").CombinedOutput(); err != nil {
 		return "", fmt.Errorf("git add: %w\n%s", err, out)
