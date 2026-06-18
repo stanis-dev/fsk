@@ -125,7 +125,7 @@ the trap-specific conformance lives in each scenario's `expectations`.
 # skipped; needs the claude CLI):
 cd sims/judge && go run . -scenario ../scenarios/<id>/scenario.json -expect ../scenarios/<id>/fixture
 
-# full run, including the trajectory checks gate (needs a CLAUDE_CODE_OAUTH_TOKEN in
-# repo .env and the claude CLI):
-sims/evals/run-scenario.sh <id>
+# full run in Docker, including the trajectory checks gate (needs CLAUDE_CODE_OAUTH_TOKEN
+# in repo .env and the claude CLI):
+cd sims/runner && go run . run <id>
 ```

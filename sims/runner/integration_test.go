@@ -58,7 +58,7 @@ func TestRunScenario_RealDocker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}
-	for _, name := range []string{"meta.json", "transcript.jsonl", "build.txt", "test.txt", "judge.txt", "changes.diff", "grounded.txt"} {
+	for _, name := range []string{"meta.json", "transcript.jsonl", "build.txt", "test.txt", "judge.txt", "judge.json", "changes.diff"} {
 		if _, err := os.Stat(filepath.Join(res.runDir, name)); err != nil {
 			t.Errorf("missing artifact %s: %v", name, err)
 		}

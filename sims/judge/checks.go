@@ -77,7 +77,10 @@ func runChecks(c judgeChecks, t Trajectory) []checkResult {
 					break
 				}
 			}
-			detail := ternary(ok, "fetched "+matchedID, "no fetched doc matching "+want)
+			detail := "no fetched doc matching " + want
+			if ok {
+				detail = "fetched " + matchedID
+			}
 			out = append(out, checkResult{
 				ID:     "docsFetched:" + want,
 				Pass:   ok,
@@ -144,13 +147,6 @@ func countOccurrences(xs []string, name string) int {
 		}
 	}
 	return n
-}
-
-func ternary(cond bool, a, b string) string {
-	if cond {
-		return a
-	}
-	return b
 }
 
 // parseScenarioChecks reads a scenario.json and returns its judge.checks block.

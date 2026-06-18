@@ -8,8 +8,8 @@ result: does it still build and test green, what changed (diff), was it grounded
 in the docs, and does it satisfy the judge (deterministic checks + an LLM
 expectation layer).
 
-The single original exercise (`run-eval.sh`'s hardcoded "Zero to Receipt") is now
-scenario `01`; the other nine extend coverage across the persona's failure
+The single original exercise ("Zero to Receipt") is now scenario `01`; the other
+nine extend coverage across the persona's failure
 spectrum and **deliberately seed red herrings, false information, and dormant
 silent bugs** that interfere with getting the integration right.
 
@@ -59,15 +59,11 @@ by the source-only `expectations` layer (`go run . -scenario … -expect …/fix
 ## Running
 
 ```sh
-# One scenario, end to end (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env + the claude CLI):
-sims/evals/run-scenario.sh 06-fire-and-forget
+# One scenario, end to end in Docker (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env + the claude CLI):
+cd sims/runner && go run . run 06-fire-and-forget
 
-# The original entrypoint still works; it is scenario 01 by default:
-sims/evals/run-eval.sh                      # 01-zero-to-receipt
-SCENARIO=03-cancellation sims/evals/run-eval.sh
-
-# Hermetic Docker variant takes a scenario id too:
-sims/evals/run-eval-docker.sh 09-calver-migration
+# All scenarios:
+cd sims/runner && go run . run
 
 # Source-only expectation grading of a seed (no trajectory; needs the claude CLI):
 cd sims/judge && go run . -scenario ../scenarios/06-fire-and-forget/scenario.json -expect \

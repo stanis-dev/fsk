@@ -28,7 +28,7 @@ func filterScenarios(all []scenario, ids []string) ([]scenario, error) {
 }
 
 // runAll runs each scenario through the single path independently and returns 0
-// only if all completed without a preflight violation or harness error. An
+// only if all completed without a harness error. An
 // agent failure is recorded in claude.err, not counted as a failure here.
 func runAll(scenarios []scenario, runsBase, judgeBin string, ag agent, cfg runConfig, w io.Writer) int {
 	failed := 0

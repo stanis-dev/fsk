@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -29,43 +27,6 @@ func TestStripCommentsKeepLayoutHandlesCRLF(t *testing.T) {
 	}
 	if !strings.Contains(out, "realCode") {
 		t.Fatalf("code after the comment was dropped: %q", out)
-	}
-}
-
-func TestDenyRuleIgnoresComments(t *testing.T) {
-	dir := t.TempDir()
-	correct := "package x\n" +
-		"// Do not call /refunds; void via /records CANCELLATION instead.\n" +
-		"func void() { http.Post(base+\"/records\", nil) }\n"
-	if err := os.WriteFile(filepath.Join(dir, "x.go"), []byte(correct), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	src, err := readSource(dir)
-	if err != nil {
-		t.Fatalf("readSource error: %v", err)
-	}
-	if contains(src, "/refunds") {
-		t.Error("readSource kept /refunds from a comment; comments must be stripped")
-	}
-}
-
-func TestReadSourceExcludesTests(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "x.go"), []byte("package x\nconst Host = \"test.api.fiskaly.com\"\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(dir, "x_test.go"), []byte("package x\nconst Forbidden = \"/refunds\"\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	src, err := readSource(dir)
-	if err != nil {
-		t.Fatalf("readSource error: %v", err)
-	}
-	if want := "test.api.fiskaly.com"; !contains(src, want) {
-		t.Errorf("readSource dropped non-test source (missing %q)", want)
-	}
-	if contains(src, "/refunds") {
-		t.Error("readSource included a _test.go file; tests must be excluded")
 	}
 }
 
@@ -99,15 +60,4 @@ func TestRenderExpectationsContainsFields(t *testing.T) {
 			t.Errorf("render missing %q", w)
 		}
 	}
-}
-
-func contains(haystack, needle string) bool {
-	return len(haystack) >= len(needle) && (func() bool {
-		for i := 0; i+len(needle) <= len(haystack); i++ {
-			if haystack[i:i+len(needle)] == needle {
-				return true
-			}
-		}
-		return false
-	})()
 }

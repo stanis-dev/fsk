@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Summary, TranscriptEvent, DiffLine, TelemetrySummary, JudgeReport, Check } from "./types";
+import type { Summary, TranscriptEvent, DiffLine, TelemetrySummary, JudgeReport } from "./types";
 import { runsDir } from "./paths";
 import { parseTranscript } from "./transcript";
 import { classifyDiff } from "./diff";
@@ -18,8 +18,7 @@ export interface RunDetail {
   telemetry: TelemetrySummary;
 }
 
-// parseJudgeReport reads judge.json; returns null on absent or malformed input so
-// callers fall back to the judge.txt VERDICT line.
+// parseJudgeReport reads judge.json; returns null on absent or malformed input.
 export function parseJudgeReport(json: string): JudgeReport | null {
   if (!json.trim()) return null;
   try {
@@ -31,18 +30,6 @@ export function parseJudgeReport(json: string): JudgeReport | null {
   } catch {
     return null;
   }
-}
-
-// verdictFromLog reads the judge's authoritative final "VERDICT:" line. Used as the
-// fallback when judge.json is absent — keying off this line (not a bare substring
-// scan) prevents untrusted model reasoning/evidence text that mentions "conformant"
-// from flipping a FAIL to PASS.
-export function verdictFromLog(judge: string): Check {
-  const line = judge.split("\n").reverse().find((l) => l.startsWith("VERDICT:"));
-  if (!line) return "";
-  if (line.includes("conformant")) return "PASS";
-  if (line.includes("NON-COMPLIANT")) return "FAIL";
-  return "";
 }
 
 export function listRuns(dir = runsDir()): Summary[] {
@@ -89,10 +76,9 @@ export function summarizeRun(dir: string, created = safeMtime(dir)): Summary {
   const judge = readFile(path.join(dir, "judge.txt"));
   if (!judge) return s; // judge.txt is the last step; absent means still running
   s.status = "done";
-  // Prefer the structured verdict (authoritative, unambiguous); fall back to the
-  // judge.txt VERDICT line for runs that predate judge.json.
+  // judge.json is the sole verdict source; absent/malformed leaves it blank.
   const report = parseJudgeReport(readFile(path.join(dir, "judge.json")));
-  s.judge = report ? (report.verdict === "conformant" ? "PASS" : "FAIL") : verdictFromLog(judge);
+  s.judge = report ? (report.verdict === "conformant" ? "PASS" : "FAIL") : "";
 
   s.build = readFile(path.join(dir, "build.txt")).trim() === "" ? "PASS" : "FAIL";
   const tt = readFile(path.join(dir, "test.txt"));

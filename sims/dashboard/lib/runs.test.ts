@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, it, expect, test } from "vitest";
-import { summarizeRun, loadRun, listRuns, parseJudgeReport, verdictFromLog } from "./runs";
+import { summarizeRun, loadRun, listRuns, parseJudgeReport } from "./runs";
 
 const fixtures = path.resolve(__dirname, "../__fixtures__");
 const sample = path.join(fixtures, "run.sample");
@@ -58,12 +58,6 @@ test("parseJudgeReport reads checks.passed and expectations.criteria and returns
   expect(r!.checks.passed).toBe(true);
   expect(r!.expectations).not.toBeNull();
   expect(r!.expectations!.criteria[0].id).toBe("vat-derived-from-line");
-});
-
-test("verdictFromLog reads the VERDICT line, not model reasoning", () => {
-  expect(verdictFromLog("RUBRIC\nUNMET c1\n  the code is not conformant\nVERDICT: NON-COMPLIANT (rubric). exit 1")).toBe("FAIL");
-  expect(verdictFromLog("VERDICT: conformant. exit 0")).toBe("PASS");
-  expect(verdictFromLog("no verdict line here")).toBe("");
 });
 
 test("loadRun parses the structured judge.json report", () => {

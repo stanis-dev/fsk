@@ -31,8 +31,8 @@ Each run directory may contain:
 | `changes.diff` | Diff from the fixture baseline after the agent run. |
 | `build.txt` | `go build ./...` output. |
 | `test.txt` | `go test ./...` output. |
-| `judge.txt` | Deterministic SIGN IT conformance verdict. |
-| `grounded.txt` | Search-before-edit grounding check from the local runner. |
+| `judge.txt` | Human-readable judge verdict (checks gate + LLM expectations). |
+| `judge.json` | Structured judge verdict: check results and expectation criteria. |
 | `mcp-telemetry.jsonl` | One MCP tool-call event per line. |
 | `claude.err` | Agent stderr. |
 

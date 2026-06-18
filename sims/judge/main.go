@@ -195,29 +195,6 @@ func writeReport(path string, report judgeReport) {
 	}
 }
 
-// readSource concatenates non-test Go source under dir, with comments stripped.
-// Tests are excluded so a mock that mimics an invented API cannot satisfy a rule;
-// comments are excluded so rules match the code an integration actually runs.
-func readSource(dir string) (string, error) {
-	var b strings.Builder
-	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
-			return nil
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		b.WriteString(stripComments(data))
-		b.WriteByte('\n')
-		return nil
-	})
-	return b.String(), err
-}
-
 // readSourceRaw concatenates non-test Go source under dir with comments retained,
 // for the LLM expectation layer (the model reasons over comments; the citation
 // check later validates evidence against the comment-stripped source). Tests are
@@ -242,11 +219,10 @@ func readSourceRaw(dir string) (string, error) {
 	return b.String(), err
 }
 
-// stripCommentsKeepLayout removes comment spans from src while preserving the
-// rest of the code byte-for-byte. Unlike stripComments (which re-emits
-// space-separated tokens for regex gates), this keeps verbatim code intact so
-// the expectation layer's citation check can match an evidence_quote the model
-// copied from the real source, while still excluding comment text.
+// stripCommentsKeepLayout removes comment spans from src while preserving the rest
+// of the code byte-for-byte, so the expectation layer's citation check can match an
+// evidence_quote the model copied from the real source while still excluding comment
+// text.
 func stripCommentsKeepLayout(src string) string {
 	// Normalize line endings first: go/scanner drops lone \r from a COMMENT
 	// literal, so start+len(lit) would undercount the span and leak trailing
@@ -284,32 +260,5 @@ func stripCommentsKeepLayout(src string) string {
 		prev = sp.end
 	}
 	b.WriteString(src[prev:])
-	return b.String()
-}
-
-// stripComments returns the Go source with comment tokens removed. It lexes with
-// go/scanner so string literals are preserved intact. Falls back to the raw
-// bytes if scanning yields nothing.
-func stripComments(src []byte) string {
-	var s scanner.Scanner
-	fset := token.NewFileSet()
-	file := fset.AddFile("", fset.Base(), len(src))
-	s.Init(file, src, nil, 0)
-	var b strings.Builder
-	for {
-		_, tok, lit := s.Scan()
-		if tok == token.EOF {
-			break
-		}
-		if lit != "" {
-			b.WriteString(lit)
-		} else {
-			b.WriteString(tok.String())
-		}
-		b.WriteByte(' ')
-	}
-	if b.Len() == 0 {
-		return string(src)
-	}
 	return b.String()
 }

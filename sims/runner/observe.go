@@ -53,4 +53,3 @@ func gitDiffStaged(work string) (string, error) {
 	}
 	return string(out), nil
 }
-

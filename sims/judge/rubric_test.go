@@ -11,7 +11,7 @@ import (
 var errStub = errors.New("stub")
 
 func TestParseScenarioExpectations(t *testing.T) {
-	data := []byte(`{"judge":{"rules":["fiskaly-host"],"expectations":[
+	data := []byte(`{"judge":{"expectations":[
 		{"id":"c1","expectation":"does X"}]}}`)
 	got, err := parseScenarioExpectations(data)
 	if err != nil {
@@ -23,7 +23,7 @@ func TestParseScenarioExpectations(t *testing.T) {
 }
 
 func TestParseScenarioExpectationsEmpty(t *testing.T) {
-	got, err := parseScenarioExpectations([]byte(`{"judge":{"rules":["x"]}}`))
+	got, err := parseScenarioExpectations([]byte(`{"judge":{}}`))
 	if err != nil || got != nil {
 		t.Fatalf("want nil,nil got %+v %v", got, err)
 	}
@@ -91,7 +91,7 @@ func TestReadSourceRawExcludesTests(t *testing.T) {
 		t.Fatal(err)
 	}
 	if strings.Contains(src, "TESTONLY") {
-		t.Fatal("raw reader must exclude *_test.go (anti-gaming, like readSource)")
+		t.Fatal("raw reader must exclude *_test.go (anti-gaming)")
 	}
 }
 
