@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // criterion is one atomic, binary rubric check, authored in scenario.json. It is
@@ -42,4 +43,35 @@ func rubricFromScenario(path string) ([]criterion, error) {
 		return nil, fmt.Errorf("reading scenario: %w", err)
 	}
 	return parseScenarioRubric(data)
+}
+
+// buildRubricPrompt frames a conservative conformance review of one fiskaly
+// integration. The source carries comments (the model reasons over them) but the
+// caller's citation check later validates every MET quote against the
+// comment-stripped source, so a comment that merely claims correctness cannot pass.
+func buildRubricPrompt(source string, crits []criterion) string {
+	var b strings.Builder
+	b.WriteString(`You are a strict conformance reviewer for an Italian fiscalization integration
+(fiskaly SIGN IT). The domain is tax-sensitive: a wrong PASS ships systematic
+non-compliance, so when in doubt you FAIL. Judge ONLY the criteria below, each
+independently, against the integration source. For each criterion return exactly
+one verdict:
+  - MET: the source clearly satisfies the criterion. You MUST copy a verbatim code
+    span from the source into evidence_quote (real code, not a comment).
+  - UNMET: the source violates the criterion or lacks the required behavior.
+  - CANNOT_ASSESS: you cannot tell from the source. (This counts as not a pass.)
+Default to UNMET or CANNOT_ASSESS rather than guessing MET.
+
+Reply with ONLY one JSON object and no prose, no markdown fences:
+{"criteria":[{"id":"<id>","verdict":"MET|UNMET|CANNOT_ASSESS","evidence_quote":"<verbatim code span or empty>","reasoning":"<one sentence>"}]}
+
+CRITERIA:
+`)
+	for _, c := range crits {
+		fmt.Fprintf(&b, "- id: %s\n  check: %s\n  where: %s\n  reference: %s\n", c.ID, c.Criterion, c.Where, c.Cite)
+	}
+	b.WriteString("\nINTEGRATION SOURCE:\n```go\n")
+	b.WriteString(source)
+	b.WriteString("\n```\n")
+	return b.String()
 }

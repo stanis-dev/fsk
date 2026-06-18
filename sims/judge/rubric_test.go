@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -20,5 +21,16 @@ func TestParseScenarioRubricEmpty(t *testing.T) {
 	got, err := parseScenarioRubric([]byte(`{"judge":{"rules":["x"]}}`))
 	if err != nil || got != nil {
 		t.Fatalf("want nil,nil got %+v %v", got, err)
+	}
+}
+
+func TestBuildRubricPrompt(t *testing.T) {
+	p := buildRubricPrompt("package main // src", []criterion{
+		{ID: "c1", Criterion: "check X", Where: "foo.go", Cite: "NOTES"},
+	})
+	for _, want := range []string{"c1", "check X", "foo.go", "NOTES", "package main // src", "MET", "UNMET", "CANNOT_ASSESS", "evidence_quote", "JSON"} {
+		if !strings.Contains(p, want) {
+			t.Errorf("prompt missing %q", want)
+		}
 	}
 }
