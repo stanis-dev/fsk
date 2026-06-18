@@ -81,6 +81,7 @@ docker run --rm \
   -e CLAUDE_CODE_OAUTH_TOKEN="$oauth_token" \
   -e IS_SANDBOX=1 \
   -e RUN_MODEL="$model" -e RUN_EFFORT="$effort" \
+  -e FISKALY_MCP_TELEMETRY="/work/mcp-telemetry.jsonl" \
   -v "$work:/work" \
   "$image" "$task" >"$run_dir/transcript.jsonl" 2>"$run_dir/claude.err" || true
 

@@ -65,7 +65,9 @@ printf '{"harness":"local","coder":"claude-code","model":"%s","effort":"%s","sce
 # Build the fiskaly MCP and hand it to the coder.
 mcp_bin="$run_dir/fiskaly-mcp"
 (cd "$repo_root/mcp" && go build -o "$mcp_bin" .)
-printf '{ "mcpServers": { "fiskaly": { "command": "%s" } } }\n' "$mcp_bin" >"$run_dir/mcp.json"
+tele="$run_dir/mcp-telemetry.jsonl"
+printf '{ "mcpServers": { "fiskaly": { "command": "%s", "env": { "FISKALY_MCP_TELEMETRY": "%s" } } } }\n' \
+  "$mcp_bin" "$tele" >"$run_dir/mcp.json"
 
 # Clean room: an empty HOME so no global ~/.claude (CLAUDE.md, skills, settings)
 # loads, with subscription auth from the OAuth token. Only CLAUDE_CODE_OAUTH_TOKEN
@@ -122,6 +124,7 @@ echo "build: $build    tests: $tests    judge: $judge    grounded: $grounded"
 echo "judge:      $run_dir/judge.txt"
 echo "diff:       $run_dir/changes.diff"
 echo "transcript: $run_dir/transcript.jsonl"
+echo "telemetry:  $run_dir/mcp-telemetry.jsonl"
 echo "rubric:     $scenario_dir/SOLUTION.md"
 echo "logs:       $run_dir/build.txt  $run_dir/test.txt  $run_dir/claude.err"
 echo "workdir:    $work"
