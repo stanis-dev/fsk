@@ -1,12 +1,12 @@
-// Command judge_eval is the meta-evaluation for the rubric judge: it runs the
-// judge (with -rubric) over a gold set of integrations whose correct verdict is
-// known, and gates on genuine separation — every good fixture conformant, every
-// bad fixture caught by at least one UNMET rubric criterion (not mere abstention),
-// and zero errors. Every gold fixture passes the deterministic gate by
-// construction, so only the rubric layer can separate good from bad — this measures
-// the rubric, not the gate.
+// Command judge_eval is the meta-evaluation for the expectation judge: it runs
+// the judge (with -expect) over a gold set of integrations whose correct verdict
+// is known, and gates on genuine separation — every good fixture conformant, every
+// bad fixture caught by at least one UNMET expectation criterion (not mere
+// abstention), and zero errors. Every gold fixture passes the deterministic gate
+// by construction, so only the expectation layer can separate good from bad —
+// this measures the expectation layer, not the gate.
 //
-// Requires the claude CLI to be authenticated (the rubric layer calls it).
+// Requires the claude CLI to be authenticated (the expectation layer calls it).
 // Run from anywhere: paths are resolved relative to this source file.
 //
 // Usage: go run ./judge_eval   (from sims/judge)
@@ -38,20 +38,20 @@ var cases = []goldCase{
 
 // evalReport mirrors the judge.json fields the meta-eval needs.
 type evalReport struct {
-	Verdict string `json:"verdict"`
-	Rubric  *struct {
+	Verdict      string `json:"verdict"`
+	Expectations *struct {
 		Criteria []struct {
 			Verdict string `json:"verdict"`
 		} `json:"criteria"`
-	} `json:"rubric"`
+	} `json:"expectations"`
 }
 
 func unmetCount(r evalReport) int {
-	if r.Rubric == nil {
+	if r.Expectations == nil {
 		return 0
 	}
 	n := 0
-	for _, c := range r.Rubric.Criteria {
+	for _, c := range r.Expectations.Criteria {
 		if c.Verdict == "UNMET" {
 			n++
 		}
@@ -91,7 +91,7 @@ func main() {
 		}
 		for r := 0; r < reps; r++ {
 			_ = os.Remove(reportPath)
-			cmd := exec.Command(bin, "-rubric", "-json", reportPath, "-scenario", scenario, work)
+			cmd := exec.Command(bin, "-expect", "-json", reportPath, "-scenario", scenario, "-run", work)
 			out, _ := cmd.CombinedOutput()
 			code := cmd.ProcessState.ExitCode()
 

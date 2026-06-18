@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -136,4 +138,22 @@ func ternary(cond bool, a, b string) string {
 		return a
 	}
 	return b
+}
+
+// parseScenarioChecks reads a scenario.json and returns its judge.checks block.
+// A missing or empty checks block returns a zero judgeChecks (no assertions).
+func parseScenarioChecks(path string) (judgeChecks, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return judgeChecks{}, fmt.Errorf("reading scenario: %w", err)
+	}
+	var s struct {
+		Judge struct {
+			Checks judgeChecks `json:"checks"`
+		} `json:"judge"`
+	}
+	if err := json.Unmarshal(data, &s); err != nil {
+		return judgeChecks{}, fmt.Errorf("parsing scenario %s: %w", path, err)
+	}
+	return s.Judge.Checks, nil
 }
