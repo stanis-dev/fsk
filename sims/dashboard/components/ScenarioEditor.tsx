@@ -223,27 +223,18 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
             >
               <X className="size-4" />
             </button>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Field label="id">
-                <input
-                  className={INPUT}
-                  value={exp.id}
-                  onChange={(e) => patchExpectation(i, { id: e.target.value })}
-                />
-              </Field>
-              <Field label="where">
-                <select
-                  className={INPUT}
-                  value={exp.where ?? ""}
-                  onChange={(e) => patchExpectation(i, { where: e.target.value || undefined })}
-                >
-                  <option value="">—</option>
-                  <option value="source">source</option>
-                  <option value="transcript">transcript</option>
-                  <option value="telemetry">telemetry</option>
-                </select>
-              </Field>
-            </div>
+            <Field label="where">
+              <select
+                className={INPUT}
+                value={exp.where ?? ""}
+                onChange={(e) => patchExpectation(i, { where: e.target.value || undefined })}
+              >
+                <option value="">—</option>
+                <option value="source">source</option>
+                <option value="transcript">transcript</option>
+                <option value="telemetry">telemetry</option>
+              </select>
+            </Field>
             <Field label="expectation">
               <textarea
                 className={cn(INPUT, "min-h-16 font-mono text-xs leading-relaxed")}

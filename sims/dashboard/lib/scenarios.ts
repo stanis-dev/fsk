@@ -59,6 +59,24 @@ function hasNonEmptyChecks(checks: Record<string, unknown>): boolean {
   );
 }
 
+// assignExpectationIds fills a stable id for every expectation that lacks one.
+// Expectation ids are not user-facing — they exist only as the join key the judge
+// uses to map each model verdict back to its expectation. Existing ids are kept so
+// a scenario's judge reports stay labelled across edits; new rows get e1, e2, …,
+// skipping any id already in use.
+export function assignExpectationIds(config: ScenarioConfig): ScenarioConfig {
+  const used = new Set(config.judge.expectations.map((e) => e.id).filter(Boolean));
+  let n = 1;
+  const nextId = (): string => {
+    let id = `e${n++}`;
+    while (used.has(id)) id = `e${n++}`;
+    used.add(id);
+    return id;
+  };
+  const expectations = config.judge.expectations.map((e) => (e.id ? e : { ...e, id: nextId() }));
+  return { ...config, judge: { ...config.judge, expectations } };
+}
+
 export function validateConfig(obj: unknown): string | null {
   if (typeof obj !== "object" || obj === null) return "config must be an object";
   const c = obj as Record<string, unknown>;

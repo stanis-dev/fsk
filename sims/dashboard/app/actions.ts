@@ -4,7 +4,7 @@ import { spawn, execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { runnerDir, runsDir, scenariosDir } from "@/lib/paths";
-import { isKnownScenario, validateConfig } from "@/lib/scenarios";
+import { assignExpectationIds, isKnownScenario, validateConfig } from "@/lib/scenarios";
 import type { ScenarioConfig } from "@/lib/types";
 
 // Spawn the eval detached so it outlives this request; the new run dir shows up
@@ -58,10 +58,11 @@ export async function saveScenario(
 ): Promise<void> {
   if (!isKnownScenario(id)) throw new Error(`unknown scenario: ${id}`);
   if (data.config.id !== id) throw new Error(`scenario id mismatch: ${data.config.id} !== ${id}`);
-  const err = validateConfig(data.config);
+  const config = assignExpectationIds(data.config);
+  const err = validateConfig(config);
   if (err) throw new Error(`invalid scenario config: ${err}`);
   const dir = path.join(scenariosDir(), id);
-  fs.writeFileSync(path.join(dir, "scenario.json"), JSON.stringify(data.config, null, 2) + "\n");
+  fs.writeFileSync(path.join(dir, "scenario.json"), JSON.stringify(config, null, 2) + "\n");
   fs.writeFileSync(path.join(dir, "task.md"), data.task);
   fs.writeFileSync(path.join(dir, "SOLUTION.md"), data.solution);
 }

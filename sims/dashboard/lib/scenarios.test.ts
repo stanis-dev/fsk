@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { listScenarios, isKnownScenario, loadScenario, validateConfig } from "./scenarios";
+import { listScenarios, isKnownScenario, loadScenario, validateConfig, assignExpectationIds } from "./scenarios";
+import type { ScenarioConfig } from "./types";
 
 function fixtureDir(): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "scenarios-"));
@@ -96,5 +97,29 @@ describe("scenarios", () => {
       traps: [], judge: { checks: {}, expectations: [{ id: "x", expectation: "y" }] },
     };
     expect(validateConfig(good)).toBeNull();
+  });
+
+  it("assignExpectationIds preserves existing ids and fills empty ones without collision", () => {
+    const config = {
+      id: "01-demo", title: "Demo", tier: 1, capability: "x", persona_ref: "P",
+      traps: [],
+      judge: {
+        checks: {},
+        expectations: [
+          { id: "e1", expectation: "a" },
+          { id: "", expectation: "b" },
+          { id: "kept", expectation: "c" },
+          { id: "", expectation: "d" },
+        ],
+      },
+    } as ScenarioConfig;
+    const out = assignExpectationIds(config);
+    const ids = out.judge.expectations.map((e) => e.id);
+    expect(ids[0]).toBe("e1");
+    expect(ids[2]).toBe("kept");
+    expect(ids[1]).not.toBe("e1"); // must skip the already-used e1
+    expect(new Set(ids).size).toBe(4); // all unique
+    expect(ids.every(Boolean)).toBe(true); // none empty
+    expect(config.judge.expectations[1].id).toBe(""); // input not mutated
   });
 });
