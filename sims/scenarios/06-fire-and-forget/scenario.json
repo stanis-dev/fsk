@@ -7,5 +7,20 @@
   "traps": [
     { "kind": "silent-bug", "where": "fixture/fiskaly.go (issueReceipt)", "detail": "returns success on the accepted TRANSACTION (PROCESSING) and never polls to FINISHED; looks fine in TEST, silently fails on LIVE", "correct": "poll the record (GET /records/{id}) until state/mode FINISHED, fail the completion if it does not reach FINISHED" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow", "polling"] }
+  "judge": {
+    "checks": {
+      "groundedBeforeWrite": true,
+      "toolsCalled": [{ "name": "search_fiskaly_docs", "min": 1 }],
+      "docsFetched": ["records", "finished"],
+      "maxMcpErrors": 0
+    },
+    "expectations": [
+      { "id": "real-host", "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.", "where": "source", "cite": "NOTES.md host" },
+      { "id": "token-exchange", "expectation": "Exchanges credentials for a JWT at POST /tokens.", "where": "source", "cite": "NOTES.md step 1" },
+      { "id": "idempotency", "expectation": "Sets X-Idempotency-Key on every POST.", "where": "source", "cite": "NOTES.md addendum" },
+      { "id": "api-version", "expectation": "Sends the dated X-Api-Version header on all calls.", "where": "source", "cite": "NOTES.md" },
+      { "id": "records-flow", "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.", "where": "source", "cite": "NOTES.md steps 10-11" },
+      { "id": "polling", "expectation": "Polls the record (GET /records/{id}) until it reaches the FINISHED terminal state; does not treat a PROCESSING response as success.", "where": "source", "cite": "NOTES.md step 11" }
+    ]
+  }
 }

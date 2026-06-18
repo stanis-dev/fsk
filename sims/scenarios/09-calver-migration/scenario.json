@@ -7,5 +7,20 @@
   "traps": [
     { "kind": "false-info", "where": "fixture/fiskaly.go", "detail": "the client pins X-Api-Version 2025-08-12 and provisions via the pre-rename /entities and /assets resources, which look authoritative", "correct": "pin the current 2026-02-03 version and use the current resources (/organizations, /taxpayers, /locations, /systems)" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version-current", "records-flow", "no-legacy-resources"] }
+  "judge": {
+    "checks": {
+      "groundedBeforeWrite": true,
+      "toolsCalled": [{ "name": "search_fiskaly_docs", "min": 1 }],
+      "docsFetched": ["taxpayers", "organizations", "locations"],
+      "maxMcpErrors": 0
+    },
+    "expectations": [
+      { "id": "real-host", "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.", "where": "source", "cite": "NOTES.md host" },
+      { "id": "token-exchange", "expectation": "Exchanges credentials for a JWT at POST /tokens.", "where": "source", "cite": "NOTES.md step 1" },
+      { "id": "idempotency", "expectation": "Sets X-Idempotency-Key on every POST.", "where": "source", "cite": "NOTES.md addendum" },
+      { "id": "api-version-current", "expectation": "Sends X-Api-Version pinned to the current dated version (2026-02-03), not the stale 2025-08-12 in the fixture.", "where": "source", "cite": "NOTES.md current contract" },
+      { "id": "records-flow", "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.", "where": "source", "cite": "NOTES.md steps 10-11" },
+      { "id": "no-legacy-resources", "expectation": "Uses the current resource names (/organizations, /taxpayers, /locations, /systems) and not the pre-rename /entities or /assets paths.", "where": "source", "cite": "NOTES.md current contract" }
+    ]
+  }
 }

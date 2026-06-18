@@ -7,5 +7,20 @@
   "traps": [
     { "kind": "false-info", "where": "fixture/README.md", "detail": "a teammate quickstart note claims you can POST the taxpayer directly with the HUB key", "correct": "the HUB key is a GROUP org; direct taxpayer creation returns 405. Create a UNIT, mint a UNIT-scoped subject via X-Scope-Identifier, then provision taxpayer/location/system and commission in order." }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "scope-identifier", "commissioning"] }
+  "judge": {
+    "checks": {
+      "groundedBeforeWrite": true,
+      "toolsCalled": [{ "name": "search_fiskaly_docs", "min": 1 }],
+      "docsFetched": ["organizations", "taxpayers", "systems"],
+      "maxMcpErrors": 0
+    },
+    "expectations": [
+      { "id": "real-host", "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.", "where": "source", "cite": "NOTES.md host" },
+      { "id": "token-exchange", "expectation": "Exchanges credentials for a JWT at POST /tokens.", "where": "source", "cite": "NOTES.md step 1" },
+      { "id": "idempotency", "expectation": "Sets X-Idempotency-Key on every POST.", "where": "source", "cite": "NOTES.md addendum" },
+      { "id": "api-version", "expectation": "Sends the dated X-Api-Version header on all calls.", "where": "source", "cite": "NOTES.md" },
+      { "id": "scope-identifier", "expectation": "Scopes subject creation to the UNIT org via X-Scope-Identifier, not the HUB/GROUP key directly.", "where": "source", "cite": "NOTES.md steps 3-9" },
+      { "id": "commissioning", "expectation": "Commissions taxpayer -> location -> system in order before issuing any receipts.", "where": "source", "cite": "NOTES.md steps 3-9" }
+    ]
+  }
 }

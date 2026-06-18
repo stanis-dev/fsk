@@ -7,5 +7,19 @@
   "traps": [
     { "kind": "silent-bug", "where": "fixture/fiskaly.go (idemKey)", "detail": "one idempotency key is generated at client creation and reused for every request, so distinct POSTs collide", "correct": "generate a fresh lowercase-hex key per logical request; reuse the same key only when retrying that exact request" }
   ],
-  "judge": { "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"] }
+  "judge": {
+    "checks": {
+      "groundedBeforeWrite": true,
+      "toolsCalled": [{ "name": "search_fiskaly_docs", "min": 1 }],
+      "docsFetched": ["idempotency", "records"],
+      "maxMcpErrors": 0
+    },
+    "expectations": [
+      { "id": "real-host", "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.", "where": "source", "cite": "NOTES.md host" },
+      { "id": "token-exchange", "expectation": "Exchanges credentials for a JWT at POST /tokens.", "where": "source", "cite": "NOTES.md step 1" },
+      { "id": "idempotency", "expectation": "Generates a fresh X-Idempotency-Key per logical request; reuses the same key only when retrying that exact request, never across distinct POSTs.", "where": "source", "cite": "NOTES.md addendum" },
+      { "id": "api-version", "expectation": "Sends the dated X-Api-Version header on all calls.", "where": "source", "cite": "NOTES.md" },
+      { "id": "records-flow", "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.", "where": "source", "cite": "NOTES.md steps 10-11" }
+    ]
+  }
 }

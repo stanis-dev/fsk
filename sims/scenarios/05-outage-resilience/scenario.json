@@ -8,26 +8,21 @@
     { "kind": "false-info", "where": "fixture/checkout.go", "detail": "a comment says call fiskaly synchronously inline with no timeout/fallback, while holding the store lock", "correct": "bound the call with a context deadline, do not hold the store lock across the network call, never freeze the till, and on outage fall back to the legal path (paper document + electronic invoice within 12 days)" }
   ],
   "judge": {
-    "rules": ["fiskaly-host", "token-exchange", "idempotency-key", "api-version", "records-flow"],
-    "rubric": [
-      {
-        "id": "deadline-bounded",
-        "criterion": "The fiskaly network call is bounded by a context deadline/timeout (context.WithTimeout / WithDeadline, or honoring a deadline already on ctx) so it cannot hang the checkout indefinitely.",
-        "where": "the fiscalize path in checkout.go",
-        "cite": "SOLUTION.md 05: bound the call with a deadline"
-      },
-      {
-        "id": "no-lock-across-io",
-        "criterion": "The store mutex (s.mu) is NOT held across the fiskaly network round-trip. The lock may guard in-memory Store state, but must be released before the network call. Judge the code, not comments.",
-        "where": "CompleteOrder / fiscalize critical section in checkout.go",
-        "cite": "SOLUTION.md 05: release the store lock before the network call"
-      },
-      {
-        "id": "outage-legal-fallback",
-        "criterion": "On a fiskaly/authority outage the code routes to the legal fallback (records the order for a deferred electronic invoice / flags the paper-document path) rather than dropping the sale or marking it completed as if fiscalized.",
-        "where": "the outage/error branch of the fiscalize path",
-        "cite": "SOLUTION.md 05: 12-day legal fallback (paper doc + e-invoice within 12 days)"
-      }
+    "checks": {
+      "groundedBeforeWrite": true,
+      "toolsCalled": [{ "name": "search_fiskaly_docs", "min": 1 }],
+      "docsFetched": ["records", "tokens"],
+      "maxMcpErrors": 0
+    },
+    "expectations": [
+      { "id": "real-host", "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.", "where": "source", "cite": "NOTES.md host" },
+      { "id": "token-exchange", "expectation": "Exchanges credentials for a JWT at POST /tokens.", "where": "source", "cite": "NOTES.md step 1" },
+      { "id": "idempotency", "expectation": "Sets X-Idempotency-Key on every POST.", "where": "source", "cite": "NOTES.md addendum" },
+      { "id": "api-version", "expectation": "Sends the dated X-Api-Version header on all calls.", "where": "source", "cite": "NOTES.md" },
+      { "id": "records-flow", "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.", "where": "source", "cite": "NOTES.md steps 10-11" },
+      { "id": "deadline-bounded", "expectation": "The fiskaly network call is bounded by a context deadline/timeout (context.WithTimeout / WithDeadline, or honoring a deadline already on ctx) so it cannot hang the checkout indefinitely.", "where": "source", "cite": "SOLUTION.md 05: bound the call with a deadline" },
+      { "id": "no-lock-across-io", "expectation": "The store mutex (s.mu) is NOT held across the fiskaly network round-trip. The lock may guard in-memory Store state, but must be released before the network call. Judge the code, not comments.", "where": "source", "cite": "SOLUTION.md 05: release the store lock before the network call" },
+      { "id": "outage-legal-fallback", "expectation": "On a fiskaly/authority outage the code routes to the legal fallback (records the order for a deferred electronic invoice / flags the paper-document path) rather than dropping the sale or marking it completed as if fiscalized.", "where": "source", "cite": "SOLUTION.md 05: 12-day legal fallback (paper doc + e-invoice within 12 days)" }
     ]
   }
 }
