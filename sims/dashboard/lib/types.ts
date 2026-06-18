@@ -1,5 +1,5 @@
 export type Check = "PASS" | "FAIL" | "";
-export type RunStatus = "running" | "done";
+export type RunStatus = "running" | "done" | "cancelled";
 
 export interface Summary {
   id: string;
@@ -72,4 +72,28 @@ export interface JudgeReport {
   gate: { passed: boolean; rules: { id: string; desc: string; pass: boolean }[] };
   rubric: { model: string; criteria: JudgeCriterion[] } | null;
   note: string;
+}
+
+export interface Verdicts {
+  build: string;
+  tests: string;
+  judge: string;
+}
+
+export interface ScenarioConfig {
+  id: string;
+  title: string;
+  tier: number;
+  capability: string;
+  persona_ref: string;
+  traps: string[];
+  judge: { rules: string[] };
+  baseline: Verdicts;
+  target: Verdicts;
+}
+
+export interface ScenarioDetail {
+  config: ScenarioConfig;
+  task: string;
+  solution: string;
 }

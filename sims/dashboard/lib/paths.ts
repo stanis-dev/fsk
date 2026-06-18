@@ -10,3 +10,7 @@ export function runsDir(): string {
 export function runnerDir(): string {
   return process.env.FISKALY_RUNNER_DIR ?? path.resolve(process.cwd(), "..", "runner");
 }
+
+export function scenariosDir(): string {
+  return process.env.FISKALY_SCENARIOS_DIR ?? path.resolve(process.cwd(), "..", "scenarios");
+}
