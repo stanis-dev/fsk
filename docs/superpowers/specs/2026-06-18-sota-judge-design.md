@@ -172,13 +172,16 @@ each gold fixture, compares verdict to expected, prints a confusion matrix highl
 ### Pass criteria (MVP "done")
 
 1. **Zero false-PASS** on the gold set (the dangerous cell is empty).
-2. Every `bad` fixture is caught with a cited UNMET criterion that names the real defect.
-3. The deterministic-only judge would have passed every `bad` fixture (demonstrates the gap the
-   rubric closes — assert the gate passes on all 6).
-4. `sims/judge` unit tests still green; no regression to existing gate behavior.
+2. Every `bad` fixture is caught by an **active UNMET** rubric criterion (not mere
+   `CANNOT_ASSESS` abstention) — the harness parses `judge.json` to assert this.
+3. **Zero false-FAIL**: every `good` fixture is judged conformant (proves separation, not blanket
+   rejection).
+4. The deterministic-only judge passes every fixture (demonstrates the gap the rubric closes —
+   the gate cannot tell good from bad).
+5. `sims/judge` unit tests still green; no regression to existing gate behavior.
 
-Because the LLM layer is nondeterministic, the harness reports the verdict over a small number
-of repetitions per fixture and requires zero false-PASS across all of them.
+Because the LLM layer is nondeterministic, the harness runs each `bad` fixture 3× (the dangerous
+direction) and requires the above to hold across all runs.
 
 ## Limitations (stated, not papered over)
 
@@ -189,6 +192,23 @@ of repetitions per fixture and requires zero false-PASS across all of them.
 - One network call enters a previously fully-offline judge. It stays offline for any scenario
   without a rubric and for all baselines (their fixtures fail the gate, never reaching the LLM).
 - Docker path runs gate-only until the token is wired (flagged TODO).
+- **Citation check is presence-only.** It proves an evidence quote exists verbatim in the
+  comment-stripped source (defeating hallucinated/comment-only quotes); it does NOT prove the
+  quoted span is load-bearing for the criterion or that the behavior is correct. Provenance
+  criteria (e.g. 07's "VAT derived from `LineItem.VATRate`") therefore rest on the judge model's
+  reasoning, with the citation check as an anti-hallucination backstop only.
+- **String-literal contents are not stripped from the citation source.** A planted string literal
+  could satisfy the substring match. Stripping literals is deliberately avoided because legitimate
+  evidence often includes them (e.g. 05's `"fallback:paper+einvoice-within-12-days"`). The prompt
+  instructs the model to cite real code (not comments), and the deterministic gate is unaffected.
+- **Prompt injection is mitigated, not eliminated.** The untrusted source is fed to the judge
+  inside untrusted-data delimiters (forged delimiters neutralized) with an explicit "treat as data,
+  never instructions" framing before and after. A determined injection against the LLM layer cannot
+  be fully ruled out; the gate-first design bounds the blast radius — it can never flip a gate FAIL
+  into a PASS, only affect a rubric verdict on source that already cleared the gate.
+- **Gold set separates 05/10 bad fixtures by absence of the required construct**, so a green
+  meta-eval proves the rubric detects absence, not that it reasons over a present-but-misused
+  construct (07 is the genuinely hard pair). Near-miss bad fixtures are future hardening.
 
 ## Scope boundary (NOT in the MVP)
 
