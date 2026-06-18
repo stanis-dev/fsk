@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -20,6 +21,36 @@ func (f fakeAgent) run(rd runDir, task string, cfg runConfig) error {
 	// start from empty if the fixture has no pos.go
 	b, _ := os.ReadFile(pos)
 	return os.WriteFile(pos, append(b, []byte("\n// touched by fake agent\n")...), 0o644)
+}
+
+func TestContainerName(t *testing.T) {
+	if got := containerName("/x/y/run.AbC.123"); got != "fiskaly-eval-run.AbC.123" {
+		t.Errorf("containerName = %q", got)
+	}
+}
+
+func TestWriteRunHandle(t *testing.T) {
+	rp := filepath.Join(t.TempDir(), "run.ZZZ")
+	if err := os.MkdirAll(rp, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeRunHandle(rp); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(rp, "run.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var h runHandle
+	if err := json.Unmarshal(data, &h); err != nil {
+		t.Fatal(err)
+	}
+	if h.Container != "fiskaly-eval-run.ZZZ" {
+		t.Errorf("container = %q", h.Container)
+	}
+	if h.PID == 0 || h.PGID == 0 {
+		t.Errorf("pid/pgid not set: %+v", h)
+	}
 }
 
 func TestRunScenario_PreflightHoldsAndArtifactsWritten(t *testing.T) {

@@ -13,6 +13,12 @@ type agent interface {
 	run(rd runDir, task string, cfg runConfig) error
 }
 
+// containerName derives a deterministic, per-run container name so a run can be
+// cancelled with `docker kill` even though it was spawned detached.
+func containerName(runPath string) string {
+	return "fiskaly-eval-" + filepath.Base(runPath)
+}
+
 // dockerAgent runs the coder hermetically: only the work dir is mounted, so the
 // container cannot reach the repo, the MCP/judge source, or research/.
 type dockerAgent struct {
@@ -43,6 +49,7 @@ func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
 	defer stderr.Close()
 
 	run := exec.Command("docker", "run", "--rm",
+		"--name", containerName(rd.path),
 		"-e", "CLAUDE_CODE_OAUTH_TOKEN="+cfg.token,
 		"-e", "IS_SANDBOX=1",
 		"-e", "RUN_MODEL="+cfg.model,

@@ -39,6 +39,9 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 	if err != nil {
 		return scenarioResult{}, fmt.Errorf("prepareRun: %w", err)
 	}
+	if err := writeRunHandle(rd.path); err != nil {
+		return scenarioResult{}, fmt.Errorf("writeRunHandle: %w", err)
+	}
 
 	pre := observeCore(rd.work, judgeBin, s.scenarioJSON, false, "")
 	if !baselineHolds(s, pre) {
