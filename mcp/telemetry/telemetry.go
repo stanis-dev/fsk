@@ -4,10 +4,15 @@
 package telemetry
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"sync"
+	"time"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // Event is one tools/call observation. Field names are the on-disk JSONL schema.
@@ -64,3 +69,82 @@ func (nopRecorder) Record(Event) {}
 
 // Nop returns a Recorder that discards everything.
 func Nop() Recorder { return nopRecorder{} }
+
+// Middleware records one Event per tools/call. Other methods pass through
+// untouched. The handlers themselves are never modified.
+func Middleware(rec Recorder) mcp.Middleware {
+	return func(next mcp.MethodHandler) mcp.MethodHandler {
+		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {
+			if method != "tools/call" {
+				return next(ctx, method, req)
+			}
+			start := time.Now()
+			res, err := next(ctx, method, req)
+			ev := Event{
+				TS:        time.Now().UTC().Format(time.RFC3339),
+				LatencyMS: time.Since(start).Milliseconds(),
+			}
+			if sess := req.GetSession(); sess != nil {
+				ev.SessionID = sess.ID()
+			}
+			if p, ok := req.GetParams().(*mcp.CallToolParamsRaw); ok {
+				ev.Tool = p.Name
+				if len(p.Arguments) > 0 {
+					ev.Args = append(json.RawMessage(nil), p.Arguments...)
+				}
+			}
+			switch {
+			case err != nil:
+				ev.IsError = true
+				ev.Error = err.Error()
+			case res != nil:
+				if ctr, ok := res.(*mcp.CallToolResult); ok {
+					ev.IsError = ctr.IsError
+					if ctr.IsError {
+						ev.Error = contentText(ctr.Content)
+					}
+					ev.ResultCount = resultCount(ctr)
+				}
+			}
+			rec.Record(ev)
+			return res, err
+		}
+	}
+}
+
+// resultCount derives a count from a tool result without importing the server's
+// typed output: a list-returning tool exposes a top-level "results" array; a
+// single-document tool returns one object.
+func resultCount(ctr *mcp.CallToolResult) int {
+	if ctr.IsError || ctr.StructuredContent == nil {
+		return 0
+	}
+	b, err := json.Marshal(ctr.StructuredContent)
+	if err != nil {
+		return 0
+	}
+	var obj map[string]json.RawMessage
+	if json.Unmarshal(b, &obj) != nil {
+		return 0
+	}
+	if raw, ok := obj["results"]; ok {
+		var arr []json.RawMessage
+		if json.Unmarshal(raw, &arr) == nil {
+			return len(arr)
+		}
+	}
+	if len(obj) > 0 {
+		return 1
+	}
+	return 0
+}
+
+func contentText(cs []mcp.Content) string {
+	var b strings.Builder
+	for _, c := range cs {
+		if tc, ok := c.(*mcp.TextContent); ok {
+			b.WriteString(tc.Text)
+		}
+	}
+	return b.String()
+}
