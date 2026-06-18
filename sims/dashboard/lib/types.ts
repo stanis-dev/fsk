@@ -28,3 +28,30 @@ export interface DiffLine {
   cls: DiffClass;
   text: string;
 }
+
+export interface TelemetryEvent {
+  ts: string;
+  sessionId: string;
+  tool: string;
+  args: Record<string, unknown>;
+  resultCount: number;
+  isError: boolean;
+  error: string;
+  latencyMs: number;
+}
+
+export interface TelemetryToolStat {
+  tool: string;
+  calls: number;
+  errors: number;
+}
+
+export interface TelemetrySummary {
+  total: number;
+  errors: number;
+  byTool: TelemetryToolStat[];
+  p50LatencyMs: number;
+  p95LatencyMs: number;
+  queries: string[];
+  docsFetched: string[];
+}
