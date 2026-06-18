@@ -49,6 +49,16 @@ func TestParseModelJSON(t *testing.T) {
 	}
 }
 
+func TestParseModelJSONSkipsProseBraces(t *testing.T) {
+	// Leading prose that itself contains braces must not be mistaken for the object.
+	in := "Analysis: the code uses map[string]int{} here.\n" +
+		`{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"x","reasoning":"r"}]}`
+	got, err := parseModelJSON(in)
+	if err != nil || len(got) != 1 || got[0].ID != "c1" {
+		t.Fatalf("prose-brace case mishandled: %+v err=%v", got, err)
+	}
+}
+
 func TestParseModelJSONHandlesBraceInString(t *testing.T) {
 	// A brace inside a string literal must not end the object early.
 	in := `{"criteria":[{"id":"c1","verdict":"UNMET","evidence_quote":"map[string]int{}","reasoning":"r"}]}`
@@ -128,6 +138,27 @@ func TestRunRubricMissingCriterionIsCannotAssess(t *testing.T) {
 	}
 	if conformant(rep.Criteria) {
 		t.Fatal("a criterion the model skipped must be CANNOT_ASSESS, blocking the pass")
+	}
+}
+
+func TestRunRubricRetriesOnBadJSON(t *testing.T) {
+	calls := 0
+	stub := func(string) (string, error) {
+		calls++
+		if calls == 1 {
+			return "garbage, no json object here", nil
+		}
+		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
+	}
+	rep, err := runRubric("keep", "keep", []criterion{{ID: "c1"}}, stub, "m")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls < 2 {
+		t.Fatalf("expected a retry on bad JSON, calls=%d", calls)
+	}
+	if !conformant(rep.Criteria) {
+		t.Fatal("should be conformant after the retry")
 	}
 }
 

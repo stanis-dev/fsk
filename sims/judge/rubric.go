@@ -95,29 +95,46 @@ type verdict struct {
 }
 
 // parseModelJSON extracts the verdict array from a model reply. The model is asked
-// for a bare JSON object, but tolerate a ```json fence and surrounding prose by
-// scanning for the first brace-balanced object (ignoring braces inside strings).
+// for a bare JSON object, but tolerate a ```json fence and surrounding prose:
+// consider every brace-balanced object in the text and return the first one that
+// parses AND carries a non-empty criteria array. This skips prose that contains
+// braces (e.g. a mention of map[string]int{}) instead of mistaking it for the
+// answer.
 func parseModelJSON(text string) ([]verdict, error) {
-	obj, err := firstJSONObject(text)
-	if err != nil {
-		return nil, err
+	var lastErr error = fmt.Errorf("no JSON object found")
+	for _, obj := range jsonCandidates(text) {
+		var payload struct {
+			Criteria []verdict `json:"criteria"`
+		}
+		if err := json.Unmarshal([]byte(obj), &payload); err != nil {
+			lastErr = err
+			continue
+		}
+		if len(payload.Criteria) > 0 {
+			return payload.Criteria, nil
+		}
 	}
-	var payload struct {
-		Criteria []verdict `json:"criteria"`
-	}
-	if err := json.Unmarshal([]byte(obj), &payload); err != nil {
-		return nil, fmt.Errorf("parsing model JSON: %w", err)
-	}
-	return payload.Criteria, nil
+	return nil, fmt.Errorf("parsing model JSON: %w", lastErr)
 }
 
-// firstJSONObject returns the first top-level brace-balanced {...} in s, tracking
-// string literals and escapes so a brace inside a quoted value does not end it.
-func firstJSONObject(s string) (string, error) {
-	start := strings.IndexByte(s, '{')
-	if start < 0 {
-		return "", fmt.Errorf("no JSON object found")
+// jsonCandidates returns every brace-balanced {...} substring, left to right, so
+// the outermost real object is tried before inner or prose objects.
+func jsonCandidates(s string) []string {
+	var out []string
+	for i := 0; i < len(s); i++ {
+		if s[i] == '{' {
+			if obj := balancedFrom(s, i); obj != "" {
+				out = append(out, obj)
+			}
+		}
 	}
+	return out
+}
+
+// balancedFrom returns the brace-balanced object starting at s[start] ('{'),
+// tracking string literals and escapes so a brace inside a quoted value does not
+// end it. Returns "" if it never balances before EOF.
+func balancedFrom(s string, start int) string {
 	depth, inStr, esc := 0, false, false
 	for i := start; i < len(s); i++ {
 		c := s[i]
@@ -140,11 +157,11 @@ func firstJSONObject(s string) (string, error) {
 		case '}':
 			depth--
 			if depth == 0 {
-				return s[start : i+1], nil
+				return s[start : i+1]
 			}
 		}
 	}
-	return "", fmt.Errorf("unbalanced JSON object")
+	return ""
 }
 
 // modelFn invokes a judge model with a prompt and returns its raw text reply.
@@ -163,13 +180,25 @@ type rubricReport struct {
 // the citation check validates against. Any criterion the model did not return is
 // added as CANNOT_ASSESS so a skipped check can never silently pass.
 func runRubric(source, stripped string, crits []criterion, model modelFn, modelName string) (rubricReport, error) {
-	raw, err := model(buildRubricPrompt(source, crits))
-	if err != nil {
-		return rubricReport{}, fmt.Errorf("judge model: %w", err)
+	prompt := buildRubricPrompt(source, crits)
+	// Retry only malformed output (a known nondeterministic failure mode of
+	// structured LLM replies). A model invocation error is not retried — it is a
+	// hard failure surfaced to the caller (no silent fallback).
+	const maxAttempts = 3
+	var vs []verdict
+	var parseErr error
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		raw, err := model(prompt)
+		if err != nil {
+			return rubricReport{}, fmt.Errorf("judge model: %w", err)
+		}
+		vs, parseErr = parseModelJSON(raw)
+		if parseErr == nil {
+			break
+		}
 	}
-	vs, err := parseModelJSON(raw)
-	if err != nil {
-		return rubricReport{}, err
+	if parseErr != nil {
+		return rubricReport{}, fmt.Errorf("judge model output unparseable after %d attempts: %w", maxAttempts, parseErr)
 	}
 	byID := map[string]*verdict{}
 	for i := range vs {
