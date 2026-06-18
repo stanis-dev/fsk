@@ -25,6 +25,11 @@ export async function cancelRun(runId: string): Promise<void> {
   if (!RUN_ID.test(runId)) throw new Error(`invalid run id: ${runId}`);
   const dir = path.join(runsDir(), runId);
   if (!fs.existsSync(dir)) throw new Error(`no such run: ${runId}`);
+  // Only a still-running run can be cancelled. If it already finished (judge.txt
+  // present) or was already cancelled, do nothing — never signal a pgid the OS may
+  // have recycled after the run's process group exited, and never flip a finished
+  // run to "cancelled".
+  if (fs.existsSync(path.join(dir, "judge.txt")) || fs.existsSync(path.join(dir, "cancelled"))) return;
   // Marker first: the UI flips to cancelled even if a kill below fails.
   fs.writeFileSync(path.join(dir, "cancelled"), new Date().toISOString() + "\n");
   let handle: { pgid?: number; container?: string };
@@ -52,6 +57,7 @@ export async function saveScenario(
   data: { config: ScenarioConfig; task: string; solution: string },
 ): Promise<void> {
   if (!isKnownScenario(id)) throw new Error(`unknown scenario: ${id}`);
+  if (data.config.id !== id) throw new Error(`scenario id mismatch: ${data.config.id} !== ${id}`);
   const err = validateConfig(data.config);
   if (err) throw new Error(`invalid scenario config: ${err}`);
   const dir = path.join(scenariosDir(), id);
