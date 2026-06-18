@@ -40,7 +40,7 @@ func runAll(scenarios []scenario, runsBase, judgeBin string, ag agent, cfg runCo
 			continue
 		}
 		if res.preflightViolated {
-			fmt.Fprintf(w, "%-22s PREFLIGHT VIOLATED (seed not build PASS/tests PASS/judge NON-COMPLIANT)\n", s.id)
+			fmt.Fprintf(w, "%-22s PREFLIGHT VIOLATED: pristine seed did not meet the baseline invariant\n", s.id)
 			failed++
 			continue
 		}

@@ -22,6 +22,9 @@ func TestFilterScenarios_PrefixAndExact(t *testing.T) {
 }
 
 func TestRunAll_PreflightViolationExitsNonZero(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires building the judge")
+	}
 	simsRoot, _ := filepath.Abs("..")
 	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
 	if err != nil {
@@ -45,6 +48,9 @@ func TestRunAll_PreflightViolationExitsNonZero(t *testing.T) {
 }
 
 func TestRunAll_AllPassExitsZero(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires building the judge")
+	}
 	simsRoot, _ := filepath.Abs("..")
 	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
 	if err != nil {

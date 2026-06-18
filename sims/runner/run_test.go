@@ -23,6 +23,9 @@ func (f fakeAgent) run(rd runDir, task string, cfg runConfig) error {
 }
 
 func TestRunScenario_PreflightHoldsAndArtifactsWritten(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires building the judge")
+	}
 	simsRoot, _ := filepath.Abs("..")
 	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
 	if err != nil {
