@@ -12,6 +12,22 @@ const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-
 const INPUT =
   "w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
+// The tools a trajectory check can assert: the fiskaly MCP docs tools plus the
+// built-in code tools that appear in agent transcripts. The judge matches these
+// bare names against the MCP-prefixed transcript names.
+const TOOL_NAMES = [
+  "search_fiskaly_docs",
+  "fetch_fiskaly_doc",
+  "Read",
+  "Edit",
+  "Write",
+  "MultiEdit",
+  "Bash",
+  "Glob",
+  "Grep",
+  "Task",
+];
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
@@ -77,7 +93,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   }
 
   function addToolReq() {
-    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: "", min: 1 }] });
+    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: TOOL_NAMES[0], min: 1 }] });
   }
 
   function removeToolReq(i: number) {
@@ -134,12 +150,17 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
           <span className={LABEL}>tools called</span>
           {(checks.toolsCalled ?? []).map((req, i) => (
             <div key={i} className="flex items-center gap-2">
-              <input
+              <select
                 className={cn(INPUT, "flex-1")}
-                placeholder="tool name"
                 value={req.name}
                 onChange={(e) => patchToolReq(i, { name: e.target.value })}
-              />
+              >
+                {(TOOL_NAMES.includes(req.name) ? TOOL_NAMES : [req.name, ...TOOL_NAMES]).map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
               <input
                 className={cn(INPUT, "w-20")}
                 type="number"
