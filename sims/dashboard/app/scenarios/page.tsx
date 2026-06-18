@@ -22,7 +22,7 @@ export default function ScenariosPage() {
             <TableHead className={HEAD}>id</TableHead>
             <TableHead className={HEAD}>title</TableHead>
             <TableHead className={cn(HEAD, "text-right")}>tier</TableHead>
-            <TableHead className={cn(HEAD, "text-right")}>rules</TableHead>
+            <TableHead className={cn(HEAD, "text-right")}>expectations</TableHead>
             <TableHead className={cn(HEAD, "text-right")}>traps</TableHead>
           </TableRow>
         </TableHeader>

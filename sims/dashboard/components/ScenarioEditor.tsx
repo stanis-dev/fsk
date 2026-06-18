@@ -6,7 +6,7 @@ import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { saveScenario } from "@/app/actions";
-import type { ScenarioDetail } from "@/lib/types";
+import type { ScenarioDetail, Expectation, ToolReq } from "@/lib/types";
 
 const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
 const INPUT =
@@ -53,6 +53,41 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   const [solution, setSolution] = useState(detail.solution);
   const [state, setState] = useState<{ kind: "idle" | "saving" | "saved" | "error"; msg?: string }>({ kind: "idle" });
 
+  const checks = config.judge.checks;
+  const expectations = config.judge.expectations;
+
+  function setChecks(patch: Partial<typeof checks>) {
+    setConfig({ ...config, judge: { ...config.judge, checks: { ...checks, ...patch } } });
+  }
+
+  function setExpectations(next: Expectation[]) {
+    setConfig({ ...config, judge: { ...config.judge, expectations: next } });
+  }
+
+  function addExpectation() {
+    setExpectations([...expectations, { id: "", expectation: "", where: undefined, cite: undefined }]);
+  }
+
+  function removeExpectation(i: number) {
+    setExpectations(expectations.filter((_, j) => j !== i));
+  }
+
+  function patchExpectation(i: number, patch: Partial<Expectation>) {
+    setExpectations(expectations.map((e, j) => (j === i ? { ...e, ...patch } : e)));
+  }
+
+  function addToolReq() {
+    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: "", min: 1 }] });
+  }
+
+  function removeToolReq(i: number) {
+    setChecks({ toolsCalled: (checks.toolsCalled ?? []).filter((_, j) => j !== i) });
+  }
+
+  function patchToolReq(i: number, patch: Partial<ToolReq>) {
+    setChecks({ toolsCalled: (checks.toolsCalled ?? []).map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+  }
+
   async function save() {
     setState({ kind: "saving" });
     try {
@@ -81,11 +116,120 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
         </Field>
       </div>
 
-      <StringList
-        label="judge expectations"
-        items={config.judge.expectations.map((e) => e.id)}
-        onChange={(ids) => setConfig({ ...config, judge: { ...config.judge, expectations: ids.map((id) => ({ id, expectation: id })) } })}
-      />
+      {/* checks */}
+      <div className="space-y-4 rounded-lg border border-border p-4">
+        <span className={LABEL}>checks</span>
+
+        <label className="flex items-center gap-2.5 text-sm">
+          <input
+            type="checkbox"
+            checked={checks.groundedBeforeWrite ?? false}
+            onChange={(e) => setChecks({ groundedBeforeWrite: e.target.checked || undefined })}
+            className="rounded border-border"
+          />
+          <span>grounded before write</span>
+        </label>
+
+        <div className="space-y-1.5">
+          <span className={LABEL}>tools called</span>
+          {(checks.toolsCalled ?? []).map((req, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input
+                className={cn(INPUT, "flex-1")}
+                placeholder="tool name"
+                value={req.name}
+                onChange={(e) => patchToolReq(i, { name: e.target.value })}
+              />
+              <input
+                className={cn(INPUT, "w-20")}
+                type="number"
+                min={1}
+                placeholder="min"
+                value={req.min}
+                onChange={(e) => patchToolReq(i, { min: Number(e.target.value) })}
+              />
+              <button type="button" onClick={() => removeToolReq(i)} className="text-muted-foreground hover:text-danger">
+                <X className="size-4" />
+              </button>
+            </div>
+          ))}
+          <Button type="button" variant="outline" size="sm" onClick={addToolReq}>
+            <Plus className="size-3.5 mr-1" /> add tool
+          </Button>
+        </div>
+
+        <StringList
+          label="docs fetched"
+          items={checks.docsFetched ?? []}
+          onChange={(v) => setChecks({ docsFetched: v.length ? v : undefined })}
+        />
+
+        <Field label="max mcp errors">
+          <input
+            className={cn(INPUT, "w-32")}
+            type="number"
+            min={0}
+            placeholder="unset"
+            value={checks.maxMcpErrors ?? ""}
+            onChange={(e) => setChecks({ maxMcpErrors: e.target.value === "" ? undefined : Number(e.target.value) })}
+          />
+        </Field>
+      </div>
+
+      {/* expectations */}
+      <div className="space-y-3">
+        <span className={LABEL}>expectations</span>
+        {expectations.map((exp, i) => (
+          <div key={i} className="relative space-y-2 rounded-lg border border-border p-3">
+            <button
+              type="button"
+              onClick={() => removeExpectation(i)}
+              className="absolute right-2 top-2 text-muted-foreground hover:text-danger"
+            >
+              <X className="size-4" />
+            </button>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <Field label="id">
+                <input
+                  className={INPUT}
+                  value={exp.id}
+                  onChange={(e) => patchExpectation(i, { id: e.target.value })}
+                />
+              </Field>
+              <Field label="where">
+                <select
+                  className={INPUT}
+                  value={exp.where ?? ""}
+                  onChange={(e) => patchExpectation(i, { where: e.target.value || undefined })}
+                >
+                  <option value="">—</option>
+                  <option value="source">source</option>
+                  <option value="transcript">transcript</option>
+                  <option value="telemetry">telemetry</option>
+                </select>
+              </Field>
+            </div>
+            <Field label="expectation">
+              <textarea
+                className={cn(INPUT, "min-h-16 font-mono text-xs leading-relaxed")}
+                value={exp.expectation}
+                onChange={(e) => patchExpectation(i, { expectation: e.target.value })}
+              />
+            </Field>
+            <Field label="cite">
+              <input
+                className={INPUT}
+                value={exp.cite ?? ""}
+                onChange={(e) => patchExpectation(i, { cite: e.target.value || undefined })}
+              />
+            </Field>
+          </div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={addExpectation}>
+          <Plus className="size-3.5 mr-1" /> add expectation
+        </Button>
+      </div>
+
       <StringList label="traps" items={config.traps} onChange={(traps) => setConfig({ ...config, traps })} />
 
       <Field label="task.md">
