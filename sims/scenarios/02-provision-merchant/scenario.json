@@ -30,33 +30,27 @@
     "expectations": [
       {
         "id": "real-host",
-        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.",
-        "cite": "NOTES.md host"
+        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."
       },
       {
         "id": "token-exchange",
-        "expectation": "Exchanges credentials for a JWT at POST /tokens.",
-        "cite": "NOTES.md step 1"
+        "expectation": "Exchanges credentials for a JWT at POST /tokens."
       },
       {
         "id": "idempotency",
-        "expectation": "Sets X-Idempotency-Key on every POST.",
-        "cite": "NOTES.md addendum"
+        "expectation": "Sets X-Idempotency-Key on every POST."
       },
       {
         "id": "api-version",
-        "expectation": "Sends the dated X-Api-Version header on all calls.",
-        "cite": "NOTES.md"
+        "expectation": "Sends the dated X-Api-Version header on all calls."
       },
       {
         "id": "scope-identifier",
-        "expectation": "Scopes subject creation to the UNIT org via X-Scope-Identifier, not the HUB/GROUP key directly.",
-        "cite": "NOTES.md steps 3-9"
+        "expectation": "Scopes subject creation to the UNIT org via X-Scope-Identifier, not the HUB/GROUP key directly."
       },
       {
         "id": "commissioning",
-        "expectation": "Commissions taxpayer -> location -> system in order before issuing any receipts.",
-        "cite": "NOTES.md steps 3-9"
+        "expectation": "Commissions taxpayer -> location -> system in order before issuing any receipts."
       }
     ]
   }

@@ -68,7 +68,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   }
 
   function addExpectation() {
-    setExpectations([...expectations, { id: "", expectation: "", cite: undefined }]);
+    setExpectations([...expectations, { id: "", expectation: "" }]);
   }
 
   function removeExpectation(i: number) {
@@ -212,31 +212,22 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
       </div>
 
       {/* expectations */}
-      <div className="space-y-3">
+      <div className="space-y-4 rounded-lg border border-border p-4">
         <span className={LABEL}>expectations</span>
         {expectations.map((exp, i) => (
-          <div key={i} className="relative space-y-2 rounded-lg border border-border p-3">
+          <div key={i} className="flex items-start gap-2">
+            <textarea
+              className={cn(INPUT, "min-h-16 flex-1 font-mono text-xs leading-relaxed")}
+              value={exp.expectation}
+              onChange={(e) => patchExpectation(i, { expectation: e.target.value })}
+            />
             <button
               type="button"
               onClick={() => removeExpectation(i)}
-              className="absolute right-2 top-2 text-muted-foreground hover:text-danger"
+              className="mt-2 text-muted-foreground hover:text-danger"
             >
               <X className="size-4" />
             </button>
-            <Field label="expectation">
-              <textarea
-                className={cn(INPUT, "min-h-16 font-mono text-xs leading-relaxed")}
-                value={exp.expectation}
-                onChange={(e) => patchExpectation(i, { expectation: e.target.value })}
-              />
-            </Field>
-            <Field label="cite">
-              <input
-                className={INPUT}
-                value={exp.cite ?? ""}
-                onChange={(e) => patchExpectation(i, { cite: e.target.value || undefined })}
-              />
-            </Field>
           </div>
         ))}
         <Button type="button" variant="outline" size="sm" onClick={addExpectation}>

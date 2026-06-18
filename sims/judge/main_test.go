@@ -92,9 +92,9 @@ func TestBuildReport(t *testing.T) {
 
 func TestRenderExpectationsContainsFields(t *testing.T) {
 	s := renderExpectations(rubricReport{Model: "claude-opus-4-8", Criteria: []verdict{
-		{ID: "c1", Verdict: "UNMET", Reasoning: "because", EvidenceQuote: "MenuVAT[x]", Cite: "SOLUTION"},
+		{ID: "c1", Verdict: "UNMET", Reasoning: "because", EvidenceQuote: "MenuVAT[x]"},
 	}})
-	for _, w := range []string{"UNMET", "c1", "because", "MenuVAT[x]", "SOLUTION", "claude-opus-4-8"} {
+	for _, w := range []string{"UNMET", "c1", "because", "MenuVAT[x]", "claude-opus-4-8"} {
 		if !strings.Contains(s, w) {
 			t.Errorf("render missing %q", w)
 		}

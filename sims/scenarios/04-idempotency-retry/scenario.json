@@ -30,28 +30,23 @@
     "expectations": [
       {
         "id": "real-host",
-        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.",
-        "cite": "NOTES.md host"
+        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."
       },
       {
         "id": "token-exchange",
-        "expectation": "Exchanges credentials for a JWT at POST /tokens.",
-        "cite": "NOTES.md step 1"
+        "expectation": "Exchanges credentials for a JWT at POST /tokens."
       },
       {
         "id": "idempotency",
-        "expectation": "Generates a fresh X-Idempotency-Key per logical request; reuses the same key only when retrying that exact request, never across distinct POSTs.",
-        "cite": "NOTES.md addendum"
+        "expectation": "Generates a fresh X-Idempotency-Key per logical request; reuses the same key only when retrying that exact request, never across distinct POSTs."
       },
       {
         "id": "api-version",
-        "expectation": "Sends the dated X-Api-Version header on all calls.",
-        "cite": "NOTES.md"
+        "expectation": "Sends the dated X-Api-Version header on all calls."
       },
       {
         "id": "records-flow",
-        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.",
-        "cite": "NOTES.md steps 10-11"
+        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST."
       }
     ]
   }

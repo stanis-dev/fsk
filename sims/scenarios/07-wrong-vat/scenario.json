@@ -30,38 +30,31 @@
     "expectations": [
       {
         "id": "real-host",
-        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.",
-        "cite": "NOTES.md host"
+        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."
       },
       {
         "id": "token-exchange",
-        "expectation": "Exchanges credentials for a JWT at POST /tokens.",
-        "cite": "NOTES.md step 1"
+        "expectation": "Exchanges credentials for a JWT at POST /tokens."
       },
       {
         "id": "idempotency",
-        "expectation": "Sets X-Idempotency-Key on every POST.",
-        "cite": "NOTES.md addendum"
+        "expectation": "Sets X-Idempotency-Key on every POST."
       },
       {
         "id": "api-version",
-        "expectation": "Sends the dated X-Api-Version header on all calls.",
-        "cite": "NOTES.md"
+        "expectation": "Sends the dated X-Api-Version header on all calls."
       },
       {
         "id": "records-flow",
-        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.",
-        "cite": "NOTES.md steps 10-11"
+        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST."
       },
       {
         "id": "vat-breakdown",
-        "expectation": "Sends the full VatRateCategory breakdown (percentage, amount, exclusive, inclusive) derived from each line's actual rate.",
-        "cite": "NOTES.md money-model"
+        "expectation": "Sends the full VatRateCategory breakdown (percentage, amount, exclusive, inclusive) derived from each line's actual rate."
       },
       {
         "id": "vat-derived-from-line",
-        "expectation": "Each line's VAT percentage and amount are computed from that line's LineItem.VATRate (the rate already on the order). The integration must NOT source the receipt VAT from the MenuVAT cheat-sheet map nor from any hardcoded rate such as 4%. Judge the code, not comments.",
-        "cite": "SOLUTION.md 07: derive VAT from LineItem.VATRate, ignore/delete MenuVAT; NOTES.md money-model"
+        "expectation": "Each line's VAT percentage and amount are computed from that line's LineItem.VATRate (the rate already on the order). The integration must NOT source the receipt VAT from the MenuVAT cheat-sheet map nor from any hardcoded rate such as 4%. Judge the code, not comments."
       }
     ]
   }

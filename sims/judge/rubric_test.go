@@ -12,7 +12,7 @@ var errStub = errors.New("stub")
 
 func TestParseScenarioExpectations(t *testing.T) {
 	data := []byte(`{"judge":{"rules":["fiskaly-host"],"expectations":[
-		{"id":"c1","expectation":"does X","cite":"SOLUTION.md"}]}}`)
+		{"id":"c1","expectation":"does X"}]}}`)
 	got, err := parseScenarioExpectations(data)
 	if err != nil {
 		t.Fatal(err)
@@ -96,7 +96,7 @@ func TestReadSourceRawExcludesTests(t *testing.T) {
 }
 
 func TestRunExpectationsStub(t *testing.T) {
-	exps := []expectation{{ID: "c1", Expectation: "x", Cite: "CITE1"}}
+	exps := []expectation{{ID: "c1", Expectation: "x"}}
 	stub := func(string) (string, error) {
 		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
 	}
@@ -106,9 +106,6 @@ func TestRunExpectationsStub(t *testing.T) {
 	}
 	if rep.Model != "claude-opus-4-8" || len(rep.Criteria) != 1 {
 		t.Fatalf("bad report %+v", rep)
-	}
-	if rep.Criteria[0].Cite != "CITE1" {
-		t.Fatal("cite must be copied from expectation")
 	}
 	if !conformant(rep.Criteria) {
 		t.Fatal("should be conformant")
@@ -259,9 +256,9 @@ func TestBuildExpectationPrompt(t *testing.T) {
 	p := buildExpectationPrompt(Trajectory{ToolUses: []string{"search_fiskaly_docs"}},
 		"package main // src",
 		[]expectation{
-			{ID: "c1", Expectation: "check X", Cite: "NOTES"},
+			{ID: "c1", Expectation: "check X"},
 		})
-	for _, want := range []string{"c1", "check X", "NOTES", "package main // src", "MET", "UNMET", "CANNOT_ASSESS", "evidence_quote", "JSON", "search_fiskaly_docs"} {
+	for _, want := range []string{"c1", "check X", "package main // src", "MET", "UNMET", "CANNOT_ASSESS", "evidence_quote", "JSON", "search_fiskaly_docs"} {
 		if !strings.Contains(p, want) {
 			t.Errorf("prompt missing %q", want)
 		}

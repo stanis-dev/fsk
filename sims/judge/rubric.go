@@ -46,12 +46,11 @@ func claudeModel(prompt string) (string, error) {
 	return env.Result, nil
 }
 
-// expectation is one atomic, binary rubric check authored in scenario.json — what
-// the deterministic regex layer cannot see — grounded by a short cite.
+// expectation is one atomic, binary rubric check authored in scenario.json —
+// something the deterministic checks cannot infer.
 type expectation struct {
 	ID          string `json:"id"`
 	Expectation string `json:"expectation"`
-	Cite        string `json:"cite"`
 }
 
 // parseScenarioExpectations extracts judge.expectations from scenario.json bytes;
@@ -83,7 +82,6 @@ type verdict struct {
 	Verdict       string `json:"verdict"` // MET | UNMET | CANNOT_ASSESS
 	EvidenceQuote string `json:"evidence_quote"`
 	Reasoning     string `json:"reasoning"`
-	Cite          string `json:"cite,omitempty"`
 }
 
 // parseModelJSON extracts the verdict array from a model reply. The model is asked
@@ -183,8 +181,8 @@ func transcriptText(traj Trajectory) string {
 	return b.String()
 }
 
-// runExpectations ties prompt -> model -> parse -> cite-fill -> citation check
-// together for the trajectory-aware path. Source carries comments (for the model);
+// runExpectations ties prompt -> model -> parse -> citation check together for the
+// trajectory-aware path. Source carries comments (for the model);
 // stripped is the comment-stripped source. The citation check validates against
 // stripped ∪ transcriptText(traj). Any expectation the model did not return is
 // added as CANNOT_ASSESS so a skipped check can never silently pass.
@@ -216,7 +214,6 @@ func runExpectations(traj Trajectory, source, stripped string, exps []expectatio
 	out := make([]verdict, 0, len(exps))
 	for _, e := range exps {
 		if v, ok := byID[e.ID]; ok {
-			v.Cite = e.Cite
 			out = append(out, *v)
 			continue
 		}
@@ -224,7 +221,6 @@ func runExpectations(traj Trajectory, source, stripped string, exps []expectatio
 			ID:        e.ID,
 			Verdict:   "CANNOT_ASSESS",
 			Reasoning: "model returned no verdict for this expectation",
-			Cite:      e.Cite,
 		})
 	}
 	citeSrc := stripped + "\n" + transcriptText(traj)
@@ -358,7 +354,7 @@ Reply with ONLY one JSON object and no prose, no markdown fences:
 EXPECTATIONS:
 `)
 	for _, e := range exps {
-		fmt.Fprintf(&b, "- id: %s\n  check: %s\n  reference: %s\n", e.ID, e.Expectation, e.Cite)
+		fmt.Fprintf(&b, "- id: %s\n  check: %s\n", e.ID, e.Expectation)
 	}
 
 	b.WriteString("\n" + trajectoryBeginMarker + "\n")

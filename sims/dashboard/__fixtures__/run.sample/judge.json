@@ -13,8 +13,7 @@
         "id": "vat-derived-from-line",
         "verdict": "MET",
         "evidence_quote": "pct := line.VATRate",
-        "reasoning": "VAT percentage is taken from the order line's own rate.",
-        "cite": "SOLUTION.md 07: derive VAT from LineItem.VATRate"
+        "reasoning": "VAT percentage is taken from the order line's own rate."
       }
     ]
   },

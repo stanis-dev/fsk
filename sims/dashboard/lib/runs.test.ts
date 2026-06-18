@@ -48,7 +48,7 @@ test("parseJudgeReport reads checks.passed and expectations.criteria and returns
     checks: { passed: true, results: [{ id: "r1", pass: true, detail: "ok" }] },
     expectations: {
       model: "claude-opus-4-8",
-      criteria: [{ id: "vat-derived-from-line", verdict: "MET", evidence_quote: "pct := line.VATRate", reasoning: "ok", cite: "SOLUTION.md" }],
+      criteria: [{ id: "vat-derived-from-line", verdict: "MET", evidence_quote: "pct := line.VATRate", reasoning: "ok" }],
     },
     note: "",
   });

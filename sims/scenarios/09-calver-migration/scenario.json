@@ -30,33 +30,27 @@
     "expectations": [
       {
         "id": "real-host",
-        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one.",
-        "cite": "NOTES.md host"
+        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."
       },
       {
         "id": "token-exchange",
-        "expectation": "Exchanges credentials for a JWT at POST /tokens.",
-        "cite": "NOTES.md step 1"
+        "expectation": "Exchanges credentials for a JWT at POST /tokens."
       },
       {
         "id": "idempotency",
-        "expectation": "Sets X-Idempotency-Key on every POST.",
-        "cite": "NOTES.md addendum"
+        "expectation": "Sets X-Idempotency-Key on every POST."
       },
       {
         "id": "api-version-current",
-        "expectation": "Sends X-Api-Version pinned to the current dated version (2026-02-03), not the stale 2025-08-12 in the fixture.",
-        "cite": "NOTES.md current contract"
+        "expectation": "Sends X-Api-Version pinned to the current dated version (2026-02-03), not the stale 2025-08-12 in the fixture."
       },
       {
         "id": "records-flow",
-        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST.",
-        "cite": "NOTES.md steps 10-11"
+        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST."
       },
       {
         "id": "no-legacy-resources",
-        "expectation": "Uses the current resource names (/organizations, /taxpayers, /locations, /systems) and not the pre-rename /entities or /assets paths.",
-        "cite": "NOTES.md current contract"
+        "expectation": "Uses the current resource names (/organizations, /taxpayers, /locations, /systems) and not the pre-rename /entities or /assets paths."
       }
     ]
   }

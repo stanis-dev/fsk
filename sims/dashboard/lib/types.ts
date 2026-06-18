@@ -63,7 +63,6 @@ export interface JudgeCriterion {
   verdict: CriterionVerdict;
   evidence_quote: string;
   reasoning: string;
-  cite: string;
 }
 
 export interface ToolReq { name: string; min: number }
@@ -73,7 +72,7 @@ export interface JudgeChecks {
   docsFetched?: string[];
   maxMcpErrors?: number;
 }
-export interface Expectation { id: string; expectation: string; cite?: string }
+export interface Expectation { id: string; expectation: string }
 
 export interface JudgeReport {
   scenario: string;

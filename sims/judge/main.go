@@ -59,9 +59,6 @@ func renderExpectations(rep rubricReport) string {
 		if v.EvidenceQuote != "" {
 			fmt.Fprintf(&b, "      evidence: %s\n", v.EvidenceQuote)
 		}
-		if v.Cite != "" {
-			fmt.Fprintf(&b, "      cite: %s\n", v.Cite)
-		}
 	}
 	return b.String()
 }

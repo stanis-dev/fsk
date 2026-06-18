@@ -148,9 +148,6 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
                     {criterion.evidence_quote}
                   </pre>
                 )}
-                {criterion.cite && (
-                  <p className="mt-2 text-xs text-muted-foreground">cite: {criterion.cite}</p>
-                )}
               </li>
             ))}
           </ul>
