@@ -41,5 +41,6 @@ func Run(cfg Config) (int, error) {
 			return 2, err
 		}
 	}
-	return runAll(context.Background(), discovered, cfg.RunsBase, runner.judgeBin, runner.ag, runner.cfg, true, cfg.Out), nil
+	rc := runConfig{model: runner.defaultModel, effort: runner.defaultEffort, token: runner.token}
+	return runAll(context.Background(), discovered, cfg.RunsBase, runner.judgeBin, runner.ag, rc, true, cfg.Out), nil
 }

@@ -36,7 +36,7 @@ func filterScenarios(all []scenarios.Scenario, ids []string) ([]scenarios.Scenar
 func runAll(ctx context.Context, ss []scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, detached bool, w io.Writer) int {
 	failed := 0
 	for _, s := range ss {
-		res, err := runScenario(ctx, s, runsBase, judgeBin, ag, cfg, detached)
+		res, err := runScenario(ctx, s, runsBase, judgeBin, ag, cfg, detached, nil)
 		if err != nil {
 			fmt.Fprintf(w, "%-22s ERROR: %v\n", s.ID, err)
 			failed++

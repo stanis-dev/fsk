@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
+	"backend/internal/artifacts"
 	"backend/internal/scenarios"
 )
 
 // fakeRunner implements Runner for tests; no Docker needed.
 type fakeRunner struct {
-	mu           sync.Mutex
-	killCalls    []string
-	containerMap map[string]string // runDir → container name
+	mu        sync.Mutex
+	killCalls []string
 
 	// block controls whether RunScenario blocks until released.
 	// Send on blockRelease to unblock a specific call; RunScenario selects on
@@ -30,7 +30,6 @@ type fakeRunner struct {
 
 func newFakeRunner() *fakeRunner {
 	return &fakeRunner{
-		containerMap: make(map[string]string),
 		blockRelease: make(chan struct{}),
 	}
 }
@@ -42,22 +41,25 @@ func (f *fakeRunner) Resolve(id string) (scenarios.Scenario, bool) {
 	return scenarios.Scenario{}, false
 }
 
-func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, detached bool) (string, error) {
-	// Create a temp run dir to simulate the real runner.
+func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, detached bool, onStart func(runDir string)) (string, error) {
+	// Create a temp run dir to simulate the real runner creating it before the
+	// long coder step. Call onStart immediately so the registry records the dir
+	// while the run is still in flight (mirrors the real runner's behaviour).
 	runDir, err := os.MkdirTemp("", "run.")
 	if err != nil {
 		return "", err
 	}
 
-	f.mu.Lock()
-	f.containerMap[runDir] = "fiskaly-eval-" + filepath.Base(runDir)
-	f.mu.Unlock()
+	if onStart != nil {
+		onStart(runDir)
+	}
 
 	if f.block {
 		select {
 		case <-ctx.Done():
-			// Cancelled; return without writing judge.txt.
-			return runDir, ctx.Err()
+			// On cancel the real runner returns "" so the caller cannot rely on
+			// the return value — the registry was already updated via onStart.
+			return "", ctx.Err()
 		case <-f.blockRelease:
 		}
 	}
@@ -66,7 +68,7 @@ func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, deta
 		return runDir, os.ErrInvalid
 	}
 
-	if err := os.WriteFile(filepath.Join(runDir, "judge.txt"), []byte("pass"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(runDir, artifacts.JudgeLogFile), []byte("pass"), 0o644); err != nil {
 		return "", err
 	}
 	return runDir, nil
@@ -125,6 +127,26 @@ func waitActiveEmpty(t *testing.T, svc *Service) {
 	waitActive(t, svc, 0)
 }
 
+// waitRunDir blocks until the liveRun for runID has a non-empty runDir.
+func waitRunDir(t *testing.T, svc *Service, runID string) string {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		svc.mu.Lock()
+		lr, ok := svc.live[runID]
+		if ok && lr.runDir != "" {
+			dir := lr.runDir
+			svc.mu.Unlock()
+			return dir
+		}
+		svc.mu.Unlock()
+		runtime.Gosched()
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatalf("timed out waiting for runDir on %s", runID)
+	return ""
+}
+
 // ---- Tests ----------------------------------------------------------------
 
 func TestEnqueueUnknown(t *testing.T) {
@@ -171,22 +193,12 @@ func TestCancelLiveRun(t *testing.T) {
 	// Wait until the worker is blocked inside RunScenario (phase "running").
 	waitActivePhase(t, svc, "running")
 
-	// We need the run dir to check for the cancelled marker. The run dir is
-	// reconciled after RunScenario returns, but since f.block is true the call
-	// hasn't returned yet. The marker is only written if runDir is known.
-	// We cancel first; RunScenario will return via ctx.Done with a runDir.
-	// After cancel the worker reconciles and the marker is written.
-
+	// onStart fires before the block, so the registry has the runDir already.
+	// Cancel finds the container name, kills it, and writes the marker.
 	ok := svc.Cancel(id)
 	if !ok {
 		t.Fatal("Cancel returned false for live run")
 	}
-
-	// KillContainer should have been called (container set once RunScenario
-	// returned with a runDir; Cancel calls KillContainer on the container).
-	// Because Cancel may run before RunScenario returns (and thus before
-	// container is set on the liveRun), KillContainer may or may not be called.
-	// The spec says best-effort, so we just verify Cancel returned true.
 
 	// Active() should now be empty.
 	waitActiveEmpty(t, svc)
@@ -215,18 +227,27 @@ func TestCancelWritesMarker(t *testing.T) {
 		t.Fatalf("Enqueue: %v", err)
 	}
 
-	waitActivePhase(t, svc, "running")
-	svc.Cancel(id)
+	// Wait until the worker is blocked inside RunScenario AND onStart has fired,
+	// so the registry has recorded the run dir.
+	runDir := waitRunDir(t, svc, id)
 
-	// After cancellation the worker unblocks (ctx.Done), RunScenario returns
-	// a runDir, and the worker reconciles it onto the liveRun. Cancel already
-	// removed the liveRun from the registry, so the worker's reconciliation is
-	// a no-op for the registry. BUT the marker is written by Cancel only if
-	// runDir is already set. Since RunScenario hadn't returned yet, runDir was
-	// empty at Cancel time and no marker is written here.
-	//
-	// To test marker writing we need the runDir set BEFORE cancel. Use the
-	// reattach path instead (see TestReattachCancel).
+	// Cancel: ctx is cancelled (unblocks RunScenario), KillContainer called,
+	// and the cancelled marker written to the now-known run dir.
+	ok := svc.Cancel(id)
+	if !ok {
+		t.Fatal("Cancel returned false")
+	}
+
+	if f.killCallCount() == 0 {
+		t.Error("KillContainer was not called")
+	}
+
+	marker := filepath.Join(runDir, artifacts.CancelledFile)
+	if _, err := os.Stat(marker); err != nil {
+		t.Fatalf("cancelled marker not written: %v", err)
+	}
+
+	waitActiveEmpty(t, svc)
 }
 
 func TestCancelIdempotent(t *testing.T) {
@@ -280,7 +301,7 @@ func TestReattachRegistersInFlight(t *testing.T) {
 	}
 
 	// Marker must exist.
-	marker := filepath.Join(orphan, "cancelled")
+	marker := filepath.Join(orphan, artifacts.CancelledFile)
 	if _, err := os.Stat(marker); err != nil {
 		t.Fatalf("cancelled marker not written: %v", err)
 	}
@@ -345,7 +366,7 @@ func TestReattachSkipsCompleted(t *testing.T) {
 	if err := os.MkdirAll(done, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(done, "judge.txt"), []byte("pass"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(done, artifacts.JudgeLogFile), []byte("pass"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -354,7 +375,7 @@ func TestReattachSkipsCompleted(t *testing.T) {
 	if err := os.MkdirAll(cancelled, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(cancelled, "cancelled"), []byte{}, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(cancelled, artifacts.CancelledFile), []byte{}, 0o644); err != nil {
 		t.Fatal(err)
 	}
 

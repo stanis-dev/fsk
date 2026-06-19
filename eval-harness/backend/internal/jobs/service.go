@@ -9,6 +9,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"backend/internal/artifacts"
 	"backend/internal/scenarios"
 )
 
@@ -16,7 +17,7 @@ import (
 // KillContainer is dockerctx-bound by the adapter; ContainerName wraps the
 // orchestrator package func.
 type Runner interface {
-	RunScenario(ctx context.Context, s scenarios.Scenario, detached bool) (string, error)
+	RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, detached bool, onStart func(runDir string)) (string, error)
 	Resolve(id string) (scenarios.Scenario, bool)
 	ContainerName(runDir string) string
 	KillContainer(container string) error
@@ -34,8 +35,8 @@ type ActiveRun struct {
 type liveRun struct {
 	id         string
 	scenarioID string
-	container  string             // set once RunScenario returns a runDir
-	runDir     string             // base name of the run dir, set once known
+	container  string             // set once onStart fires or RunScenario returns a runDir
+	runDir     string             // absolute path of the run dir, set once known
 	phase      string             // "queued" | "running" | "done" | "error"
 	ctx        context.Context    // cancelled by cancel
 	cancel     context.CancelFunc // call to abort the run
@@ -44,6 +45,8 @@ type liveRun struct {
 type job struct {
 	id         string
 	scenarioID string
+	model      string
+	effort     string
 }
 
 // Service is a bounded worker pool with a live-run registry.
@@ -101,7 +104,7 @@ func (s *Service) Enqueue(scenarioID, model, effort string) (string, error) {
 	s.live[id] = lr
 	s.mu.Unlock()
 
-	s.queue <- job{id: id, scenarioID: scenarioID}
+	s.queue <- job{id: id, scenarioID: scenarioID, model: model, effort: effort}
 	return id, nil
 }
 
@@ -115,21 +118,21 @@ func (s *Service) Cancel(runID string) bool {
 		return false
 	}
 	delete(s.live, runID)
+	runDir := lr.runDir
+	container := lr.container
 	s.mu.Unlock()
 
 	lr.cancel()
 
-	// Derive container name if we have a run dir but not yet the container field.
-	container := lr.container
-	if container == "" && lr.runDir != "" {
-		container = s.r.ContainerName(filepath.Join(s.runsBase, lr.runDir))
+	if container == "" && runDir != "" {
+		container = s.r.ContainerName(runDir)
 	}
 	if container != "" {
 		_ = s.r.KillContainer(container)
 	}
 
-	if lr.runDir != "" {
-		marker := filepath.Join(s.runsBase, lr.runDir, "cancelled")
+	if runDir != "" {
+		marker := filepath.Join(runDir, artifacts.CancelledFile)
 		_ = os.WriteFile(marker, []byte{}, 0o644)
 	}
 
@@ -181,20 +184,20 @@ func (s *Service) runJob(j job) {
 		return
 	}
 
-	runDir, runErr := s.r.RunScenario(lr.ctx, sc, false)
-
-	// Reconcile: once RunScenario returns we know the real run dir. Update the
-	// registry so a concurrent Cancel can write the marker and name the container.
-	if runDir != "" {
-		base := filepath.Base(runDir)
+	// onStart fires right after the run dir is created, before the long coder
+	// step. Recording the run dir and container here means a concurrent Cancel
+	// finds them and can KillContainer + write the marker even mid-run.
+	onStart := func(runDir string) {
 		container := s.r.ContainerName(runDir)
 		s.mu.Lock()
 		if lr2, still := s.live[j.id]; still {
-			lr2.runDir = base
+			lr2.runDir = runDir
 			lr2.container = container
 		}
 		s.mu.Unlock()
 	}
+
+	_, runErr := s.r.RunScenario(lr.ctx, sc, j.model, j.effort, false, onStart)
 
 	if runErr != nil {
 		s.setPhaseAndDeregister(j.id, "error")
@@ -226,7 +229,7 @@ func (s *Service) reattach() {
 		}
 		name := e.Name()
 		full := filepath.Join(s.runsBase, name)
-		if fileExists(filepath.Join(full, "judge.txt")) || fileExists(filepath.Join(full, "cancelled")) {
+		if fileExists(filepath.Join(full, artifacts.JudgeLogFile)) || fileExists(filepath.Join(full, artifacts.CancelledFile)) {
 			continue
 		}
 		container := s.r.ContainerName(full)
@@ -236,7 +239,7 @@ func (s *Service) reattach() {
 		s.mu.Lock()
 		s.live[id] = &liveRun{
 			id:        id,
-			runDir:    name,
+			runDir:    full,
 			container: container,
 			phase:     "running",
 			ctx:       ctx,

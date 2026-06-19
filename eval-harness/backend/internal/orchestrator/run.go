@@ -16,7 +16,7 @@ type scenarioResult struct {
 	obs    observation
 }
 
-func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, detached bool) (scenarioResult, error) {
+func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, detached bool, onStart func(string)) (scenarioResult, error) {
 	taskBytes, err := os.ReadFile(filepath.Join(s.Dir, "task.md"))
 	if err != nil {
 		return scenarioResult{}, fmt.Errorf("reading task: %w", err)
@@ -28,6 +28,10 @@ func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin s
 	}
 	if err := writeRunHandle(rd.path, detached); err != nil {
 		return scenarioResult{}, fmt.Errorf("writeRunHandle: %w", err)
+	}
+
+	if onStart != nil {
+		onStart(rd.path)
 	}
 
 	if err := ag.run(ctx, rd, string(taskBytes), cfg); err != nil {

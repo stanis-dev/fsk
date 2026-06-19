@@ -9,15 +9,28 @@ import (
 	"backend/internal/scenarios"
 )
 
+// RunOptions are per-run inputs. Empty Model/Effort fall back to the Runner's defaults.
+type RunOptions struct {
+	Model    string
+	Effort   string
+	Detached bool
+	// OnStart is called once, right after the run dir is created and before the
+	// long coder run. The caller can use it to record the run dir while the run
+	// is in flight (e.g. so a concurrent Cancel knows where to write a marker).
+	OnStart func(runDir string)
+}
+
 // Runner holds a fully-initialised pipeline: toolchain verified, judge built,
 // Docker image built once. Multiple scenarios can be run without rebuilding.
 type Runner struct {
-	cfg          runConfig
-	ag           agent
-	judgeBin     string
-	runsBase     string
-	dockerCtx    string
-	scenariosDir string
+	defaultModel  string
+	defaultEffort string
+	token         string
+	ag            agent
+	judgeBin      string
+	runsBase      string
+	dockerCtx     string
+	scenariosDir  string
 }
 
 // NewRunner validates the toolchain, loads config, builds the judge binary, and
@@ -52,21 +65,30 @@ func NewRunner(cfg Config) (*Runner, error) {
 		return nil, fmt.Errorf("building image: %w", err)
 	}
 	return &Runner{
-		cfg:          rc,
-		ag:           ag,
-		judgeBin:     judgeBin,
-		runsBase:     cfg.RunsBase,
-		dockerCtx:    ctx,
-		scenariosDir: cfg.ScenariosDir,
+		defaultModel:  rc.model,
+		defaultEffort: rc.effort,
+		token:         rc.token,
+		ag:            ag,
+		judgeBin:      judgeBin,
+		runsBase:      cfg.RunsBase,
+		dockerCtx:     ctx,
+		scenariosDir:  cfg.ScenariosDir,
 	}, nil
 }
 
 // RunScenario runs one scenario through the pipeline. The image is already
 // built; this call only runs the container. ctx cancellation kills the run.
-// detached controls whether run.json records the real PID/PGID (CLI path) or
-// zeroes (server in-process path, where the dashboard must not kill the server).
-func (r *Runner) RunScenario(ctx context.Context, s scenarios.Scenario, detached bool) (runDir string, err error) {
-	res, err := runScenario(ctx, s, r.runsBase, r.judgeBin, r.ag, r.cfg, detached)
+func (r *Runner) RunScenario(ctx context.Context, s scenarios.Scenario, opts RunOptions) (runDir string, err error) {
+	model := opts.Model
+	if model == "" {
+		model = r.defaultModel
+	}
+	effort := opts.Effort
+	if effort == "" {
+		effort = r.defaultEffort
+	}
+	rc := runConfig{model: model, effort: effort, token: r.token}
+	res, err := runScenario(ctx, s, r.runsBase, r.judgeBin, r.ag, rc, opts.Detached, opts.OnStart)
 	if err != nil {
 		return "", err
 	}

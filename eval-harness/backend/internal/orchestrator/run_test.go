@@ -108,7 +108,7 @@ func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	}
 	one := sc[0] // 01-zero-to-receipt
 
-	res, err := runScenario(context.Background(), one, t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"}, false)
+	res, err := runScenario(context.Background(), one, t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"}, false, nil)
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestRunScenario_CancelStopsRun(t *testing.T) {
 		err error
 	}, 1)
 	go func() {
-		res, err := runScenario(ctx, one, runsBase, judgeBin, blockingAgent{}, runConfig{model: "m", effort: "e"}, false)
+		res, err := runScenario(ctx, one, runsBase, judgeBin, blockingAgent{}, runConfig{model: "m", effort: "e"}, false, nil)
 		done <- struct {
 			res scenarioResult
 			err error
