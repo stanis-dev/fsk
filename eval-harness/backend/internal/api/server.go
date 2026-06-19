@@ -9,7 +9,6 @@ import (
 )
 
 // RunService is the subset of jobs.Service the API layer depends on.
-// Keeping it local lets tests use a fake without importing jobs.
 type RunService interface {
 	Enqueue(scenarioID, model, effort string) (string, error)
 	Cancel(runID string) bool

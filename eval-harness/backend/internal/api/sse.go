@@ -10,6 +10,10 @@ import (
 // stream subscribes to the service and writes events as SSE until the client
 // disconnects. filter, if non-empty, restricts to events for that run id.
 func (cfg Config) stream(w http.ResponseWriter, r *http.Request, filter string) {
+	if cfg.Service == nil {
+		writeError(w, http.StatusServiceUnavailable, "no job service")
+		return
+	}
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		writeError(w, http.StatusInternalServerError, "streaming unsupported")
@@ -41,7 +45,10 @@ func (cfg Config) stream(w http.ResponseWriter, r *http.Request, filter string) 
 			if filter != "" && ev.RunID != filter {
 				continue
 			}
-			data, _ := json.Marshal(ev)
+			data, err := json.Marshal(ev)
+			if err != nil {
+				continue
+			}
 			fmt.Fprintf(w, "data: %s\n\n", data)
 			flusher.Flush()
 		}

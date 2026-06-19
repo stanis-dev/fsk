@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -84,9 +85,10 @@ func mustWrite(t *testing.T, path, content string) {
 
 // fakeService implements RunService for tests.
 type fakeService struct {
-	enqueueErr error           // non-nil causes Enqueue to return this error
-	cancelOK   bool            // value returned by Cancel
-	subCh      chan jobs.Event // if set, Subscribe returns this channel
+	enqueueErr   error           // non-nil causes Enqueue to return this error
+	cancelOK     bool            // value returned by Cancel
+	subCh        chan jobs.Event // if set, Subscribe returns this channel
+	unsubscribed atomic.Bool     // set to true when the unsubscribe func is called
 }
 
 func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) {
@@ -103,7 +105,7 @@ func (f *fakeService) Subscribe() (<-chan jobs.Event, func()) {
 	if ch == nil {
 		ch = make(chan jobs.Event, 4)
 	}
-	return ch, func() {}
+	return ch, func() { f.unsubscribed.Store(true) }
 }
 
 func newServer(t *testing.T) (*httptest.Server, Config) {
@@ -504,9 +506,9 @@ func TestStreamRunsSSE(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
 
 	if ct := resp.Header.Get("Content-Type"); ct != "text/event-stream" {
+		resp.Body.Close()
 		t.Fatalf("want Content-Type text/event-stream, got %q", ct)
 	}
 
@@ -515,20 +517,41 @@ func TestStreamRunsSSE(t *testing.T) {
 
 	// Read lines until we find the data frame or the context expires.
 	scanner := bufio.NewScanner(resp.Body)
+	found := false
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "data: ") {
 			payload := strings.TrimPrefix(line, "data: ")
 			if !strings.Contains(payload, `"phase":"running"`) {
-				t.Errorf("unexpected payload: %s", payload)
+				t.Errorf("want phase=running in payload: %s", payload)
 			}
-			return
+			if !strings.Contains(payload, `"runId":"job.1"`) {
+				t.Errorf("want runId=job.1 in payload: %s", payload)
+			}
+			if !strings.Contains(payload, `"scenarioId":"01-demo"`) {
+				t.Errorf("want scenarioId=01-demo in payload: %s", payload)
+			}
+			found = true
+			break
 		}
 	}
-	if err := scanner.Err(); err != nil && ctx.Err() == nil {
-		t.Fatalf("scanner error: %v", err)
+	resp.Body.Close()
+	if !found {
+		if err := scanner.Err(); err != nil && ctx.Err() == nil {
+			t.Fatalf("scanner error: %v", err)
+		}
+		t.Fatal("no data frame received before timeout")
 	}
-	t.Fatal("no data frame received before timeout")
+
+	// After the client closes, the handler's defer unsubscribe() must fire.
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if svc.unsubscribed.Load() {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Error("unsubscribe was not called after client disconnect")
 }
 
 func TestStreamRunEventsFiltersOtherRuns(t *testing.T) {
