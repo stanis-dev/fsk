@@ -47,12 +47,17 @@ func cmdRun(args []string) int {
 		return 2
 	}
 
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "eval-harness:", err)
+		return 2
+	}
 	code, err := orchestrator.Run(orchestrator.Config{
 		ScenariosDir:   filepath.Join(ehRoot, "scenarios"),
 		JudgeDir:       filepath.Join(ehRoot, "backend", "cmd", "judge"),
 		RepoRoot:       filepath.Dir(ehRoot),
 		DockerfilePath: filepath.Join(ehRoot, "evals", "Dockerfile"),
-		RunsBase:       filepath.Join(os.Getenv("HOME"), ".cache", "fiskaly-eval"),
+		RunsBase:       filepath.Join(home, ".cache", "fiskaly-eval"),
 		Image:          "fiskaly-eval",
 		Model:          *model,
 		Effort:         *effort,
@@ -107,7 +112,12 @@ func cmdServe(args []string) int {
 	}
 	runsDir := os.Getenv("FISKALY_RUNS_DIR")
 	if runsDir == "" {
-		runsDir = filepath.Join(os.Getenv("HOME"), ".cache", "fiskaly-eval")
+		home, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "eval-harness:", err)
+			return 2
+		}
+		runsDir = filepath.Join(home, ".cache", "fiskaly-eval")
 	}
 	h := api.Handler(api.Config{
 		RunsDir:      runsDir,
