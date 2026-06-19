@@ -8,7 +8,7 @@ import (
 
 // ParseTranscript parses a JSONL transcript into typed display events.
 func ParseTranscript(jsonl string) []TranscriptEvent {
-	var events []TranscriptEvent
+	events := []TranscriptEvent{}
 	sc := bufio.NewScanner(strings.NewReader(jsonl))
 	sc.Buffer(make([]byte, 16*1024*1024), 16*1024*1024)
 	for sc.Scan() {

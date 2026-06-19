@@ -10,7 +10,7 @@ import (
 
 // ParseTelemetry parses a JSONL telemetry file into typed events.
 func ParseTelemetry(jsonl string) []TelemetryEvent {
-	var out []TelemetryEvent
+	out := []TelemetryEvent{}
 	sc := bufio.NewScanner(strings.NewReader(jsonl))
 	sc.Buffer(make([]byte, 16*1024*1024), 16*1024*1024)
 	for sc.Scan() {

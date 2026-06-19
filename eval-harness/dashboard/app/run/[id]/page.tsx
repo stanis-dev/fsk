@@ -192,8 +192,8 @@ export default function RunPage() {
           </pre>
         </Disclosure>
 
-        <Disclosure title={`session transcript · ${run.transcript.length} events`} open>
-          <TranscriptView events={run.transcript} />
+        <Disclosure title={`session transcript · ${run.transcript?.length ?? 0} events`} open>
+          <TranscriptView events={run.transcript ?? []} />
         </Disclosure>
 
         <Disclosure title={`MCP telemetry · ${run.telemetry.total} calls`} open>
@@ -201,7 +201,7 @@ export default function RunPage() {
         </Disclosure>
 
         <Disclosure title="diff">
-          <DiffView lines={run.diff} />
+          <DiffView lines={run.diff ?? []} />
         </Disclosure>
       </div>
     </main>

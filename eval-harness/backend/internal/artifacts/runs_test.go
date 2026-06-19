@@ -193,6 +193,35 @@ func TestSummarizeRunCancelledPrecedence(t *testing.T) {
 	}
 }
 
+func TestLoadRunEmptyDirNoNullSlices(t *testing.T) {
+	dir := t.TempDir()
+	runDir := filepath.Join(dir, "run.empty-test")
+	must(t, os.Mkdir(runDir, 0o755))
+	must(t, os.WriteFile(filepath.Join(runDir, MetaFile), []byte(`{"scenario":"01-demo","harness":"docker"}`), 0o644))
+
+	rd, ok := LoadRun(dir, "run.empty-test")
+	if !ok || rd == nil {
+		t.Fatal("LoadRun returned false for valid empty run dir")
+	}
+
+	out, err := json.Marshal(rd)
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	s := string(out)
+
+	for _, want := range []string{`"transcript":[]`, `"diff":[]`, `"byTool":[]`, `"queries":[]`, `"docsFetched":[]`} {
+		if !strings.Contains(s, want) {
+			t.Errorf("marshaled JSON missing %q; got: %s", want, s)
+		}
+	}
+	for _, bad := range []string{`"transcript":null`, `"diff":null`, `"byTool":null`, `"queries":null`, `"docsFetched":null`} {
+		if strings.Contains(s, bad) {
+			t.Errorf("marshaled JSON contains %q (should be []); got: %s", bad, s)
+		}
+	}
+}
+
 func must(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
