@@ -73,11 +73,11 @@ func (r *Runner) RunScenario(ctx context.Context, s scenarios.Scenario, detached
 	return res.runDir, nil
 }
 
-// Resolve discovers scenarios under scenariosDir and returns the one whose ID
+// Resolve discovers scenarios under r.scenariosDir and returns the one whose ID
 // matches id exactly or has id as a numeric prefix (e.g. "06" matches
 // "06-fire-and-forget"). ok is false if nothing matches.
-func (r *Runner) Resolve(scenariosDir, id string) (scenarios.Scenario, bool) {
-	all, err := scenarios.Discover(scenariosDir)
+func (r *Runner) Resolve(id string) (scenarios.Scenario, bool) {
+	all, err := scenarios.Discover(r.scenariosDir)
 	if err != nil {
 		return scenarios.Scenario{}, false
 	}

@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -167,8 +168,19 @@ func TestRunScenario_CancelStopsRun(t *testing.T) {
 	if result.err == nil {
 		t.Fatal("expected error after cancel, got nil")
 	}
-	if result.res.runDir != "" {
-		if _, err := os.Stat(filepath.Join(result.res.runDir, "judge.txt")); err == nil {
+	if !errors.Is(result.err, context.Canceled) {
+		t.Errorf("expected context.Canceled, got %v", result.err)
+	}
+
+	// Capture the run dir from the single child of runsBase (created before cancel)
+	// and assert judge.txt was not written.
+	entries, err := os.ReadDir(runsBase)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) > 0 {
+		runDir := filepath.Join(runsBase, entries[0].Name())
+		if _, err := os.Stat(filepath.Join(runDir, "judge.txt")); err == nil {
 			t.Error("judge.txt must not be written when run is cancelled")
 		}
 	}
