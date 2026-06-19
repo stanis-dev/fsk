@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"os"
@@ -33,43 +33,6 @@ func TestDiscoverScenarios(t *testing.T) {
 	}
 	if filepath.Base(got[0].scenarioJSON) != "scenario.json" {
 		t.Errorf("scenarioJSON = %q, want .../scenario.json", got[0].scenarioJSON)
-	}
-}
-
-func TestFindSimsRoot(t *testing.T) {
-	root := t.TempDir()
-	sims := filepath.Join(root, "eval-harness")
-	mustMkdir(t, filepath.Join(sims, "scenarios"))
-	mustMkdir(t, filepath.Join(sims, "judge"))
-
-	// Above sims: a dir that contains sims/.
-	if got, err := findSimsRoot(root); err != nil || got != sims {
-		t.Errorf("from parent: got %q, %v; want %q", got, err, sims)
-	}
-	// Inside sims: the dir itself has scenarios/ and judge/.
-	if got, err := findSimsRoot(sims); err != nil || got != sims {
-		t.Errorf("from sims itself: got %q, %v; want %q", got, err, sims)
-	}
-	// A grandchild walks up to find it.
-	grandchild := filepath.Join(sims, "judge")
-	if got, err := findSimsRoot(grandchild); err != nil || got != sims {
-		t.Errorf("from grandchild: got %q, %v; want %q", got, err, sims)
-	}
-	// A tree with no sims/ terminates with an error instead of looping.
-	if _, err := findSimsRoot(t.TempDir()); err == nil {
-		t.Error("expected error when no sims/ is present")
-	}
-}
-
-func TestIsSimsDir_RequiresBoth(t *testing.T) {
-	only := t.TempDir()
-	mustMkdir(t, filepath.Join(only, "scenarios"))
-	if isSimsDir(only) {
-		t.Error("a dir with only scenarios/ should not be a sims dir")
-	}
-	mustMkdir(t, filepath.Join(only, "judge"))
-	if !isSimsDir(only) {
-		t.Error("a dir with both scenarios/ and judge/ should be a sims dir")
 	}
 }
 

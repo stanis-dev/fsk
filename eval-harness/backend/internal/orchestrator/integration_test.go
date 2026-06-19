@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"os"
@@ -10,11 +10,11 @@ func TestDiscoverScenarios_RealCount(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping real-scenario discovery in -short mode")
 	}
-	simsRoot, err := filepath.Abs("..")
+	ehRoot, err := filepath.Abs("../../..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := discoverScenarios(filepath.Join(simsRoot, "scenarios"))
+	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
 		t.Fatalf("discoverScenarios: %v", err)
 	}
@@ -35,24 +35,24 @@ func TestRunScenario_RealDocker(t *testing.T) {
 		t.Skipf("docker daemon not reachable: %v", err)
 	}
 
-	simsRoot, err := filepath.Abs("..")
+	ehRoot, err := filepath.Abs("../../..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	repoRoot := filepath.Dir(simsRoot)
+	repoRoot := filepath.Dir(ehRoot)
 	cfg, err := loadConfig(repoRoot, "claude-sonnet-4-6", "low")
 	if err != nil {
 		t.Skipf("no usable config (.env token): %v", err)
 	}
-	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
+	judgeBin, err := buildJudge(filepath.Join(ehRoot, "backend", "cmd", "judge"), t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := discoverScenarios(filepath.Join(simsRoot, "scenarios"))
+	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	ag := dockerAgent{repoRoot: repoRoot, simsRoot: simsRoot, context: dockerContext(), image: "fiskaly-eval"}
+	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "evals", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
 
 	res, err := runScenario(sc[0], t.TempDir(), judgeBin, ag, cfg)
 	if err != nil {

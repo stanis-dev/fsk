@@ -1,6 +1,6 @@
 // Command judge_eval runs the expectation judge against gold fixtures.
 //
-// Usage: go run ./judge_eval   (from eval-harness/judge)
+// Usage: go run ./judge_eval   (from eval-harness/backend)
 package main
 
 import (
@@ -56,10 +56,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, "locating judge_eval source file")
 		os.Exit(2)
 	}
-	evalDir := filepath.Dir(thisFile)
-	judgeDir := filepath.Dir(evalDir)
-	simsDir := filepath.Dir(judgeDir)
-	scenariosDir := filepath.Join(simsDir, "scenarios")
+	evalDir := filepath.Dir(thisFile)   // .../backend/judge_eval
+	backendDir := filepath.Dir(evalDir) // .../backend
+	ehRoot := filepath.Dir(backendDir)  // .../eval-harness
+	judgeDir := filepath.Join(backendDir, "cmd", "judge")
+	scenariosDir := filepath.Join(ehRoot, "scenarios")
 	goldDir := filepath.Join(judgeDir, "testdata", "goldset")
 
 	bin := filepath.Join(os.TempDir(), "judge-eval-bin")

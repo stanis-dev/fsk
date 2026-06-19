@@ -6,7 +6,7 @@ export function runsDir(): string {
 }
 
 export function runnerDir(): string {
-  return process.env.FISKALY_RUNNER_DIR ?? path.resolve(process.cwd(), "..", "runner");
+  return process.env.FISKALY_RUNNER_DIR ?? path.resolve(process.cwd(), "..", "backend", "cmd", "eval-harness");
 }
 
 export function scenariosDir(): string {

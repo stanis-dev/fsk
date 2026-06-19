@@ -15,5 +15,6 @@
 
 # Go build artifacts (rebuildable via `go build`)
 /mcp/fiskaly-mcp
-/eval-harness/judge/judge
-/eval-harness/runner/runner
+/eval-harness/backend/cmd/judge/judge
+/eval-harness/backend/cmd/eval-harness/eval-harness
+/eval-harness/backend/judge_eval/judge_eval

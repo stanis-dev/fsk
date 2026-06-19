@@ -1,7 +1,7 @@
 # Eval dashboard
 
 The dashboard is the inspection surface for fiskaly eval runs. It reads run
-artifacts produced by the Go runner (`eval-harness/runner/`), then shows the signals
+artifacts produced by the Go runner (`eval-harness/backend/cmd/eval-harness`), then shows the signals
 needed to decide what to change next.
 
 ## Run locally
@@ -18,7 +18,7 @@ Open `http://localhost:3000`.
 - `FISKALY_RUNS_DIR`: directory containing `run.*` artifacts. Defaults to
   `~/.cache/fiskaly-eval`.
 - `FISKALY_RUNNER_DIR`: path to the Go runner module invoked by the trigger
-  button. Defaults to `../runner` from this package directory.
+  button. Defaults to `../backend/cmd/eval-harness` from this package directory.
 - `FISKALY_SCENARIOS_DIR`: path to the scenario library. Defaults to
   `../scenarios` from this package directory.
 

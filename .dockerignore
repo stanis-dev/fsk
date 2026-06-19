@@ -4,7 +4,7 @@
 research/
 report/
 memo/
-eval-harness/judge/
+eval-harness/backend/
 eval-harness/pos/
 eval-harness/dashboard/
 .claude/

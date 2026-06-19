@@ -15,8 +15,8 @@ test("runsDir honors the env override", () => {
   expect(runsDir()).toBe("/tmp/runs");
 });
 
-test("runnerDir defaults to the sibling runner module", () => {
-  expect(runnerDir().endsWith("/runner")).toBe(true);
+test("runnerDir defaults to the sibling backend/cmd/eval-harness module", () => {
+  expect(runnerDir().endsWith("/backend/cmd/eval-harness")).toBe(true);
 });
 
 test("runnerDir honors the env override", () => {

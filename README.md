@@ -41,9 +41,8 @@ questions such as:
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
 | `eval-harness/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
-| `eval-harness/judge/` | Deterministic source-level conformance gate for SIGN IT contract shape. |
+| `eval-harness/backend/` | Go CLI (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; `eval-harness run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
 | `eval-harness/evals/` | Docker eval container (Dockerfile and entrypoint); scenario and judge assets. |
-| `eval-harness/runner/` | Go CLI for the eval workbench; `runner run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
 | `eval-harness/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
 | `eval-harness/pos/` | The base POS fixture used to build scenario seeds. |
 
@@ -79,17 +78,16 @@ Fast package checks:
 
 ```sh
 cd mcp && go test ./...
-cd ../eval-harness/judge && go test ./...
+cd ../eval-harness/backend && go test ./...
 cd ../pos && go test ./...
-cd ../runner && go test ./...
 cd ../dashboard && pnpm test && pnpm lint && pnpm build
 ```
 
 Run the preflight + Docker eval for all scenarios or one:
 
 ```sh
-cd eval-harness/runner && go run . run            # all scenarios
-cd eval-harness/runner && go run . run 06         # one scenario
+cd eval-harness/backend && go run ./cmd/eval-harness run            # all scenarios
+cd eval-harness/backend && go run ./cmd/eval-harness run 06         # one scenario
 ```
 
 For each scenario the runner copies the fixture, asserts the baseline invariant

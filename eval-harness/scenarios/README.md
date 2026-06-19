@@ -60,13 +60,13 @@ by the source-only `expectations` layer (`go run . -scenario … -expect …/fix
 
 ```sh
 # One scenario, end to end in Docker (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env + the claude CLI):
-cd eval-harness/runner && go run . run 06-fire-and-forget
+cd eval-harness/backend && go run ./cmd/eval-harness run 06-fire-and-forget
 
 # All scenarios:
-cd eval-harness/runner && go run . run
+cd eval-harness/backend && go run ./cmd/eval-harness run
 
 # Source-only expectation grading of a seed (no trajectory; needs the claude CLI):
-cd eval-harness/judge && go run . -scenario ../scenarios/06-fire-and-forget/scenario.json -expect \
+cd eval-harness/backend && go run ./cmd/judge -scenario ../scenarios/06-fire-and-forget/scenario.json -expect \
                                     ../scenarios/06-fire-and-forget/fixture
 ```
 

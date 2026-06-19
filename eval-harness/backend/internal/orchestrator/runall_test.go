@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"path/filepath"
@@ -25,15 +25,15 @@ func TestRunAll_AllPassExitsZero(t *testing.T) {
 	if testing.Short() {
 		t.Skip("requires building the judge")
 	}
-	simsRoot, err := filepath.Abs("..")
+	ehRoot, err := filepath.Abs("../../..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
+	judgeBin, err := buildJudge(filepath.Join(ehRoot, "backend", "cmd", "judge"), t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := discoverScenarios(filepath.Join(simsRoot, "scenarios"))
+	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}

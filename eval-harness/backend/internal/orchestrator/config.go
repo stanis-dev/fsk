@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	defaultModel  = "claude-sonnet-4-6"
-	defaultEffort = "medium"
+	DefaultModel  = "claude-sonnet-4-6"
+	DefaultEffort = "medium"
 )
 
 type runConfig struct {

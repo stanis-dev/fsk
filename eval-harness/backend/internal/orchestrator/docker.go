@@ -1,4 +1,4 @@
-package main
+package orchestrator
 
 import (
 	"fmt"
@@ -22,15 +22,15 @@ func containerName(runPath string) string {
 // dockerAgent runs the coder hermetically: only the work dir is mounted, so the
 // container cannot reach the repo, the MCP/judge source, or research/.
 type dockerAgent struct {
-	repoRoot string
-	simsRoot string
-	context  string
-	image    string
+	repoRoot       string
+	dockerfilePath string
+	context        string
+	image          string
 }
 
 func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
 	build := exec.Command("docker", "build",
-		"-f", filepath.Join(a.simsRoot, "evals", "Dockerfile"),
+		"-f", a.dockerfilePath,
 		"-t", a.image, a.repoRoot)
 	build.Env = dockerEnv(a.context)
 	if out, err := build.CombinedOutput(); err != nil {
