@@ -1,4 +1,3 @@
-// rubric.go is the LLM expectation layer behind the deterministic gate.
 package judge
 
 import (
@@ -153,9 +152,6 @@ func transcriptText(traj trajectory) string {
 
 func runExpectations(traj trajectory, source, stripped string, exps []expectation, model modelFn, modelName string) (rubricReport, error) {
 	prompt := buildExpectationPrompt(traj, source, exps)
-	// Retry only malformed output (a known nondeterministic failure mode of
-	// structured LLM replies). A model invocation error is not retried - it is a
-	// hard failure surfaced to the caller (no silent fallback).
 	const maxAttempts = 3
 	var vs []verdict
 	var parseErr error
@@ -193,12 +189,7 @@ func runExpectations(traj trajectory, source, stripped string, exps []expectatio
 	return rubricReport{Model: modelName, Criteria: out}, nil
 }
 
-// citationCheck enforces that every MET is backed by evidence that actually
-// appears in the citation source. A MET with
-// an empty quote, or whose quote is not present, is downgraded to UNMET. This is
-// the anti-hallucination and anti-gaming guard: a comment claiming correctness
-// cannot satisfy an expectation because the quote is matched against stripped
-// source; a tool-use claim must appear in the transcript text.
+// citationCheck downgrades uncited or ungrounded MET verdicts.
 func citationCheck(vs []verdict, citationSource string) []verdict {
 	normSrc := normalizeWS(citationSource)
 	for i := range vs {

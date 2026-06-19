@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { saveScenario } from "@/lib/api";
 import type { ScenarioDetail, Expectation, ToolReq } from "@/lib/types";
@@ -10,11 +9,12 @@ import type { ScenarioDetail, Expectation, ToolReq } from "@/lib/types";
 const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
 const INPUT =
   "w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+const BUTTON =
+  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md text-sm font-medium transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50";
+const PRIMARY_BUTTON = cn(BUTTON, "h-8 bg-primary px-2.5 text-primary-foreground hover:bg-primary/80");
+const OUTLINE_BUTTON = cn(BUTTON, "h-7 border border-border px-2.5 text-[0.8rem] hover:bg-muted");
 
-// The tools a trajectory check can assert: the fiskaly MCP docs tools plus the
-// built-in code tools that appear in agent transcripts. The judge matches these
-// bare names against the MCP-prefixed transcript names.
-const TOOL_NAMES = [
+const TRAJECTORY_TOOL_NAMES = [
   "search_fiskaly_docs",
   "fetch_fiskaly_doc",
   "Read",
@@ -27,8 +27,7 @@ const TOOL_NAMES = [
   "Task",
 ];
 
-// The corpus doc IDs (mcp/corpus/index.json) a docsFetched check can require.
-const DOC_IDS = [
+const CORPUS_DOC_IDS = [
   "probe:auth-and-headers",
   "probe:scoped-subject",
   "probe:provisioning",
@@ -74,7 +73,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   }
 
   function addToolReq() {
-    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: TOOL_NAMES[0], min: 1 }] });
+    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: TRAJECTORY_TOOL_NAMES[0], min: 1 }] });
   }
 
   function removeToolReq(i: number) {
@@ -101,7 +100,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
         <input className={INPUT} value={config.title} onChange={(e) => setConfig({ ...config, title: e.target.value })} />
       </Field>
 
-      {/* checks */}
       <div className="space-y-4 rounded-lg border border-border p-4">
         <span className={LABEL}>checks</span>
 
@@ -124,7 +122,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
                 value={req.name}
                 onChange={(e) => patchToolReq(i, { name: e.target.value })}
               >
-                {(TOOL_NAMES.includes(req.name) ? TOOL_NAMES : [req.name, ...TOOL_NAMES]).map((n) => (
+                {(TRAJECTORY_TOOL_NAMES.includes(req.name) ? TRAJECTORY_TOOL_NAMES : [req.name, ...TRAJECTORY_TOOL_NAMES]).map((n) => (
                   <option key={n} value={n}>
                     {n}
                   </option>
@@ -143,15 +141,15 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
               </button>
             </div>
           ))}
-          <Button type="button" variant="outline" size="sm" onClick={addToolReq}>
+          <button type="button" className={OUTLINE_BUTTON} onClick={addToolReq}>
             <Plus className="size-3.5 mr-1" /> add tool
-          </Button>
+          </button>
         </div>
 
         <div className="space-y-1.5">
           <span className={LABEL}>docs fetched</span>
           <div className="flex flex-col gap-1.5">
-            {[...DOC_IDS, ...(checks.docsFetched ?? []).filter((d) => !DOC_IDS.includes(d))].map((id) => {
+            {[...CORPUS_DOC_IDS, ...(checks.docsFetched ?? []).filter((d) => !CORPUS_DOC_IDS.includes(d))].map((id) => {
               const list = checks.docsFetched ?? [];
               return (
                 <label key={id} className="flex items-center gap-2.5 text-sm">
@@ -183,7 +181,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
         </Field>
       </div>
 
-      {/* expectations */}
       <div className="space-y-4 rounded-lg border border-border p-4">
         <span className={LABEL}>expectations</span>
         {expectations.map((exp, i) => (
@@ -202,9 +199,9 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
             </button>
           </div>
         ))}
-        <Button type="button" variant="outline" size="sm" onClick={addExpectation}>
+        <button type="button" className={OUTLINE_BUTTON} onClick={addExpectation}>
           <Plus className="size-3.5 mr-1" /> add expectation
-        </Button>
+        </button>
       </div>
 
       <Field label="task.md">
@@ -212,9 +209,9 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
       </Field>
 
       <div className="flex items-center gap-4 border-t border-border pt-5">
-        <Button onClick={save} disabled={state.kind === "saving"}>
+        <button type="button" className={PRIMARY_BUTTON} onClick={save} disabled={state.kind === "saving"}>
           {state.kind === "saving" ? "saving…" : "save"}
-        </Button>
+        </button>
         {state.kind === "saved" && <span className="text-xs text-success">saved</span>}
         {state.kind === "error" && <span className="text-xs text-danger">{state.msg}</span>}
       </div>

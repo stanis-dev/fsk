@@ -1,8 +1,8 @@
 # Eval dashboard
 
 The dashboard is the inspection surface for fiskaly eval runs. It reads run
-artifacts produced by the Go runner (`eval-harness/backend/cmd/eval-harness`), then shows the signals
-needed to decide what to change next.
+artifacts through the Go API, then shows the signals needed to decide what to
+change next.
 
 ## Run locally
 
@@ -11,16 +11,14 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:8080`. The backend API must be running on
+`http://localhost:8090` unless `NEXT_PUBLIC_API_URL` is set.
 
 ## Configuration
 
-- `FISKALY_RUNS_DIR`: directory containing `run.*` artifacts. Defaults to
-  `~/.cache/fiskaly-eval`.
-- `FISKALY_RUNNER_DIR`: path to the Go runner module invoked by the trigger
-  button. Defaults to `../backend/cmd/eval-harness` from this package directory.
-- `FISKALY_SCENARIOS_DIR`: path to the scenario library. Defaults to
-  `../scenarios` from this package directory.
+- `NEXT_PUBLIC_API_URL`: dashboard API URL. Defaults to `http://localhost:8090`.
+- `FISKALY_RUNS_DIR`: backend run artifact directory. Defaults to
+  `~/.cache/fiskaly-eval` when the backend starts.
 
 ## What it reads
 

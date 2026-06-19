@@ -2,27 +2,26 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cancelRun } from "@/lib/api";
 
 export function CancelButton({ runId }: { runId: string }) {
-  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   return (
-    <Button
-      variant="ghost"
-      size="xs"
+    <button
+      type="button"
       className="text-muted-foreground hover:text-danger"
       onClick={async () => {
         try {
-          setFailed(false);
+          setError(null);
           await cancelRun(runId);
-        } catch {
-          setFailed(true);
+        } catch (e) {
+          setError(e instanceof Error ? e.message : String(e));
         }
       }}
+      title={error ?? undefined}
     >
       <X className="size-3" />
-      {failed ? "cancel failed" : "cancel"}
-    </Button>
+      {error ? "cancel failed" : "cancel"}
+    </button>
   );
 }

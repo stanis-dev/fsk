@@ -8,4 +8,5 @@ eval-harness/backend/
 eval-harness/pos/
 eval-harness/dashboard/
 .claude/
+.superpowers/
 *.output

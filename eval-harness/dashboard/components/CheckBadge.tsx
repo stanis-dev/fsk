@@ -6,7 +6,7 @@ const STYLES = {
   FAIL: { dot: "bg-danger", text: "text-danger", label: "fail" },
 } as const;
 
-export function JudgeBadge({ value }: { value: Check }) {
+export function CheckBadge({ value }: { value: Check }) {
   if (value === "") return <span className="text-muted-foreground/50">-</span>;
   const s = STYLES[value];
   return (

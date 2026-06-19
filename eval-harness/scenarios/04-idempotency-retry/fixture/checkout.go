@@ -39,6 +39,5 @@ func (s *Store) CompleteOrder(ctx context.Context, o *Order) error {
 }
 
 func fiscalize(ctx context.Context, o *Order) error {
-	// TODO: implement fiscalization; completion must fail if this fails.
 	return nil
 }

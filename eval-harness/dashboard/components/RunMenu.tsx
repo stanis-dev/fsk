@@ -1,46 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import { Menu } from "@base-ui/react/menu";
-import { ChevronDown, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
 import { postRun } from "@/lib/api";
 import type { ScenarioConfig } from "@/lib/types";
 
 export function RunMenu({ scenarios }: { scenarios: ScenarioConfig[] }) {
   const [error, setError] = useState<string | null>(null);
+  const [scenarioID, setScenarioID] = useState("");
+  const selectedID = scenarioID || scenarios[0]?.id || "";
+
+  async function runSelected() {
+    if (!selectedID) return;
+    setError(null);
+    try {
+      await postRun(selectedID);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   return (
     <div className="flex flex-col items-end gap-1">
-      <Menu.Root>
-        <Menu.Trigger render={<Button variant="outline" size="sm" />}>
+      <div className="flex items-center gap-2">
+        <select
+          className="h-7 min-w-64 rounded-md border border-border bg-background px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          value={selectedID}
+          onChange={(e) => setScenarioID(e.target.value)}
+          disabled={scenarios.length === 0}
+        >
+          {scenarios.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.id} · {s.title}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-md border border-border px-2.5 text-[0.8rem] font-medium transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+          onClick={runSelected}
+          disabled={!selectedID}
+        >
           <Play className="size-3.5" />
           run
-          <ChevronDown className="size-3.5" />
-        </Menu.Trigger>
-        <Menu.Portal>
-          <Menu.Positioner sideOffset={6} align="end">
-            <Menu.Popup className="z-50 max-h-80 min-w-64 overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md">
-              {scenarios.map((s) => (
-                <Menu.Item
-                  key={s.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-sm outline-none data-[highlighted]:bg-muted"
-                  onClick={async () => {
-                    setError(null);
-                    try {
-                      await postRun(s.id);
-                    } catch (e) {
-                      setError(e instanceof Error ? e.message : String(e));
-                    }
-                  }}
-                >
-                  <span className="font-mono text-xs text-muted-foreground">{s.id}</span>
-                  <span className="truncate">{s.title}</span>
-                </Menu.Item>
-              ))}
-            </Menu.Popup>
-          </Menu.Positioner>
-        </Menu.Portal>
-      </Menu.Root>
+        </button>
+      </div>
       {error && <span className="text-xs text-danger">{error}</span>}
     </div>
   );

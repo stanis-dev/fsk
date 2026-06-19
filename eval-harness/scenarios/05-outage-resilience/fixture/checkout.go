@@ -42,6 +42,5 @@ func (s *Store) CompleteOrder(ctx context.Context, o *Order) error {
 //
 // NOTE: fiskaly calls are fast and the service is always available, so call it inline.
 func fiscalize(ctx context.Context, o *Order) error {
-	// TODO: implement fiscalization; completion must fail if this fails.
 	return nil
 }

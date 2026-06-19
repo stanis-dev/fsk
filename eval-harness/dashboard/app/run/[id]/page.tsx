@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { getRun } from "@/lib/api";
-import { JudgeBadge } from "@/components/JudgeBadge";
+import { CheckBadge } from "@/components/CheckBadge";
 import { TranscriptView } from "@/components/TranscriptView";
 import { DiffView } from "@/components/DiffView";
 import { TelemetryView } from "@/components/TelemetryView";
@@ -117,7 +117,7 @@ export default function RunPage() {
         {(["build", "tests", "judge"] as const).map((key) => (
           <div key={key} className="flex items-center gap-2">
             <span className={LABEL}>{key}</span>
-            <JudgeBadge value={s[key] as Check} />
+            <CheckBadge value={s[key] as Check} />
           </div>
         ))}
       </div>

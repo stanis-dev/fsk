@@ -90,9 +90,6 @@ func (c *fiskalyClient) authenticate(ctx context.Context) error {
 
 // provision creates the merchant. Written against the old resource model:
 // a legal "entity" and its fiscal-device "asset".
-//
-// TODO: this targets the old API. The entity/asset resources were renamed in
-// SIGN IT API version 2026-02-03.
 func (c *fiskalyClient) provision(ctx context.Context) error {
 	if _, err := c.post(ctx, "/entities", map[string]any{
 		"type": "COMPANY",

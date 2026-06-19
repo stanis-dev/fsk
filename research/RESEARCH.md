@@ -1,9 +1,9 @@
-# fiskaly Interview Exercise — Research Synthesis
+# fiskaly Research Synthesis
 
 Date: 2026-06-12. Full raw research (6 areas, fact-checked) in `fiskaly_research.json`; downloaded OpenAPI artifacts in
 `specs/`.
 
-## The exercise
+## Brief
 
 Role: **Agentic Backend Engineer (Golang)** (https://www.fiskaly.com/jobs/4797666101) — 90% designing multi-agent AI
 workflows that automate the SDLC, "Judge" agents auditing "Coder" agents so fiscal signatures stay legally compliant,

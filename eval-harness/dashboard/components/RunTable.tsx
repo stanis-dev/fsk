@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { JudgeBadge } from "@/components/JudgeBadge";
+import { CheckBadge } from "@/components/CheckBadge";
 import { CancelButton } from "@/components/CancelButton";
 import { cn } from "@/lib/utils";
 import type { Summary } from "@/lib/types";
 
-const HEAD = "h-9 px-3 text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
-const CELL = "px-3 py-2.5";
+const HEAD = "h-9 whitespace-nowrap px-3 text-left text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
+const CELL = "whitespace-nowrap px-3 py-2.5";
 
 function formatWhen(iso: string): string {
   const d = new Date(iso);
@@ -17,76 +16,78 @@ function formatWhen(iso: string): string {
 
 export function RunTable({ runs }: { runs: Summary[] }) {
   return (
-    <Table className="text-sm">
-      <TableHeader>
-        <TableRow className="border-border hover:bg-transparent">
-          <TableHead className={HEAD}>run</TableHead>
-          <TableHead className={HEAD}>scenario</TableHead>
-          <TableHead className={HEAD}>when</TableHead>
-          <TableHead className={HEAD}>coder</TableHead>
-          <TableHead className={HEAD}>harness</TableHead>
-          <TableHead className={HEAD}>model</TableHead>
-          <TableHead className={HEAD}>build</TableHead>
-          <TableHead className={HEAD}>tests</TableHead>
-          <TableHead className={HEAD}>judge</TableHead>
-          <TableHead className={cn(HEAD, "text-right")}>turns</TableHead>
-          <TableHead className={cn(HEAD, "text-right")}>cost</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {runs.length === 0 && (
-          <TableRow>
-            <TableCell colSpan={11} className="h-24 text-center text-muted-foreground">
-              no runs yet
-            </TableCell>
-          </TableRow>
-        )}
-        {runs.map((r) => (
-          <TableRow key={r.id} className="group border-border">
-            <TableCell className={CELL}>
-              <Link
-                href={`/run/${r.id}`}
-                className="font-mono text-foreground underline-offset-4 decoration-muted-foreground/30 group-hover:underline"
-              >
-                {r.id}
-              </Link>
-            </TableCell>
-            <TableCell className={cn(CELL, "font-medium")}>{r.scenario}</TableCell>
-            <TableCell className={cn(CELL, "font-mono text-xs tabular-nums text-muted-foreground")}>
-              {formatWhen(r.createdIso)}
-            </TableCell>
-            <TableCell className={cn(CELL, "text-muted-foreground")}>{r.coder}</TableCell>
-            <TableCell className={cn(CELL, "text-muted-foreground")}>{r.harness}</TableCell>
-            <TableCell className={cn(CELL, "font-mono text-xs text-muted-foreground")}>{r.model}</TableCell>
-            {r.status === "running" ? (
-              <TableCell colSpan={5} className={CELL}>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-warning">
-                    <span className="size-1.5 animate-pulse rounded-full bg-warning" aria-hidden />
-                    running
+    <div className="relative w-full overflow-x-auto">
+      <table className="w-full caption-bottom text-sm">
+        <thead className="[&_tr]:border-b">
+          <tr className="border-b border-border">
+            <th className={HEAD}>run</th>
+            <th className={HEAD}>scenario</th>
+            <th className={HEAD}>when</th>
+            <th className={HEAD}>coder</th>
+            <th className={HEAD}>harness</th>
+            <th className={HEAD}>model</th>
+            <th className={HEAD}>build</th>
+            <th className={HEAD}>tests</th>
+            <th className={HEAD}>judge</th>
+            <th className={cn(HEAD, "text-right")}>turns</th>
+            <th className={cn(HEAD, "text-right")}>cost</th>
+          </tr>
+        </thead>
+        <tbody className="[&_tr:last-child]:border-0">
+          {runs.length === 0 && (
+            <tr className="border-b border-border">
+              <td colSpan={11} className="h-24 whitespace-nowrap px-3 py-2.5 text-center text-muted-foreground">
+                no runs yet
+              </td>
+            </tr>
+          )}
+          {runs.map((r) => (
+            <tr key={r.id} className="group border-b border-border transition-colors hover:bg-muted/50">
+              <td className={CELL}>
+                <Link
+                  href={`/run/${r.id}`}
+                  className="font-mono text-foreground underline-offset-4 decoration-muted-foreground/30 group-hover:underline"
+                >
+                  {r.id}
+                </Link>
+              </td>
+              <td className={cn(CELL, "font-medium")}>{r.scenario}</td>
+              <td className={cn(CELL, "font-mono text-xs tabular-nums text-muted-foreground")}>
+                {formatWhen(r.createdIso)}
+              </td>
+              <td className={cn(CELL, "text-muted-foreground")}>{r.coder}</td>
+              <td className={cn(CELL, "text-muted-foreground")}>{r.harness}</td>
+              <td className={cn(CELL, "font-mono text-xs text-muted-foreground")}>{r.model}</td>
+              {r.status === "running" ? (
+                <td colSpan={5} className={CELL}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-warning">
+                      <span className="size-1.5 animate-pulse rounded-full bg-warning" aria-hidden />
+                      running
+                    </span>
+                    <CancelButton runId={r.id} />
+                  </div>
+                </td>
+              ) : r.status === "cancelled" ? (
+                <td colSpan={5} className={CELL}>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <span className="size-1.5 rounded-full bg-muted-foreground/50" aria-hidden />
+                    cancelled
                   </span>
-                  <CancelButton runId={r.id} />
-                </div>
-              </TableCell>
-            ) : r.status === "cancelled" ? (
-              <TableCell colSpan={5} className={CELL}>
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <span className="size-1.5 rounded-full bg-muted-foreground/50" aria-hidden />
-                  cancelled
-                </span>
-              </TableCell>
-            ) : (
-              <>
-                <TableCell className={CELL}><JudgeBadge value={r.build} /></TableCell>
-                <TableCell className={CELL}><JudgeBadge value={r.tests} /></TableCell>
-                <TableCell className={CELL}><JudgeBadge value={r.judge} /></TableCell>
-                <TableCell className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{r.turns}</TableCell>
-                <TableCell className={cn(CELL, "text-right font-mono tabular-nums")}>{r.cost}</TableCell>
-              </>
-            )}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+                </td>
+              ) : (
+                <>
+                  <td className={CELL}><CheckBadge value={r.build} /></td>
+                  <td className={CELL}><CheckBadge value={r.tests} /></td>
+                  <td className={CELL}><CheckBadge value={r.judge} /></td>
+                  <td className={cn(CELL, "text-right font-mono tabular-nums text-muted-foreground")}>{r.turns}</td>
+                  <td className={cn(CELL, "text-right font-mono tabular-nums")}>{r.cost}</td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

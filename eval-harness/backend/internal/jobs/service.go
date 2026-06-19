@@ -13,9 +13,6 @@ import (
 	"backend/internal/scenarios"
 )
 
-// Runner is the interface the orchestrator adapter must satisfy.
-// KillContainer is dockerctx-bound by the adapter; ContainerName wraps the
-// orchestrator package func.
 type Runner interface {
 	RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, detached bool, onStart func(runDir string)) (string, error)
 	Resolve(id string) (scenarios.Scenario, bool)
@@ -35,11 +32,11 @@ type ActiveRun struct {
 type liveRun struct {
 	id         string
 	scenarioID string
-	container  string             // set once onStart fires or RunScenario returns a runDir
-	runDir     string             // absolute path of the run dir, set once known
-	phase      string             // "queued" | "running" | "done" | "error"
-	ctx        context.Context    // cancelled by cancel
-	cancel     context.CancelFunc // call to abort the run
+	container  string
+	runDir     string
+	phase      string
+	ctx        context.Context
+	cancel     context.CancelFunc
 }
 
 type job struct {
@@ -103,7 +100,6 @@ func (s *Service) Subscribe() (<-chan Event, func()) {
 	return ch, unsub
 }
 
-// publish broadcasts ev to every subscriber with a non-blocking send (drops on full).
 // Must be called with s.mu held.
 func (s *Service) publish(ev Event) {
 	for _, ch := range s.subs {
@@ -209,14 +205,12 @@ func (s *Service) work() {
 }
 
 func (s *Service) runJob(j job) {
-	// If the run was cancelled before the worker picked it up, skip it.
 	s.mu.Lock()
 	lr, ok := s.live[j.id]
 	if !ok {
 		s.mu.Unlock()
 		return
 	}
-	// Check if already cancelled (ctx done before worker started).
 	if err := lr.ctx.Err(); err != nil {
 		s.mu.Unlock()
 		return
@@ -231,9 +225,6 @@ func (s *Service) runJob(j job) {
 		return
 	}
 
-	// onStart fires right after the run dir is created, before the long coder
-	// step. Recording the run dir and container here means a concurrent Cancel
-	// finds them and can KillContainer + write the marker even mid-run.
 	onStart := func(runDir string) {
 		container := s.r.ContainerName(runDir)
 		s.mu.Lock()

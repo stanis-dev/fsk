@@ -55,7 +55,6 @@ func parseToolUses(path string) ([]string, error) {
 	sc.Buffer(make([]byte, 1024*1024), 16*1024*1024)
 	for sc.Scan() {
 		var ev transcriptEvent
-		// Transcript JSONL has several event shapes; only assistant tool-use events matter here.
 		if json.Unmarshal(sc.Bytes(), &ev) != nil || ev.Type != "assistant" {
 			continue
 		}

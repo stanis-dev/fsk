@@ -82,7 +82,6 @@ func Evaluate(opts Options, out io.Writer) (Report, int, error) {
 		}
 	}
 
-	// A scenario that asserts nothing is a misconfiguration.
 	if len(results) == 0 && len(exps) == 0 {
 		return infra(scenarioName, cr, fmt.Errorf("scenario declares neither checks nor expectations"))
 	}

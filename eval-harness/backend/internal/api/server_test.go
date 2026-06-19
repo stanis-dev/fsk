@@ -18,8 +18,6 @@ import (
 	"backend/internal/jobs"
 )
 
-// buildRunsDir creates a runs/ tree under root with one run.sample directory.
-// It writes the artifact files that SummarizeRun and LoadRun expect.
 func buildRunsDir(t *testing.T, root string) string {
 	t.Helper()
 	runsDir := filepath.Join(root, "runs")
@@ -28,28 +26,16 @@ func buildRunsDir(t *testing.T, root string) string {
 		t.Fatal(err)
 	}
 
-	// meta.json — scenario field makes Status derivation deterministic.
 	mustWrite(t, filepath.Join(runDir, "meta.json"), `{"scenario":"01-demo","effort":"low","harness":"local","coder":"test","model":"claude-test"}`)
-
-	// judge.txt — non-empty signals status="done".
 	mustWrite(t, filepath.Join(runDir, "judge.txt"), "judge output line\n")
-
-	// judge.json — conformant verdict; no expectations (nil) keeps ParseJudgeReport happy.
 	mustWrite(t, filepath.Join(runDir, "judge.json"), `{"scenario":"01-demo","verdict":"conformant","checks":{"passed":true,"results":[]},"note":"ok"}`)
-
-	// build.txt — empty means Build=PASS.
 	mustWrite(t, filepath.Join(runDir, "build.txt"), "")
-
-	// test.txt — contains "ok" without "FAIL" means Tests=PASS.
 	mustWrite(t, filepath.Join(runDir, "test.txt"), "ok\n")
-
-	// transcript.jsonl — empty is fine.
 	mustWrite(t, filepath.Join(runDir, "transcript.jsonl"), "")
 
 	return runsDir
 }
 
-// buildScenariosDir creates a scenarios/ tree under root with one 01-demo scenario.
 func buildScenariosDir(t *testing.T, root string) string {
 	t.Helper()
 	scenDir := filepath.Join(root, "scenarios")
@@ -59,7 +45,6 @@ func buildScenariosDir(t *testing.T, root string) string {
 		t.Fatal(err)
 	}
 
-	// scenario.json — must pass scenarios.Validate (id, title, traps, judge with checks+expectations).
 	mustWrite(t, filepath.Join(demoDir, "scenario.json"), `{
 		"id": "01-demo",
 		"title": "Demo scenario",
@@ -70,7 +55,6 @@ func buildScenariosDir(t *testing.T, root string) string {
 		}
 	}`)
 
-	// task.md — returned by scenarios.Load.
 	mustWrite(t, filepath.Join(demoDir, "task.md"), "Do the demo task.\n")
 
 	return scenDir
@@ -83,12 +67,11 @@ func mustWrite(t *testing.T, path, content string) {
 	}
 }
 
-// fakeService implements RunService for tests.
 type fakeService struct {
-	enqueueErr   error           // non-nil causes Enqueue to return this error
-	cancelOK     bool            // value returned by Cancel
-	subCh        chan jobs.Event // if set, Subscribe returns this channel
-	unsubscribed atomic.Bool     // set to true when the unsubscribe func is called
+	enqueueErr   error
+	cancelOK     bool
+	subCh        chan jobs.Event
+	unsubscribed atomic.Bool
 }
 
 func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) {

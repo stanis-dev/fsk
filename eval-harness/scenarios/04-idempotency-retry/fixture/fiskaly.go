@@ -18,7 +18,7 @@ type fiskalyClient struct {
 	apiKey  string
 	secret  string
 	jwt     string
-	idemKey string // generated once; reused for every request (see newFiskalyClient)
+	idemKey string
 	hc      *http.Client
 }
 
@@ -37,14 +37,12 @@ func newFiskalyClient(apiKey, secret string) *fiskalyClient {
 		baseURL: "https://test.api.fiskaly.com",
 		apiKey:  apiKey,
 		secret:  secret,
-		// TODO: generate the idempotency key once and reuse it so retries don't double-write.
 		idemKey: newIdempotencyKey(),
 		hc:      &http.Client{},
 	}
 }
 
-// postWithRetry sends a JSON POST, retrying transient failures. It reuses
-// c.idemKey on every attempt and every call.
+// postWithRetry sends a JSON POST, retrying transient failures.
 func (c *fiskalyClient) postWithRetry(ctx context.Context, path string, body any) (map[string]any, error) {
 	buf, err := json.Marshal(body)
 	if err != nil {

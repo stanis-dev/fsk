@@ -44,7 +44,8 @@ server-side, with `400` error bodies embedding unresolved `{{>...}}` partials, c
 spec diff is machine-readable; agent-generated migration guides and codemods per version bump are the multi-country
 scale story ("you integrated SIGN ES — here's your exact delta to SIGN IT").
 
-(Tentative) What the prototype should demonstrate: an agent provisions a merchant, issues a multi-VAT receipt with a
-real AdE document reference from fiskaly's TEST environment, cancels it, and is audited — then a sloppy POS integration
-meets the judge during an AdE outage and leaves with three violations, the relevant decreto legislativo citations, and
-an exit code CI would respect.
+The strongest demo path is an agent provisioning a merchant, issuing a multi-VAT
+receipt with a real AdE document reference from fiskaly's TEST environment,
+cancelling it, and being audited. A weaker POS integration should meet the judge
+during an AdE outage and leave with concrete violations, citations, and a CI-grade
+exit code.

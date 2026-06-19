@@ -80,8 +80,7 @@ func (a dockerAgent) run(ctx context.Context, rd runDir, task string, cfg runCon
 	cmd.Env = dockerEnv(a.context)
 	cmd.Stdout = transcript
 	cmd.Stderr = stderr
-	// The agent exiting non-zero is recorded in claude.err, not fatal: an agent
-	// failure is a result to observe, matching the Bash harness.
+	// An agent failure is a result to observe, not a harness failure.
 	_ = cmd.Run()
 
 	tele := filepath.Join(rd.work, "mcp-telemetry.jsonl")

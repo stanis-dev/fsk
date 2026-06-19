@@ -5,10 +5,8 @@ integrates fiskaly SIGN IT. The value is the loop, not a standalone MCP server:
 change the docs corpus, MCP behavior, judge, scenario, or harness; run the eval;
 inspect the result; decide whether the change improved the integration workflow.
 
-The interview task asks for API documentation improvements that move fiskaly's
-mission forward, plus a functional system. This repo answers that by making
-documentation changes measurable. It tests whether an agent can use
-grounded SIGN IT context to implement fiscalization correctly, avoid planted
+The system makes documentation changes measurable: it tests whether an agent can
+use grounded SIGN IT context to implement fiscalization correctly, avoid planted
 domain traps, and leave enough telemetry for a developer to understand what
 happened.
 
@@ -69,8 +67,8 @@ Known limits:
 - `vat-breakdown` proves the VAT fields are constructed, not that the selected
   VAT rate is correct.
 - The judge checks source shape, not live SIGN IT behavior.
-- `runner run` is the single entrypoint; the Bash eval scripts are gone. Needs
-  Docker and a valid OAuth token in `.env`.
+- `go run ./cmd/eval-harness run` is the eval entrypoint. It needs Docker and a
+  valid OAuth token in `.env`.
 
 ## Run the checks
 
@@ -90,11 +88,10 @@ cd eval-harness/backend && go run ./cmd/eval-harness run            # all scenar
 cd eval-harness/backend && go run ./cmd/eval-harness run 06         # one scenario
 ```
 
-For each scenario the runner copies the fixture, asserts the baseline invariant
-(build PASS, tests PASS, judge NON-COMPLIANT) without Docker, then runs the
-agent inside Docker, collects the transcript, diff, and judge verdict, and
-writes dashboard artifacts under `~/.cache/fiskaly-eval/run.*`. Needs Docker
-and a valid OAuth token in `.env`.
+For each scenario the runner copies the fixture, runs the agent inside Docker,
+then collects the transcript, diff, build output, test output, and judge verdict
+under `~/.cache/fiskaly-eval/run.*`. Needs Docker and a valid OAuth token in
+`.env`.
 
 ## Inspect runs
 
@@ -104,12 +101,18 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:3000`. The dashboard reads
-`~/.cache/fiskaly-eval` by default. Override paths with:
+Open `http://localhost:8080`. The dashboard reads the API at
+`http://localhost:8090` by default. Start it separately:
 
-- `FISKALY_RUNS_DIR`: run artifact directory.
-- `FISKALY_RUNNER_DIR`: path to the Go runner module the trigger button invokes.
-- `FISKALY_SCENARIOS_DIR`: path to the scenario library shown in the dashboard.
+```sh
+cd eval-harness/backend
+go run ./cmd/eval-harness serve
+```
+
+Configuration:
+
+- `FISKALY_RUNS_DIR`: run artifact directory read by the backend.
+- `NEXT_PUBLIC_API_URL`: dashboard API URL; defaults to `http://localhost:8090`.
 
 ## Iterating
 

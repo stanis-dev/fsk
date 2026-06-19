@@ -92,9 +92,6 @@ func (c *fiskalyClient) authenticate(ctx context.Context) error {
 }
 
 // issueReceipt issues a sale receipt as the two-call records flow.
-//
-// TODO: in TEST the transaction comes back state=COMPLETED synchronously, so
-// once the TRANSACTION POST is accepted there is nothing to wait on.
 func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err := c.authenticate(ctx); err != nil {
 		return err

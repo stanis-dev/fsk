@@ -1,11 +1,12 @@
 # Design Decisions
 
-Running log of load-bearing design decisions for the Zero-to-Receipt prototype and its recommendations to fiskaly.
+Running log of load-bearing design decisions for the SIGN IT eval workbench and
+its recommendations to fiskaly.
 ADR-lite: each entry records the decision, the reasoning, the rejected alternatives, and when to revisit.
 
 ## ADR-001 — Documentation context for consumer agents: local + agentic search
 
-**Date:** 2026-06-13 · **Status:** Decided — not yet implemented.
+**Date:** 2026-06-13 · **Status:** Implemented.
 
 ### Context
 
@@ -14,10 +15,9 @@ local files + grep, local vector RAG, agentic search, hosted RAG, `llms.txt`/`.m
 
 ### Decision
 
-For how our prototype (and our recommendation to fiskaly) supplies documentation context to a consumer agent, default to
-**curated local docs + agentic search (grep/read)**. Reserve hosted RAG for hosted _answer services_ (like fiskaly's
-Ask-AI), not for agent navigation. Keep the existing `ask_fiskaly_docs` tool only as an _optional remote fallback_, not
-the primary path.
+For how the eval workbench supplies documentation context to a consumer agent,
+default to **curated local docs + agentic search**. Reserve hosted RAG for hosted
+_answer services_ (like fiskaly's Ask-AI), not for agent navigation.
 
 ### Reasoning (June 2026 state of the art)
 
@@ -34,14 +34,13 @@ the primary path.
 - **RAG isn't dead — it's just the wrong tool here.** It remains right for governed, hosted, large-corpus answer
   services (fiskaly's Ask-AI is correctly a RAG); it's the wrong tool for an agent navigating docs.
 
-### What this means concretely (when implemented)
+### What this means concretely
 
-- Curate a **local docs corpus** the agent greps/reads: the SIGN IT OpenAPI spec (already in `research/specs/`), the
-  integration brief, the probed contracts (`research/api-probes/NOTES.md`), and the high-value Zendesk KB articles
-  (titles already inventoried in `PUBLIC-FEEDBACK.md`) — reference-grade, marketing stripped.
-- The agent uses **grep/read over that corpus**; no vector DB.
-- `ask_fiskaly_docs` (the remote Ask-AI passthrough) stays as an optional, clearly-labelled fallback for
-  breadth/freshness, with graceful degradation — not the default.
+- Curate a **local docs corpus** in `mcp/corpus/index.json`, using the SIGN IT
+  OpenAPI specs, API probes, and high-value support findings as source material.
+- Expose the corpus through `search_fiskaly_docs` and `fetch_fiskaly_doc`.
+- Keep the eval path local and deterministic; no vector DB and no hosted RAG in
+  the run loop.
 
 ### Rejected alternatives
 

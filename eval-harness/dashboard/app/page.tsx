@@ -9,10 +9,11 @@ import type { Summary, ScenarioConfig } from "@/lib/types";
 export default function Home() {
   const [runs, setRuns] = useState<Summary[]>([]);
   const [scenarios, setScenarios] = useState<ScenarioConfig[]>([]);
-  const [down, setDown] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     let es: EventSource | undefined;
+    const fail = (e: unknown) => setApiError(e instanceof Error ? e.message : String(e));
 
     Promise.all([listRuns(), listScenarios()])
       .then(([r, s]) => {
@@ -20,21 +21,25 @@ export default function Home() {
         setScenarios(s);
         es = new EventSource(runsStreamURL());
         es.onmessage = () => {
-          listRuns().then(setRuns).catch(() => {});
+          listRuns().then(setRuns).catch(fail);
         };
-        es.onerror = () => es?.close();
+        es.onerror = () => {
+          es?.close();
+          setApiError("run event stream disconnected");
+        };
       })
-      .catch(() => setDown(true));
+      .catch(fail);
 
     return () => es?.close();
   }, []);
 
-  if (down) {
+  if (apiError) {
     return (
       <main className="mx-auto w-full max-w-6xl px-8 py-12">
         <p className="text-sm text-muted-foreground">
-          Backend unreachable — start <code className="font-mono">eval-harness serve</code>
+          Backend unreachable: <code className="font-mono">eval-harness serve</code>
         </p>
+        <p className="mt-2 font-mono text-xs text-danger">{apiError}</p>
       </main>
     );
   }

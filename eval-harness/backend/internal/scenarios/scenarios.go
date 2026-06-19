@@ -131,7 +131,7 @@ func Load(scenariosDir, id string) (cfg *Config, task string, ok bool) {
 }
 
 // Validate returns "" if raw is a valid scenario.json, otherwise a human-readable
-// error message. Ports validateConfig from dashboard/lib/scenarios.ts exactly.
+// error message.
 func Validate(raw []byte) string {
 	var obj any
 	if err := json.Unmarshal(raw, &obj); err != nil {
