@@ -466,6 +466,79 @@ func TestCancelRunNotFound(t *testing.T) {
 	}
 }
 
+func put(t *testing.T, srv *httptest.Server, path, body string) *http.Response {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodPut, srv.URL+path, strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return resp
+}
+
+func TestPutScenarioOK(t *testing.T) {
+	srv, cfg := newServer(t)
+	defer srv.Close()
+
+	body := `{"config":{"id":"01-demo","title":"Updated","traps":[],"judge":{"checks":{"groundedBeforeWrite":true},"expectations":[]}},"task":"updated task\n"}`
+	resp := put(t, srv, "/scenarios/01-demo", body)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("want 204, got %d: %s", resp.StatusCode, bodyStr(t, resp))
+	}
+	// Verify file was updated on disk.
+	raw, err := os.ReadFile(filepath.Join(cfg.ScenariosDir, "01-demo", "scenario.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(raw), `"Updated"`) {
+		t.Errorf("scenario.json not updated: %s", raw)
+	}
+}
+
+func TestPutScenarioIDMismatch(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	body := `{"config":{"id":"99-wrong","title":"X","traps":[],"judge":{"checks":{"groundedBeforeWrite":true},"expectations":[]}},"task":""}`
+	resp := put(t, srv, "/scenarios/01-demo", body)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400 for id mismatch, got %d", resp.StatusCode)
+	}
+}
+
+func TestPutScenarioBadBody(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	resp := put(t, srv, "/scenarios/01-demo", `not-json`)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400 for bad body, got %d", resp.StatusCode)
+	}
+}
+
+func TestCORSPreflightIncludesPUT(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	req, _ := http.NewRequest(http.MethodOptions, srv.URL+"/scenarios/01-demo", nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	methods := resp.Header.Get("Access-Control-Allow-Methods")
+	if !strings.Contains(methods, "PUT") {
+		t.Errorf("want PUT in Allow-Methods, got %q", methods)
+	}
+}
+
 func TestCORSPreflightIncludesPost(t *testing.T) {
 	srv, _ := newServer(t)
 	defer srv.Close()

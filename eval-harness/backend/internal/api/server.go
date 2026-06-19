@@ -34,6 +34,7 @@ func Handler(cfg Config) http.Handler {
 	mux.HandleFunc("GET /runs/{id}/logs/{name}", cfg.getRunLog)
 	mux.HandleFunc("GET /scenarios", cfg.listScenarios)
 	mux.HandleFunc("GET /scenarios/{id}", cfg.getScenario)
+	mux.HandleFunc("PUT /scenarios/{id}", cfg.putScenario)
 	mux.HandleFunc("POST /runs", cfg.postRun)
 	mux.HandleFunc("POST /runs/{id}/cancel", cfg.cancelRun)
 	mux.HandleFunc("GET /runs/stream", cfg.streamRuns)
@@ -47,7 +48,7 @@ func cors(origin string, next http.Handler) http.Handler {
 		h := w.Header()
 		h.Set("Access-Control-Allow-Origin", origin)
 		h.Set("Vary", "Origin")
-		h.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		h.Set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
 		h.Set("Access-Control-Allow-Headers", "Content-Type")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)

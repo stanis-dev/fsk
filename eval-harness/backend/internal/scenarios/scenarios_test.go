@@ -284,6 +284,98 @@ func TestAssignExpectationIds(t *testing.T) {
 	}
 }
 
+func TestSave_ValidRoundtrip(t *testing.T) {
+	root := buildFixture(t)
+	cfg := Config{
+		ID: "01-demo", Title: "Updated",
+		Traps: []any{},
+		Judge: JudgeSpec{
+			Checks:       json.RawMessage(`{"groundedBeforeWrite":true}`),
+			Expectations: []Expectation{{ID: "", Expectation: "must do the thing"}},
+		},
+	}
+	if err := Save(root, "01-demo", cfg, "updated task\n"); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	// both files must be present and reloadable
+	loaded, task, ok := Load(root, "01-demo")
+	if !ok {
+		t.Fatal("Load after Save: ok = false")
+	}
+	if loaded.Title != "Updated" {
+		t.Errorf("Title = %q, want Updated", loaded.Title)
+	}
+	if task != "updated task\n" {
+		t.Errorf("task = %q, want 'updated task\\n'", task)
+	}
+	// expectation id must have been assigned
+	if len(loaded.Judge.Expectations) != 1 || loaded.Judge.Expectations[0].ID == "" {
+		t.Errorf("expectation id not assigned: %+v", loaded.Judge.Expectations)
+	}
+	// scenario.json must end with a newline
+	raw, err := os.ReadFile(filepath.Join(root, "01-demo", "scenario.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(raw) == 0 || raw[len(raw)-1] != '\n' {
+		t.Error("scenario.json does not end with newline")
+	}
+}
+
+func TestSave_IDMismatch(t *testing.T) {
+	root := buildFixture(t)
+	cfg := Config{
+		ID: "99-wrong", Title: "X",
+		Traps: []any{},
+		Judge: JudgeSpec{
+			Checks:       json.RawMessage(`{"groundedBeforeWrite":true}`),
+			Expectations: []Expectation{},
+		},
+	}
+	if err := Save(root, "01-demo", cfg, ""); err == nil {
+		t.Fatal("expected error for id mismatch")
+	}
+}
+
+func TestSave_UnknownID(t *testing.T) {
+	root := buildFixture(t)
+	cfg := Config{ID: "99-nope", Title: "X", Traps: []any{},
+		Judge: JudgeSpec{Checks: json.RawMessage(`{"groundedBeforeWrite":true}`), Expectations: []Expectation{}}}
+	if err := Save(root, "99-nope", cfg, ""); err == nil {
+		t.Fatal("expected error for unknown scenario id")
+	}
+}
+
+func TestSave_InvalidConfig_FilesNotWritten(t *testing.T) {
+	root := buildFixture(t)
+	// Read original scenario.json content before Save attempt.
+	origPath := filepath.Join(root, "01-demo", "scenario.json")
+	origBytes, err := os.ReadFile(origPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Empty checks + empty expectations fails Validate.
+	cfg := Config{
+		ID: "01-demo", Title: "Demo",
+		Traps: []any{},
+		Judge: JudgeSpec{
+			Checks:       json.RawMessage(`{}`),
+			Expectations: []Expectation{},
+		},
+	}
+	if err := Save(root, "01-demo", cfg, ""); err == nil {
+		t.Fatal("expected validation error for empty checks+expectations")
+	}
+	// File must be unchanged.
+	afterBytes, err := os.ReadFile(origPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(afterBytes) != string(origBytes) {
+		t.Error("scenario.json was modified despite validation failure")
+	}
+}
+
 func writeFile(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {

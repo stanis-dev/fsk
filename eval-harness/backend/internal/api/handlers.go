@@ -72,6 +72,19 @@ func (cfg Config) getScenario(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, scenarioDetail{Config: c, Task: task})
 }
 
+func (cfg Config) putScenario(w http.ResponseWriter, r *http.Request) {
+	var body scenarioDetail
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Config == nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if err := scenarios.Save(cfg.ScenariosDir, r.PathValue("id"), *body.Config, body.Task); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (cfg Config) postRun(w http.ResponseWriter, r *http.Request) {
 	if cfg.Service == nil {
 		writeError(w, http.StatusServiceUnavailable, "no job service")

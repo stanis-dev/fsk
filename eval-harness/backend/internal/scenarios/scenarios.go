@@ -247,6 +247,35 @@ func AssignExpectationIds(c Config) Config {
 	return Config{ID: c.ID, Title: c.Title, Traps: c.Traps, Judge: judge}
 }
 
+// Save writes config and task into <scenariosDir>/<id>/scenario.json and task.md.
+// It rejects unknown ids, id mismatches, and configs that fail Validate.
+// AssignExpectationIds is run before validation and writing.
+func Save(scenariosDir, id string, config Config, task string) error {
+	if !IsKnown(scenariosDir, id) {
+		return fmt.Errorf("unknown scenario %q", id)
+	}
+	if config.ID != id {
+		return fmt.Errorf("config.id %q does not match path id %q", config.ID, id)
+	}
+	config = AssignExpectationIds(config)
+	raw, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshaling config: %w", err)
+	}
+	if msg := Validate(raw); msg != "" {
+		return fmt.Errorf("%s", msg)
+	}
+	raw = append(raw, '\n')
+	dir := filepath.Join(scenariosDir, id)
+	if err := os.WriteFile(filepath.Join(dir, "scenario.json"), raw, 0o644); err != nil {
+		return fmt.Errorf("writing scenario.json: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "task.md"), []byte(task), 0o644); err != nil {
+		return fmt.Errorf("writing task.md: %w", err)
+	}
+	return nil
+}
+
 func isDir(p string) bool {
 	fi, err := os.Stat(p)
 	return err == nil && fi.IsDir()
