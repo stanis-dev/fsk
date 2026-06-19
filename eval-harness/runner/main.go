@@ -103,12 +103,12 @@ func findSimsRoot(start string) (string, error) {
 		if isSimsDir(dir) {
 			return dir, nil
 		}
-		if nested := filepath.Join(dir, "sims"); isSimsDir(nested) {
+		if nested := filepath.Join(dir, "eval-harness"); isSimsDir(nested) {
 			return nested, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			return "", fmt.Errorf("could not locate sims/ (with scenarios/ and judge/) from %s", start)
+			return "", fmt.Errorf("could not locate eval-harness/ (with scenarios/ and judge/) from %s", start)
 		}
 		dir = parent
 	}

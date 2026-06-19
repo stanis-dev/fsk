@@ -38,7 +38,7 @@ func TestDiscoverScenarios(t *testing.T) {
 
 func TestFindSimsRoot(t *testing.T) {
 	root := t.TempDir()
-	sims := filepath.Join(root, "sims")
+	sims := filepath.Join(root, "eval-harness")
 	mustMkdir(t, filepath.Join(sims, "scenarios"))
 	mustMkdir(t, filepath.Join(sims, "judge"))
 

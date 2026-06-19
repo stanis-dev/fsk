@@ -15,5 +15,5 @@
 
 # Go build artifacts (rebuildable via `go build`)
 /mcp/fiskaly-mcp
-/sims/judge/judge
-/sims/runner/runner
+/eval-harness/judge/judge
+/eval-harness/runner/runner

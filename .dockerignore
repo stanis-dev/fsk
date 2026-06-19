@@ -4,8 +4,8 @@
 research/
 report/
 memo/
-sims/judge/
-sims/pos/
-sims/dashboard/
+eval-harness/judge/
+eval-harness/pos/
+eval-harness/dashboard/
 .claude/
 *.output
