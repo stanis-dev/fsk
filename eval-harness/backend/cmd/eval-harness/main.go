@@ -1,23 +1,35 @@
-// Command eval-harness runs scenarios through the eval pipeline.
+// Command eval-harness runs scenarios through the eval pipeline or serves the read-only API.
 //
 // Usage: eval-harness run [-root dir] [-model m] [-effort e] [ids...]
+//
+//	eval-harness serve [-addr host:port] [-root dir] [-cors-origin origin]
 package main
 
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 
+	"backend/internal/api"
 	"backend/internal/orchestrator"
 )
 
 func main() {
-	if len(os.Args) < 2 || os.Args[1] != "run" {
-		fmt.Fprintln(os.Stderr, "usage: eval-harness run [-root dir] [-model m] [-effort e] [ids...]")
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "usage: eval-harness <run|serve> [flags]")
 		os.Exit(2)
 	}
-	os.Exit(cmdRun(os.Args[2:]))
+	switch os.Args[1] {
+	case "run":
+		os.Exit(cmdRun(os.Args[2:]))
+	case "serve":
+		os.Exit(cmdServe(os.Args[2:]))
+	default:
+		fmt.Fprintln(os.Stderr, "usage: eval-harness <run|serve> [flags]")
+		os.Exit(2)
+	}
 }
 
 func cmdRun(args []string) int {
@@ -78,4 +90,34 @@ func resolveRoot(flagRoot string) (string, error) {
 func isDir(p string) bool {
 	fi, err := os.Stat(p)
 	return err == nil && fi.IsDir()
+}
+
+func cmdServe(args []string) int {
+	fs := flag.NewFlagSet("serve", flag.ExitOnError)
+	addr := fs.String("addr", "127.0.0.1:8090", "listen address (bind localhost; auth is out of scope)")
+	root := fs.String("root", "", "eval-harness root; default: discovered from cwd")
+	corsOrigin := fs.String("cors-origin", "http://localhost:8080", "allowed browser origin for the dashboard")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	ehRoot, err := resolveRoot(*root)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "eval-harness:", err)
+		return 2
+	}
+	runsDir := os.Getenv("FISKALY_RUNS_DIR")
+	if runsDir == "" {
+		runsDir = filepath.Join(os.Getenv("HOME"), ".cache", "fiskaly-eval")
+	}
+	h := api.Handler(api.Config{
+		RunsDir:      runsDir,
+		ScenariosDir: filepath.Join(ehRoot, "scenarios"),
+		CORSOrigin:   *corsOrigin,
+	})
+	fmt.Fprintf(os.Stderr, "eval-harness: serving on http://%s (cors: %s)\n", *addr, *corsOrigin)
+	if err := http.ListenAndServe(*addr, h); err != nil {
+		fmt.Fprintln(os.Stderr, "eval-harness:", err)
+		return 1
+	}
+	return 0
 }
