@@ -3,6 +3,8 @@ package orchestrator
 import (
 	"io"
 	"os"
+
+	"backend/internal/scenarios"
 )
 
 // Config is the fully-resolved input to a run batch. The orchestrator performs
@@ -36,12 +38,12 @@ func Run(cfg Config) (int, error) {
 	if err != nil {
 		return 2, err
 	}
-	scenarios, err := discoverScenarios(cfg.ScenariosDir)
+	discovered, err := scenarios.Discover(cfg.ScenariosDir)
 	if err != nil {
 		return 2, err
 	}
 	if len(cfg.IDs) > 0 {
-		scenarios, err = filterScenarios(scenarios, cfg.IDs)
+		discovered, err = filterScenarios(discovered, cfg.IDs)
 		if err != nil {
 			return 2, err
 		}
@@ -55,5 +57,5 @@ func Run(cfg Config) (int, error) {
 		return 2, err
 	}
 	ag := dockerAgent{repoRoot: cfg.RepoRoot, dockerfilePath: cfg.DockerfilePath, context: ctx, image: cfg.Image}
-	return runAll(scenarios, cfg.RunsBase, judgeBin, ag, rc, cfg.Out), nil
+	return runAll(discovered, cfg.RunsBase, judgeBin, ag, rc, cfg.Out), nil
 }

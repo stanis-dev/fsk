@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"backend/internal/artifacts"
+	"backend/internal/scenarios"
 )
 
 type runDir struct {
@@ -23,7 +24,7 @@ type observation struct {
 
 // prepareRun creates an isolated run dir, copies the fixture, makes a baseline
 // commit so the agent's changes can be diffed, and writes meta.json.
-func prepareRun(runsBase string, s scenario, cfg runConfig) (runDir, error) {
+func prepareRun(runsBase string, s scenarios.Scenario, cfg runConfig) (runDir, error) {
 	if err := os.MkdirAll(runsBase, 0o755); err != nil {
 		return runDir{}, fmt.Errorf("creating runs base: %w", err)
 	}
@@ -32,13 +33,13 @@ func prepareRun(runsBase string, s scenario, cfg runConfig) (runDir, error) {
 		return runDir{}, fmt.Errorf("creating run dir: %w", err)
 	}
 	rd := runDir{path: path, work: filepath.Join(path, "pos")}
-	if err := copyDir(s.fixtureDir, rd.work); err != nil {
+	if err := copyDir(s.FixtureDir, rd.work); err != nil {
 		return rd, fmt.Errorf("copying fixture: %w", err)
 	}
 	if err := gitInitBaseline(rd.work); err != nil {
 		return rd, err
 	}
-	if err := writeMeta(rd.path, s.id, cfg); err != nil {
+	if err := writeMeta(rd.path, s.ID, cfg); err != nil {
 		return rd, err
 	}
 	return rd, nil

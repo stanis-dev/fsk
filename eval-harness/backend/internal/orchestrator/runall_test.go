@@ -4,16 +4,18 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"backend/internal/scenarios"
 )
 
 func TestFilterScenarios_PrefixAndExact(t *testing.T) {
-	all := []scenario{{id: "01-zero-to-receipt"}, {id: "06-fire-and-forget"}}
+	all := []scenarios.Scenario{{ID: "01-zero-to-receipt"}, {ID: "06-fire-and-forget"}}
 	got, err := filterScenarios(all, []string{"06"})
-	if err != nil || len(got) != 1 || got[0].id != "06-fire-and-forget" {
+	if err != nil || len(got) != 1 || got[0].ID != "06-fire-and-forget" {
 		t.Fatalf("prefix match failed: %+v err=%v", got, err)
 	}
 	got, err = filterScenarios(all, []string{"01-zero-to-receipt"})
-	if err != nil || len(got) != 1 || got[0].id != "01-zero-to-receipt" {
+	if err != nil || len(got) != 1 || got[0].ID != "01-zero-to-receipt" {
 		t.Fatalf("exact match failed: %+v err=%v", got, err)
 	}
 	if _, err := filterScenarios(all, []string{"99"}); err == nil {
@@ -33,7 +35,7 @@ func TestRunAll_AllPassExitsZero(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}

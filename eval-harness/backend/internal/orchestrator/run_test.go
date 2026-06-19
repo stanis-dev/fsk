@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"backend/internal/scenarios"
 )
 
 const (
@@ -69,7 +71,7 @@ func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildJudge: %v", err)
 	}
-	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}

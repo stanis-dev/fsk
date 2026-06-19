@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"backend/internal/scenarios"
 )
 
 func TestDiscoverScenarios(t *testing.T) {
@@ -18,21 +20,21 @@ func TestDiscoverScenarios(t *testing.T) {
 	// A non-numeric dir (e.g. docs): ignored.
 	mkScenario(t, root, "AUTHORING", true, true)
 
-	got, err := discoverScenarios(root)
+	got, err := scenarios.Discover(root)
 	if err != nil {
-		t.Fatalf("discoverScenarios: %v", err)
+		t.Fatalf("scenarios.Discover: %v", err)
 	}
 	if len(got) != 2 {
 		t.Fatalf("found %d scenarios, want 2: %+v", len(got), got)
 	}
-	if got[0].id != "01-alpha" || got[1].id != "02-beta" {
-		t.Errorf("scenarios not sorted/identified: %s, %s", got[0].id, got[1].id)
+	if got[0].ID != "01-alpha" || got[1].ID != "02-beta" {
+		t.Errorf("scenarios not sorted/identified: %s, %s", got[0].ID, got[1].ID)
 	}
-	if filepath.Base(got[0].fixtureDir) != "fixture" {
-		t.Errorf("fixtureDir = %q, want .../fixture", got[0].fixtureDir)
+	if filepath.Base(got[0].FixtureDir) != "fixture" {
+		t.Errorf("FixtureDir = %q, want .../fixture", got[0].FixtureDir)
 	}
-	if filepath.Base(got[0].scenarioJSON) != "scenario.json" {
-		t.Errorf("scenarioJSON = %q, want .../scenario.json", got[0].scenarioJSON)
+	if filepath.Base(got[0].ScenarioJSON) != "scenario.json" {
+		t.Errorf("ScenarioJSON = %q, want .../scenario.json", got[0].ScenarioJSON)
 	}
 }
 
@@ -72,7 +74,7 @@ func mustMkdir(t *testing.T, dir string) {
 }
 
 func TestDiscoverScenarios_NoneIsError(t *testing.T) {
-	if _, err := discoverScenarios(t.TempDir()); err == nil {
+	if _, err := scenarios.Discover(t.TempDir()); err == nil {
 		t.Fatal("expected error when no scenarios are present")
 	}
 }

@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"backend/internal/scenarios"
 )
 
 func TestDiscoverScenarios_RealCount(t *testing.T) {
@@ -14,9 +16,9 @@ func TestDiscoverScenarios_RealCount(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
-		t.Fatalf("discoverScenarios: %v", err)
+		t.Fatalf("scenarios.Discover: %v", err)
 	}
 	if len(sc) != 10 {
 		t.Fatalf("discovered %d scenarios, want 10", len(sc))
@@ -48,7 +50,7 @@ func TestRunScenario_RealDocker(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := discoverScenarios(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}

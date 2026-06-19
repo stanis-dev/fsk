@@ -1,11 +1,8 @@
 package orchestrator
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"sort"
 )
 
 type stepResult struct {
@@ -17,48 +14,6 @@ type outcome struct {
 	Build stepResult
 	Test  stepResult
 	Judge stepResult
-}
-
-type scenario struct {
-	id           string
-	dir          string
-	fixtureDir   string
-	scenarioJSON string
-}
-
-var scenarioID = regexp.MustCompile(`^[0-9]`)
-
-// discoverScenarios returns every runnable scenario under scenariosDir: a
-// numeric-prefixed directory that has both a fixture/ subdir and a scenario.json.
-// Results are sorted by id. It errors if none are found.
-func discoverScenarios(scenariosDir string) ([]scenario, error) {
-	entries, err := os.ReadDir(scenariosDir)
-	if err != nil {
-		return nil, fmt.Errorf("reading scenarios dir: %w", err)
-	}
-	var out []scenario
-	for _, e := range entries {
-		if !e.IsDir() || !scenarioID.MatchString(e.Name()) {
-			continue
-		}
-		dir := filepath.Join(scenariosDir, e.Name())
-		fixture := filepath.Join(dir, "fixture")
-		scenarioJSON := filepath.Join(dir, "scenario.json")
-		if !isDir(fixture) || !isFile(scenarioJSON) {
-			continue
-		}
-		out = append(out, scenario{
-			id:           e.Name(),
-			dir:          dir,
-			fixtureDir:   fixture,
-			scenarioJSON: scenarioJSON,
-		})
-	}
-	if len(out) == 0 {
-		return nil, fmt.Errorf("no runnable scenarios found under %s", scenariosDir)
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i].id < out[j].id })
-	return out, nil
 }
 
 func copyDir(src, dst string) error {
