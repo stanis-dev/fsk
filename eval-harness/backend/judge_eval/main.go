@@ -4,12 +4,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
+
+	"backend/internal/judge"
 )
 
 type goldCase struct {
@@ -27,17 +28,7 @@ var cases = []goldCase{
 	{"10-credential-expiry", "bad", false},
 }
 
-// evalReport mirrors the judge.json fields the meta-eval needs.
-type evalReport struct {
-	Verdict      string `json:"verdict"`
-	Expectations *struct {
-		Criteria []struct {
-			Verdict string `json:"verdict"`
-		} `json:"criteria"`
-	} `json:"expectations"`
-}
-
-func unmetCount(r evalReport) int {
+func unmetCount(r judge.Report) int {
 	if r.Expectations == nil {
 		return 0
 	}
@@ -59,18 +50,8 @@ func main() {
 	evalDir := filepath.Dir(thisFile)   // .../backend/judge_eval
 	backendDir := filepath.Dir(evalDir) // .../backend
 	ehRoot := filepath.Dir(backendDir)  // .../eval-harness
-	judgeDir := filepath.Join(backendDir, "cmd", "judge")
 	scenariosDir := filepath.Join(ehRoot, "scenarios")
-	goldDir := filepath.Join(judgeDir, "testdata", "goldset")
-
-	bin := filepath.Join(os.TempDir(), "judge-eval-bin")
-	build := exec.Command("go", "build", "-o", bin, ".")
-	build.Dir = judgeDir
-	if out, err := build.CombinedOutput(); err != nil {
-		fmt.Fprintf(os.Stderr, "build judge: %v\n%s", err, out)
-		os.Exit(2)
-	}
-	reportPath := filepath.Join(os.TempDir(), "judge-eval-report.json")
+	goldDir := filepath.Join(backendDir, "cmd", "judge", "testdata", "goldset")
 
 	// matrix[expected][actual]; index 0 = conformant, 1 = NON-COMPLIANT.
 	var matrix [2][2]int
@@ -85,30 +66,14 @@ func main() {
 			reps = 3
 		}
 		for r := 0; r < reps; r++ {
-			_ = os.Remove(reportPath)
-			cmd := exec.Command(bin, "-expect", "-json", reportPath, "-scenario", scenario, work)
-			out, err := cmd.CombinedOutput()
-			if err != nil && cmd.ProcessState == nil {
-				errs++
-				fmt.Printf("ERROR  %-22s/%-4s rep%d (judge failed: %v)\n%s\n", c.scenario, c.variant, r, err, out)
-				continue
-			}
-			code := cmd.ProcessState.ExitCode()
-
+			rep, code, err := judge.Evaluate(judge.Options{
+				ScenarioPath:   scenario,
+				IntegrationDir: work,
+				Expect:         true,
+			}, io.Discard)
 			if code == 2 {
 				errs++
-				fmt.Printf("ERROR  %-22s/%-4s rep%d (exit 2)\n%s\n", c.scenario, c.variant, r, out)
-				continue
-			}
-
-			var rep evalReport
-			if data, err := os.ReadFile(reportPath); err != nil {
-				errs++
-				fmt.Printf("ERROR  %-22s/%-4s rep%d (no judge.json: %v)\n", c.scenario, c.variant, r, err)
-				continue
-			} else if err := json.Unmarshal(data, &rep); err != nil {
-				errs++
-				fmt.Printf("ERROR  %-22s/%-4s rep%d (bad judge.json: %v)\n", c.scenario, c.variant, r, err)
+				fmt.Printf("ERROR  %-22s/%-4s rep%d (exit 2: %v)\n", c.scenario, c.variant, r, err)
 				continue
 			}
 
