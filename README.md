@@ -40,7 +40,7 @@ questions such as:
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
 | `eval-harness/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
 | `eval-harness/backend/` | Go CLI (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; `eval-harness run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
-| `eval-harness/evals/` | Docker eval container (Dockerfile and entrypoint); scenario and judge assets. |
+| `eval-harness/sandbox/` | Docker sandbox image (Dockerfile and entrypoint) the coder runs inside. |
 | `eval-harness/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
 | `eval-harness/pos/` | The base POS fixture used to build scenario seeds. |
 

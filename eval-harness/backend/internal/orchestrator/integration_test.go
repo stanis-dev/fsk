@@ -55,7 +55,7 @@ func TestRunScenario_RealDocker(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "evals", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
+	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "sandbox", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
 
 	res, err := runScenario(context.Background(), sc[0], t.TempDir(), judgeBin, ag, cfg, true, nil)
 	if err != nil {
