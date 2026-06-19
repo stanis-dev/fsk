@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -16,7 +17,12 @@ const (
 
 type fakeAgent struct{}
 
-func (f fakeAgent) run(rd runDir, task string, cfg runConfig) error {
+func (f fakeAgent) build(_ context.Context) error { return nil }
+
+func (f fakeAgent) run(ctx context.Context, rd runDir, task string, cfg runConfig) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	tr := evSearch + "\n" + evWrite + "\n"
 	if err := os.WriteFile(filepath.Join(rd.path, "transcript.jsonl"), []byte(tr), 0o644); err != nil {
 		return err
@@ -35,12 +41,12 @@ func TestContainerName(t *testing.T) {
 	}
 }
 
-func TestWriteRunHandle(t *testing.T) {
+func TestWriteRunHandle_Detached(t *testing.T) {
 	rp := filepath.Join(t.TempDir(), "run.ZZZ")
 	if err := os.MkdirAll(rp, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := writeRunHandle(rp); err != nil {
+	if err := writeRunHandle(rp, true); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join(rp, "run.json"))
@@ -55,7 +61,31 @@ func TestWriteRunHandle(t *testing.T) {
 		t.Errorf("container = %q", h.Container)
 	}
 	if h.PID == 0 || h.PGID == 0 {
-		t.Errorf("pid/pgid not set: %+v", h)
+		t.Errorf("pid/pgid not set for detached=true: %+v", h)
+	}
+}
+
+func TestWriteRunHandle_NotDetached(t *testing.T) {
+	rp := filepath.Join(t.TempDir(), "run.AAA")
+	if err := os.MkdirAll(rp, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeRunHandle(rp, false); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(rp, "run.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var h runHandle
+	if err := json.Unmarshal(data, &h); err != nil {
+		t.Fatal(err)
+	}
+	if h.Container != "fiskaly-eval-run.AAA" {
+		t.Errorf("container = %q", h.Container)
+	}
+	if h.PID != 0 || h.PGID != 0 {
+		t.Errorf("pid/pgid must be zero for detached=false: %+v", h)
 	}
 }
 
@@ -77,13 +107,69 @@ func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	}
 	one := sc[0] // 01-zero-to-receipt
 
-	res, err := runScenario(one, t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"})
+	res, err := runScenario(context.Background(), one, t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"}, false)
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}
 	for _, name := range []string{"meta.json", "build.txt", "test.txt", "judge.txt", "judge.json", "changes.diff", "transcript.jsonl"} {
 		if _, err := os.Stat(filepath.Join(res.runDir, name)); err != nil {
 			t.Errorf("missing artifact %s: %v", name, err)
+		}
+	}
+}
+
+// blockingAgent blocks run until ctx is cancelled, simulating a long container run.
+type blockingAgent struct{}
+
+func (b blockingAgent) build(_ context.Context) error { return nil }
+
+func (b blockingAgent) run(ctx context.Context, rd runDir, task string, cfg runConfig) error {
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+func TestRunScenario_CancelStopsRun(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires building the judge")
+	}
+	ehRoot, err := filepath.Abs("../../..")
+	if err != nil {
+		t.Fatal(err)
+	}
+	judgeBin, err := buildJudge(filepath.Join(ehRoot, "backend", "cmd", "judge"), t.TempDir())
+	if err != nil {
+		t.Fatalf("buildJudge: %v", err)
+	}
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	one := sc[0]
+
+	ctx, cancel := context.WithCancel(context.Background())
+	runsBase := t.TempDir()
+
+	done := make(chan struct {
+		res scenarioResult
+		err error
+	}, 1)
+	go func() {
+		res, err := runScenario(ctx, one, runsBase, judgeBin, blockingAgent{}, runConfig{model: "m", effort: "e"}, false)
+		done <- struct {
+			res scenarioResult
+			err error
+		}{res, err}
+	}()
+
+	cancel()
+
+	result := <-done
+	if result.err == nil {
+		t.Fatal("expected error after cancel, got nil")
+	}
+	if result.res.runDir != "" {
+		if _, err := os.Stat(filepath.Join(result.res.runDir, "judge.txt")); err == nil {
+			t.Error("judge.txt must not be written when run is cancelled")
 		}
 	}
 }

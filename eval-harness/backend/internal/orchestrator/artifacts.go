@@ -66,12 +66,17 @@ type runHandle struct {
 	Container string `json:"container"`
 }
 
-func writeRunHandle(runPath string) error {
-	pgid, err := syscall.Getpgid(0)
-	if err != nil {
-		return fmt.Errorf("getpgid: %w", err)
+func writeRunHandle(runPath string, detached bool) error {
+	h := runHandle{Container: containerName(runPath)}
+	if detached {
+		pgid, err := syscall.Getpgid(0)
+		if err != nil {
+			return fmt.Errorf("getpgid: %w", err)
+		}
+		h.PID = os.Getpid()
+		h.PGID = pgid
 	}
-	data, err := json.Marshal(runHandle{PID: os.Getpid(), PGID: pgid, Container: containerName(runPath)})
+	data, err := json.Marshal(h)
 	if err != nil {
 		return err
 	}

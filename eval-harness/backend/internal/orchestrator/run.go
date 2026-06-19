@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ type scenarioResult struct {
 	obs    observation
 }
 
-func runScenario(s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig) (scenarioResult, error) {
+func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, detached bool) (scenarioResult, error) {
 	taskBytes, err := os.ReadFile(filepath.Join(s.Dir, "task.md"))
 	if err != nil {
 		return scenarioResult{}, fmt.Errorf("reading task: %w", err)
@@ -25,11 +26,11 @@ func runScenario(s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg 
 	if err != nil {
 		return scenarioResult{}, fmt.Errorf("prepareRun: %w", err)
 	}
-	if err := writeRunHandle(rd.path); err != nil {
+	if err := writeRunHandle(rd.path, detached); err != nil {
 		return scenarioResult{}, fmt.Errorf("writeRunHandle: %w", err)
 	}
 
-	if err := ag.run(rd, string(taskBytes), cfg); err != nil {
+	if err := ag.run(ctx, rd, string(taskBytes), cfg); err != nil {
 		return scenarioResult{}, fmt.Errorf("agent: %w", err)
 	}
 

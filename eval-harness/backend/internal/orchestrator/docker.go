@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,13 +13,27 @@ import (
 // agent runs the coder against a prepared work dir. The real implementation
 // drives Docker; tests inject a fake.
 type agent interface {
-	run(rd runDir, task string, cfg runConfig) error
+	build(ctx context.Context) error
+	run(ctx context.Context, rd runDir, task string, cfg runConfig) error
 }
 
 // containerName derives a deterministic, per-run container name so a run can be
 // cancelled with `docker kill` even though it was spawned detached.
 func containerName(runPath string) string {
 	return "fiskaly-eval-" + filepath.Base(runPath)
+}
+
+// ContainerName is the deterministic container name for a run dir.
+func ContainerName(runDir string) string { return containerName(runDir) }
+
+// KillContainer stops a running coder container by its deterministic name.
+func KillContainer(container, dockerCtx string) error {
+	cmd := exec.Command("docker", "kill", container)
+	cmd.Env = dockerEnv(dockerCtx)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("docker kill %s: %w\n%s", container, err, out)
+	}
+	return nil
 }
 
 // dockerAgent runs the coder hermetically: only the work dir is mounted, so the
@@ -30,15 +45,18 @@ type dockerAgent struct {
 	image          string
 }
 
-func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
-	build := exec.Command("docker", "build",
+func (a dockerAgent) build(ctx context.Context) error {
+	cmd := exec.CommandContext(ctx, "docker", "build",
 		"-f", a.dockerfilePath,
 		"-t", a.image, a.repoRoot)
-	build.Env = dockerEnv(a.context)
-	if out, err := build.CombinedOutput(); err != nil {
+	cmd.Env = dockerEnv(a.context)
+	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("docker build: %w\n%s", err, out)
 	}
+	return nil
+}
 
+func (a dockerAgent) run(ctx context.Context, rd runDir, task string, cfg runConfig) error {
 	transcript, err := os.Create(filepath.Join(rd.path, artifacts.TranscriptFile))
 	if err != nil {
 		return err
@@ -50,7 +68,7 @@ func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
 	}
 	defer stderr.Close()
 
-	run := exec.Command("docker", "run", "--rm",
+	cmd := exec.CommandContext(ctx, "docker", "run", "--rm",
 		"--name", containerName(rd.path),
 		"-e", "CLAUDE_CODE_OAUTH_TOKEN="+cfg.token,
 		"-e", "IS_SANDBOX=1",
@@ -59,12 +77,12 @@ func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
 		"-e", "FISKALY_MCP_TELEMETRY=/work/mcp-telemetry.jsonl",
 		"-v", rd.work+":/work",
 		a.image, task)
-	run.Env = dockerEnv(a.context)
-	run.Stdout = transcript
-	run.Stderr = stderr
+	cmd.Env = dockerEnv(a.context)
+	cmd.Stdout = transcript
+	cmd.Stderr = stderr
 	// The agent exiting non-zero is recorded in claude.err, not fatal: an agent
 	// failure is a result to observe, matching the Bash harness.
-	_ = run.Run()
+	_ = cmd.Run()
 
 	tele := filepath.Join(rd.work, "mcp-telemetry.jsonl")
 	if _, err := os.Stat(tele); err == nil {

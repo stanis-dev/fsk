@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -40,7 +41,7 @@ func TestRunAll_AllPassExitsZero(t *testing.T) {
 		t.Fatal(err)
 	}
 	var b strings.Builder
-	code := runAll(sc[:1], t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"}, &b)
+	code := runAll(context.Background(), sc[:1], t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"}, false, &b)
 	if code != 0 {
 		t.Fatalf("exit = %d, want 0:\n%s", code, b.String())
 	}

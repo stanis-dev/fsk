@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -56,7 +57,7 @@ func TestRunScenario_RealDocker(t *testing.T) {
 	}
 	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "evals", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
 
-	res, err := runScenario(sc[0], t.TempDir(), judgeBin, ag, cfg)
+	res, err := runScenario(context.Background(), sc[0], t.TempDir(), judgeBin, ag, cfg, true)
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}

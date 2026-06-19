@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -32,10 +33,10 @@ func filterScenarios(all []scenarios.Scenario, ids []string) ([]scenarios.Scenar
 // runAll runs each scenario through the single path independently and returns 0
 // only if all completed without a harness error. An
 // agent failure is recorded in claude.err, not counted as a failure here.
-func runAll(ss []scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, w io.Writer) int {
+func runAll(ctx context.Context, ss []scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, detached bool, w io.Writer) int {
 	failed := 0
 	for _, s := range ss {
-		res, err := runScenario(s, runsBase, judgeBin, ag, cfg)
+		res, err := runScenario(ctx, s, runsBase, judgeBin, ag, cfg, detached)
 		if err != nil {
 			fmt.Fprintf(w, "%-22s ERROR: %v\n", s.ID, err)
 			failed++

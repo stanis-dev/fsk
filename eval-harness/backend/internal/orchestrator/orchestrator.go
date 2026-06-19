@@ -1,8 +1,8 @@
 package orchestrator
 
 import (
+	"context"
 	"io"
-	"os"
 
 	"backend/internal/scenarios"
 )
@@ -27,14 +27,7 @@ type Config struct {
 // the Docker pipeline. It returns the batch exit code (0 all ran, 1 some
 // failed) or 2 with a non-nil error on a harness-level failure before the batch.
 func Run(cfg Config) (int, error) {
-	ctx := dockerContext()
-	if err := checkBinaries("docker", "go", "git"); err != nil {
-		return 2, err
-	}
-	if err := dockerReachable(ctx); err != nil {
-		return 2, err
-	}
-	rc, err := loadConfig(cfg.RepoRoot, cfg.Model, cfg.Effort)
+	runner, err := NewRunner(cfg)
 	if err != nil {
 		return 2, err
 	}
@@ -48,14 +41,5 @@ func Run(cfg Config) (int, error) {
 			return 2, err
 		}
 	}
-	tempDir, err := os.MkdirTemp("", "runner-judge-")
-	if err != nil {
-		return 2, err
-	}
-	judgeBin, err := buildJudge(cfg.JudgeDir, tempDir)
-	if err != nil {
-		return 2, err
-	}
-	ag := dockerAgent{repoRoot: cfg.RepoRoot, dockerfilePath: cfg.DockerfilePath, context: ctx, image: cfg.Image}
-	return runAll(discovered, cfg.RunsBase, judgeBin, ag, rc, cfg.Out), nil
+	return runAll(context.Background(), discovered, cfg.RunsBase, runner.judgeBin, runner.ag, runner.cfg, true, cfg.Out), nil
 }
