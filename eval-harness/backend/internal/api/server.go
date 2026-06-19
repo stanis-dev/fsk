@@ -1,4 +1,4 @@
-// Package api serves runs and scenarios over a read-only JSON HTTP API.
+// Package api serves runs and scenarios over a JSON HTTP API.
 package api
 
 import (
@@ -6,14 +6,22 @@ import (
 	"net/http"
 )
 
-// Config is the resolved server configuration.
-type Config struct {
-	RunsDir      string // dir holding run.* directories (e.g. ~/.cache/fiskaly-eval)
-	ScenariosDir string // dir holding NN-slug scenario directories
-	CORSOrigin   string // exact allowed browser origin (e.g. http://localhost:8080)
+// RunService is the subset of jobs.Service the API layer depends on.
+// Keeping it local lets tests use a fake without importing jobs.
+type RunService interface {
+	Enqueue(scenarioID, model, effort string) (string, error)
+	Cancel(runID string) bool
 }
 
-// Handler returns the API router with CORS applied. Read-only (GET) this phase.
+// Config is the resolved server configuration.
+type Config struct {
+	RunsDir      string     // dir holding run.* directories (e.g. ~/.cache/fiskaly-eval)
+	ScenariosDir string     // dir holding NN-slug scenario directories
+	CORSOrigin   string     // exact allowed browser origin (e.g. http://localhost:8080)
+	Service      RunService // may be nil when running without a job worker pool
+}
+
+// Handler returns the API router with CORS applied.
 func Handler(cfg Config) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +32,8 @@ func Handler(cfg Config) http.Handler {
 	mux.HandleFunc("GET /runs/{id}/logs/{name}", cfg.getRunLog)
 	mux.HandleFunc("GET /scenarios", cfg.listScenarios)
 	mux.HandleFunc("GET /scenarios/{id}", cfg.getScenario)
+	mux.HandleFunc("POST /runs", cfg.postRun)
+	mux.HandleFunc("POST /runs/{id}/cancel", cfg.cancelRun)
 	return cors(cfg.CORSOrigin, mux)
 }
 
@@ -33,7 +43,7 @@ func cors(origin string, next http.Handler) http.Handler {
 		h := w.Header()
 		h.Set("Access-Control-Allow-Origin", origin)
 		h.Set("Vary", "Origin")
-		h.Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		h.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		h.Set("Access-Control-Allow-Headers", "Content-Type")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)

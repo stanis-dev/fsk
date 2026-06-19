@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -69,4 +70,30 @@ func (cfg Config) getScenario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, scenarioDetail{Config: c, Task: task})
+}
+
+func (cfg Config) postRun(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		ScenarioID string `json:"scenarioId"`
+		Model      string `json:"model"`
+		Effort     string `json:"effort"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ScenarioID == "" {
+		writeError(w, http.StatusBadRequest, "scenarioId required")
+		return
+	}
+	id, err := cfg.Service.Enqueue(body.ScenarioID, body.Model, body.Effort)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusAccepted, map[string]string{"runId": id})
+}
+
+func (cfg Config) cancelRun(w http.ResponseWriter, r *http.Request) {
+	if !cfg.Service.Cancel(r.PathValue("id")) {
+		writeError(w, http.StatusNotFound, "no live run to cancel")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

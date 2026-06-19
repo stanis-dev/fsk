@@ -1,11 +1,12 @@
-// Command eval-harness runs scenarios through the eval pipeline or serves the read-only API.
+// Command eval-harness runs scenarios through the eval pipeline or serves the API.
 //
 // Usage: eval-harness run [-root dir] [-model m] [-effort e] [ids...]
 //
-//	eval-harness serve [-addr host:port] [-root dir] [-cors-origin origin]
+//	eval-harness serve [-addr host:port] [-root dir] [-cors-origin origin] [-workers n]
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -13,7 +14,9 @@ import (
 	"path/filepath"
 
 	"backend/internal/api"
+	"backend/internal/jobs"
 	"backend/internal/orchestrator"
+	"backend/internal/scenarios"
 )
 
 func main() {
@@ -97,11 +100,41 @@ func isDir(p string) bool {
 	return err == nil && fi.IsDir()
 }
 
+// runnerAdapter wraps *orchestrator.Runner to satisfy jobs.Runner.
+// The adapter binds the Docker context so KillContainer is a single-arg call.
+type runnerAdapter struct {
+	r *orchestrator.Runner
+}
+
+func (a runnerAdapter) RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, detached bool, onStart func(runDir string)) (string, error) {
+	return a.r.RunScenario(ctx, s, orchestrator.RunOptions{
+		Model:    model,
+		Effort:   effort,
+		Detached: detached,
+		OnStart:  onStart,
+	})
+}
+
+func (a runnerAdapter) Resolve(id string) (scenarios.Scenario, bool) {
+	return a.r.Resolve(id)
+}
+
+func (a runnerAdapter) ContainerName(runDir string) string {
+	return orchestrator.ContainerName(runDir)
+}
+
+func (a runnerAdapter) KillContainer(container string) error {
+	return orchestrator.KillContainer(container, a.r.DockerContext())
+}
+
 func cmdServe(args []string) int {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	addr := fs.String("addr", "127.0.0.1:8090", "listen address (bind localhost; auth is out of scope)")
 	root := fs.String("root", "", "eval-harness root; default: discovered from cwd")
 	corsOrigin := fs.String("cors-origin", "http://localhost:8080", "allowed browser origin for the dashboard")
+	model := fs.String("model", orchestrator.DefaultModel, "coder model")
+	effort := fs.String("effort", orchestrator.DefaultEffort, "coder effort")
+	workers := fs.Int("workers", 1, "number of concurrent scenario workers")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -119,10 +152,30 @@ func cmdServe(args []string) int {
 		}
 		runsDir = filepath.Join(home, ".cache", "fiskaly-eval")
 	}
+
+	runner, err := orchestrator.NewRunner(orchestrator.Config{
+		ScenariosDir:   filepath.Join(ehRoot, "scenarios"),
+		JudgeDir:       filepath.Join(ehRoot, "backend", "cmd", "judge"),
+		RepoRoot:       filepath.Dir(ehRoot),
+		DockerfilePath: filepath.Join(ehRoot, "evals", "Dockerfile"),
+		RunsBase:       runsDir,
+		Image:          "fiskaly-eval",
+		Model:          *model,
+		Effort:         *effort,
+	})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "eval-harness:", err)
+		return 2
+	}
+
+	svc := jobs.NewService(runnerAdapter{runner}, runsDir, *workers)
+	svc.Start()
+
 	h := api.Handler(api.Config{
 		RunsDir:      runsDir,
 		ScenariosDir: filepath.Join(ehRoot, "scenarios"),
 		CORSOrigin:   *corsOrigin,
+		Service:      svc,
 	})
 	fmt.Fprintf(os.Stderr, "eval-harness: serving on http://%s (cors: %s)\n", *addr, *corsOrigin)
 	if err := http.ListenAndServe(*addr, h); err != nil {

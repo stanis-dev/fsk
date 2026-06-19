@@ -2,11 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -75,6 +77,21 @@ func mustWrite(t *testing.T, path, content string) {
 	}
 }
 
+// fakeService implements RunService for tests.
+type fakeService struct {
+	enqueueErr error // non-nil causes Enqueue to return this error
+	cancelOK   bool  // value returned by Cancel
+}
+
+func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) {
+	if f.enqueueErr != nil {
+		return "", f.enqueueErr
+	}
+	return "job.1", nil
+}
+
+func (f *fakeService) Cancel(runID string) bool { return f.cancelOK }
+
 func newServer(t *testing.T) (*httptest.Server, Config) {
 	t.Helper()
 	root := t.TempDir()
@@ -82,6 +99,7 @@ func newServer(t *testing.T) (*httptest.Server, Config) {
 		RunsDir:      buildRunsDir(t, root),
 		ScenariosDir: buildScenariosDir(t, root),
 		CORSOrigin:   "http://localhost:8080",
+		Service:      &fakeService{cancelOK: true},
 	}
 	return httptest.NewServer(Handler(cfg)), cfg
 }
@@ -326,5 +344,124 @@ func TestCORSOnGET(t *testing.T) {
 	origin := resp.Header.Get("Access-Control-Allow-Origin")
 	if origin != "http://localhost:8080" {
 		t.Errorf("want CORS origin on GET, got %q", origin)
+	}
+}
+
+func post(t *testing.T, srv *httptest.Server, path, body string) *http.Response {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodPost, srv.URL+path, strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return resp
+}
+
+func TestPostRunOK(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs", `{"scenarioId":"01-demo"}`)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusAccepted {
+		t.Fatalf("want 202, got %d", resp.StatusCode)
+	}
+	var m map[string]string
+	if err := json.NewDecoder(resp.Body).Decode(&m); err != nil {
+		t.Fatal(err)
+	}
+	if m["runId"] == "" {
+		t.Error("want non-empty runId")
+	}
+}
+
+func TestPostRunEmptyBody(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs", `{}`)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", resp.StatusCode)
+	}
+}
+
+func TestPostRunInvalidJSON(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs", `not-json`)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", resp.StatusCode)
+	}
+}
+
+func TestPostRunUnknownScenario(t *testing.T) {
+	root := t.TempDir()
+	svc := &fakeService{enqueueErr: fmt.Errorf("unknown scenario %q", "99-nope")}
+	cfg := Config{
+		RunsDir:      buildRunsDir(t, root),
+		ScenariosDir: buildScenariosDir(t, root),
+		CORSOrigin:   "http://localhost:8080",
+		Service:      svc,
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs", `{"scenarioId":"99-nope"}`)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400, got %d", resp.StatusCode)
+	}
+}
+
+func TestCancelRunOK(t *testing.T) {
+	srv, _ := newServer(t) // fakeService.cancelOK = true
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs/job.1/cancel", "")
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("want 204, got %d", resp.StatusCode)
+	}
+}
+
+func TestCancelRunNotFound(t *testing.T) {
+	root := t.TempDir()
+	svc := &fakeService{cancelOK: false}
+	cfg := Config{
+		RunsDir:      buildRunsDir(t, root),
+		ScenariosDir: buildScenariosDir(t, root),
+		CORSOrigin:   "http://localhost:8080",
+		Service:      svc,
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs/job.99/cancel", "")
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("want 404, got %d", resp.StatusCode)
+	}
+}
+
+func TestCORSPreflightIncludesPost(t *testing.T) {
+	srv, _ := newServer(t)
+	defer srv.Close()
+
+	req, _ := http.NewRequest(http.MethodOptions, srv.URL+"/runs", nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	methods := resp.Header.Get("Access-Control-Allow-Methods")
+	if !strings.Contains(methods, "POST") {
+		t.Errorf("want POST in Allow-Methods, got %q", methods)
 	}
 }
