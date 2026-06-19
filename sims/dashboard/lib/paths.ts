@@ -1,7 +1,6 @@
 import os from "node:os";
 import path from "node:path";
 
-// runnerDir/scenariosDir resolve relative to cwd (sims/dashboard/); env vars override.
 export function runsDir(): string {
   return process.env.FISKALY_RUNS_DIR ?? path.join(os.homedir(), ".cache", "fiskaly-eval");
 }

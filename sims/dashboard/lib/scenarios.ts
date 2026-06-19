@@ -10,21 +10,12 @@ function readConfig(dir: string): ScenarioConfig {
 }
 
 export function listScenarios(dir = scenariosDir()): ScenarioConfig[] {
-  let entries: string[];
-  try {
-    entries = fs.readdirSync(dir);
-  } catch {
-    return [];
-  }
+  const entries = fs.readdirSync(dir);
   const out: ScenarioConfig[] = [];
   for (const name of entries) {
     if (!NUMERIC_PREFIX.test(name)) continue;
     const d = path.join(dir, name);
-    try {
-      if (!fs.statSync(d).isDirectory()) continue;
-    } catch {
-      continue;
-    }
+    if (!fs.statSync(d).isDirectory()) continue;
     if (!fs.existsSync(path.join(d, "fixture")) || !fs.existsSync(path.join(d, "scenario.json"))) continue;
     out.push(readConfig(d));
   }
@@ -58,11 +49,6 @@ function hasNonEmptyChecks(checks: Record<string, unknown>): boolean {
   );
 }
 
-// assignExpectationIds fills a stable id for every expectation that lacks one.
-// Expectation ids are not user-facing — they exist only as the join key the judge
-// uses to map each model verdict back to its expectation. Existing ids are kept so
-// a scenario's judge reports stay labelled across edits; new rows get e1, e2, …,
-// skipping any id already in use.
 export function assignExpectationIds(config: ScenarioConfig): ScenarioConfig {
   const used = new Set(config.judge.expectations.map((e) => e.id).filter(Boolean));
   let n = 1;

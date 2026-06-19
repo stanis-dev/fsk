@@ -6,7 +6,7 @@ before it completes.
 
 Because this runs across so many merchants, a merchant's ability to issue
 receipts must not silently lapse over time. Operations must be alerted before a
-merchant can no longer legally sell — finding out at the till, or at an audit, is
+merchant can no longer legally sell - finding out at the till, or at an audit, is
 not acceptable. There is a CredentialHealth stub to build out for this.
 
 Keep the existing tests green and add tests for the new behavior.

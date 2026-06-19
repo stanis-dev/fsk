@@ -31,7 +31,7 @@ type fetchInput struct {
 }
 
 type fetchMetadata struct {
-	Source  string `json:"source" jsonschema:"corpus source: spec | probe | brief | kb"`
+	Source  string `json:"source" jsonschema:"corpus source"`
 	Path    string `json:"path" jsonschema:"API path/operation this document covers, if any"`
 	Version string `json:"version" jsonschema:"SIGN IT API version this document describes"`
 }
@@ -69,11 +69,9 @@ func handleFetch(c *corpus.Corpus, in fetchInput) (fetchOutput, error) {
 	}, nil
 }
 
-// registerTools wires the two read-only docs tools onto the server. AddTool
-// derives input/output JSON Schema from the structs, sets StructuredContent from
-// the returned output, and adds the JSON as a TextContent block automatically.
 func registerTools(s *mcp.Server, c *corpus.Corpus) {
-	readOnly := &mcp.ToolAnnotations{ReadOnlyHint: true, OpenWorldHint: ptr(false)}
+	openWorld := false
+	readOnly := &mcp.ToolAnnotations{ReadOnlyHint: true, OpenWorldHint: &openWorld}
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "search_fiskaly_docs",
@@ -93,5 +91,3 @@ func registerTools(s *mcp.Server, c *corpus.Corpus) {
 		return nil, out, err
 	})
 }
-
-func ptr[T any](v T) *T { return &v }

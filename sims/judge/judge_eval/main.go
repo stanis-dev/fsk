@@ -1,13 +1,4 @@
-// Command judge_eval is the meta-evaluation for the expectation judge: it runs
-// the judge (with -expect) over a gold set of integrations whose correct verdict
-// is known, and gates on genuine separation — every good fixture conformant, every
-// bad fixture caught by at least one UNMET expectation criterion (not mere
-// abstention), and zero errors. Every gold fixture passes the deterministic gate
-// by construction, so only the expectation layer can separate good from bad —
-// this measures the expectation layer, not the gate.
-//
-// Requires the claude CLI to be authenticated (the expectation layer calls it).
-// Run from anywhere: paths are resolved relative to this source file.
+// Command judge_eval runs the expectation judge against gold fixtures.
 //
 // Usage: go run ./judge_eval   (from sims/judge)
 package main
@@ -60,7 +51,11 @@ func unmetCount(r evalReport) int {
 }
 
 func main() {
-	_, thisFile, _, _ := runtime.Caller(0)
+	_, thisFile, _, ok := runtime.Caller(0)
+	if !ok {
+		fmt.Fprintln(os.Stderr, "locating judge_eval source file")
+		os.Exit(2)
+	}
 	evalDir := filepath.Dir(thisFile)
 	judgeDir := filepath.Dir(evalDir)
 	simsDir := filepath.Dir(judgeDir)
@@ -84,7 +79,6 @@ func main() {
 	for _, c := range cases {
 		scenario := filepath.Join(scenariosDir, c.scenario, "scenario.json")
 		work := filepath.Join(goldDir, c.scenario, c.variant)
-		// Re-run bad fixtures more: a false-PASS is the cell we must keep empty.
 		reps := 1
 		if !c.expectConformant {
 			reps = 3
@@ -92,7 +86,12 @@ func main() {
 		for r := 0; r < reps; r++ {
 			_ = os.Remove(reportPath)
 			cmd := exec.Command(bin, "-expect", "-json", reportPath, "-scenario", scenario, work)
-			out, _ := cmd.CombinedOutput()
+			out, err := cmd.CombinedOutput()
+			if err != nil && cmd.ProcessState == nil {
+				errs++
+				fmt.Printf("ERROR  %-22s/%-4s rep%d (judge failed: %v)\n%s\n", c.scenario, c.variant, r, err, out)
+				continue
+			}
 			code := cmd.ProcessState.ExitCode()
 
 			if code == 2 {

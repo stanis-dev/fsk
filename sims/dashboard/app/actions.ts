@@ -26,7 +26,7 @@ export async function cancelRun(runId: string): Promise<void> {
   const dir = path.join(runsDir(), runId);
   if (!fs.existsSync(dir)) throw new Error(`no such run: ${runId}`);
   // Only a still-running run can be cancelled. If it already finished (judge.txt
-  // present) or was already cancelled, do nothing — never signal a pgid the OS may
+  // present) or was already cancelled, do nothing - never signal a pgid the OS may
   // have recycled after the run's process group exited, and never flip a finished
   // run to "cancelled".
   if (fs.existsSync(path.join(dir, "judge.txt")) || fs.existsSync(path.join(dir, "cancelled"))) return;

@@ -5,7 +5,7 @@
     {
       "kind": "false-info",
       "where": "fixture/README.md",
-      "detail": "a teammate quickstart note claims you can POST the taxpayer directly with the HUB key",
+      "detail": "a draft quickstart note claims you can POST the taxpayer directly with the HUB key",
       "correct": "the HUB key is a GROUP org; direct taxpayer creation returns 405. Create a UNIT, mint a UNIT-scoped subject via X-Scope-Identifier, then provision taxpayer/location/system and commission in order."
     }
   ],

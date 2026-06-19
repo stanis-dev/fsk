@@ -6,18 +6,18 @@ import (
 	"path/filepath"
 )
 
-func runGoCmd(dir string, args ...string) StepResult {
+func runGoCmd(dir string, args ...string) stepResult {
 	cmd := exec.Command("go", args...)
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
-	return StepResult{OK: err == nil, Output: string(out)}
+	return stepResult{OK: err == nil, Output: string(out)}
 }
 
 // runJudge runs the judge against sourceDir (the agent's work dir) with
 // trajectory files read from runDir. With expect set (and a scenario that
 // declares judge.expectations), the judge adds its LLM expectation layer behind
 // the gate and, when jsonPath is given, writes the structured verdict there.
-func runJudge(judgeBin, scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) StepResult {
+func runJudge(judgeBin, scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) stepResult {
 	args := []string{"-scenario", scenarioJSON, "-run", runDir}
 	if expect {
 		args = append(args, "-expect")
@@ -28,7 +28,7 @@ func runJudge(judgeBin, scenarioJSON, sourceDir, runDir string, expect bool, jso
 	args = append(args, sourceDir)
 	cmd := exec.Command(judgeBin, args...)
 	out, err := cmd.CombinedOutput()
-	return StepResult{OK: err == nil, Output: string(out)}
+	return stepResult{OK: err == nil, Output: string(out)}
 }
 
 func buildJudge(judgeDir, outDir string) (string, error) {

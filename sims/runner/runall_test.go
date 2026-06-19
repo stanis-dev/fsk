@@ -25,7 +25,10 @@ func TestRunAll_AllPassExitsZero(t *testing.T) {
 	if testing.Short() {
 		t.Skip("requires building the judge")
 	}
-	simsRoot, _ := filepath.Abs("..")
+	simsRoot, err := filepath.Abs("..")
+	if err != nil {
+		t.Fatal(err)
+	}
 	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), t.TempDir())
 	if err != nil {
 		t.Fatal(err)

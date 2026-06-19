@@ -11,10 +11,10 @@ import (
 func TestWriteObserveArtifacts_DashboardContract(t *testing.T) {
 	runPath := t.TempDir()
 	o := observation{
-		Outcome: Outcome{
-			Build: StepResult{OK: true, Output: ""},
-			Test:  StepResult{OK: true, Output: "ok  \tpos\t0.1s\n"},
-			Judge: StepResult{OK: false, Output: "VERDICT: NON-COMPLIANT (5 failures). exit 1\n"},
+		outcome: outcome{
+			Build: stepResult{OK: true, Output: ""},
+			Test:  stepResult{OK: true, Output: "ok  \tpos\t0.1s\n"},
+			Judge: stepResult{OK: false, Output: "VERDICT: NON-COMPLIANT (5 failures). exit 1\n"},
 		},
 		diff: "diff --git a/x b/x\n",
 	}
@@ -22,16 +22,13 @@ func TestWriteObserveArtifacts_DashboardContract(t *testing.T) {
 		t.Fatalf("writeObserveArtifacts: %v", err)
 	}
 
-	// build.txt empty (trim) => dashboard reads PASS
 	if b := readFileT(t, runPath, "build.txt"); strings.TrimSpace(b) != "" {
 		t.Errorf("build.txt should be empty on PASS, got %q", b)
 	}
-	// test.txt contains ok and not FAIL => PASS
 	tt := readFileT(t, runPath, "test.txt")
 	if !strings.Contains(tt, "ok") || strings.Contains(tt, "FAIL") {
 		t.Errorf("test.txt not a PASS shape: %q", tt)
 	}
-	// judge.txt present and NON-COMPLIANT
 	if j := readFileT(t, runPath, "judge.txt"); !strings.Contains(j, "NON-COMPLIANT") {
 		t.Errorf("judge.txt missing verdict: %q", j)
 	}

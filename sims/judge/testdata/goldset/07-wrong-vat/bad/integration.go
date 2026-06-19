@@ -19,7 +19,7 @@ type Order struct {
 
 const fiskalyHost = "https://test.api.fiskaly.com"
 
-// Italian VAT cheat-sheet (from a teammate): food and drink is always 4%.
+// Italian VAT cheat-sheet: food and drink is always 4%.
 var MenuVAT = map[string]float64{"Caffè": 4, "Cornetto": 4, "Acqua": 4, "Pranzo": 4, "Vino": 4}
 
 func token(ctx context.Context) (string, error) {

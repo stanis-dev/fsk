@@ -24,13 +24,13 @@ type telemetryEntry struct {
 	IsError bool           `json:"is_error"`
 }
 
-type Trajectory struct {
-	ToolUses  []string // tool_use names from assistant events, in order
+type trajectory struct {
+	ToolUses  []string
 	Telemetry []telemetryEntry
 }
 
-func parseTrajectory(runDir string) (Trajectory, error) {
-	var t Trajectory
+func parseTrajectory(runDir string) (trajectory, error) {
+	var t trajectory
 	tu, err := parseToolUses(filepath.Join(runDir, "transcript.jsonl"))
 	if err != nil {
 		return t, err
@@ -55,8 +55,7 @@ func parseToolUses(path string) ([]string, error) {
 	sc.Buffer(make([]byte, 1024*1024), 16*1024*1024)
 	for sc.Scan() {
 		var ev transcriptEvent
-		// Transcript is heterogeneous — many valid line shapes don't match
-		// transcriptEvent; skip non-matching lines intentionally.
+		// Transcript JSONL has several event shapes; only assistant tool-use events matter here.
 		if json.Unmarshal(sc.Bytes(), &ev) != nil || ev.Type != "assistant" {
 			continue
 		}
@@ -69,7 +68,6 @@ func parseToolUses(path string) ([]string, error) {
 	return out, sc.Err()
 }
 
-// parseTelemetry tolerates a missing file — a run may legitimately have no MCP calls.
 func parseTelemetry(path string) ([]telemetryEntry, error) {
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {

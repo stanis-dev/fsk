@@ -11,9 +11,8 @@ import (
 	"net/http"
 )
 
-// fiskalyClient is an UNFINISHED SIGN IT receipt client a teammate started. It
-// authenticates and runs the two-call records flow, but it is not yet wired into
-// CompleteOrder. See issueReceipt for where it was left off.
+// fiskalyClient is an unfinished SIGN IT receipt client. It authenticates and
+// runs the two-call records flow, but it is not yet wired into CompleteOrder.
 type fiskalyClient struct {
 	baseURL string
 	apiKey  string
@@ -37,7 +36,9 @@ func newFiskalyClient(apiKey, secret, systemID string) *fiskalyClient {
 
 func newIdempotencyKey() string {
 	var b [16]byte
-	_, _ = rand.Read(b[:])
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(fmt.Errorf("idempotency key: %w", err))
+	}
 	return hex.EncodeToString(b[:]) // lowercase hex
 }
 
@@ -62,9 +63,14 @@ func (c *fiskalyClient) post(ctx context.Context, path string, body any) (map[st
 		return nil, err
 	}
 	defer resp.Body.Close()
-	data, _ := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	var out map[string]any
-	_ = json.Unmarshal(data, &out)
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, err
+	}
 	if resp.StatusCode/100 != 2 {
 		return out, fmt.Errorf("fiskaly %s: status %d", path, resp.StatusCode)
 	}
@@ -87,9 +93,8 @@ func (c *fiskalyClient) authenticate(ctx context.Context) error {
 
 // issueReceipt issues a sale receipt as the two-call records flow.
 //
-// TODO(teammate): left off here. In TEST the transaction comes back
-// state=COMPLETED synchronously, so once the TRANSACTION POST is accepted we
-// just treat the receipt as issued and return — nothing to wait on.
+// TODO: in TEST the transaction comes back state=COMPLETED synchronously, so
+// once the TRANSACTION POST is accepted there is nothing to wait on.
 func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err := c.authenticate(ctx); err != nil {
 		return err
@@ -102,7 +107,10 @@ func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err != nil {
 		return err
 	}
-	intentionID, _ := intention["id"].(string)
+	intentionID, ok := intention["id"].(string)
+	if !ok || intentionID == "" {
+		return fmt.Errorf("fiskaly intention response missing id")
+	}
 	_, err = c.post(ctx, "/records", map[string]any{
 		"type":   "TRANSACTION",
 		"record": map[string]any{"id": intentionID},
@@ -114,6 +122,5 @@ func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err != nil {
 		return err
 	}
-	// Accepted. We're done. (TEST is synchronous.)
 	return nil
 }

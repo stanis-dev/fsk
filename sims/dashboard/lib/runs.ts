@@ -18,7 +18,6 @@ export interface RunDetail {
   telemetry: TelemetrySummary;
 }
 
-// parseJudgeReport reads judge.json; returns null on absent or malformed input.
 export function parseJudgeReport(json: string): JudgeReport | null {
   if (!json.trim()) return null;
   try {
@@ -51,20 +50,20 @@ export function listRuns(dir = runsDir()): Summary[] {
     }
     if (st.isDirectory()) out.push(summarizeRun(d, st.mtime));
   }
-  out.sort((a, b) => (a.created < b.created ? 1 : -1)); // newest first
+  out.sort((a, b) => (a.createdIso < b.createdIso ? 1 : -1)); // newest first
   return out;
 }
 
 export function summarizeRun(dir: string, created = safeMtime(dir)): Summary {
   const s: Summary = {
-    id: path.basename(dir), created: created.toISOString(), status: "running",
+    id: path.basename(dir), createdIso: created.toISOString(), status: "running",
     scenario: "", coder: "", harness: "", model: "", effort: "", build: "", tests: "", judge: "", turns: "", cost: "",
   };
 
   const log = logInfo(path.join(dir, "transcript.jsonl"));
   const meta = readMeta(dir);
-  s.scenario = meta.scenario || "—";
-  s.effort = meta.effort || "—";
+  s.scenario = meta.scenario || "-";
+  s.effort = meta.effort || "-";
   s.model = log.model || meta.model;
   s.coder = (log.ccver ? "claude-code" : "") || meta.coder || "?";
   s.harness = log.cwd === "/work" ? "docker" : log.cwd ? "local" : meta.harness || "?";

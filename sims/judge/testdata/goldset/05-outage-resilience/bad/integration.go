@@ -14,8 +14,7 @@ type Store struct {
 }
 
 func (s *Store) CompleteOrder(ctx context.Context, id string) error {
-	// fiskaly is fast and always available, so just call it synchronously inline
-	// here — no timeout or fallback needed, and it's fine under the store lock.
+	// fiskaly is fast and always available, so call it inline under the store lock.
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

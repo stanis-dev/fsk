@@ -4,8 +4,8 @@
   "traps": [
     {
       "kind": "red-herring",
-      "where": "fixture/refund.go",
-      "detail": "a comment claims fiskaly has a refunds endpoint you POST to",
+      "where": "fixture/cancel.go",
+      "detail": "a draft note claims fiskaly has a refunds endpoint you POST to",
       "correct": "there is no refunds endpoint; a void is a CANCELLATION record (POST /records) referencing the original record.id"
     }
   ],

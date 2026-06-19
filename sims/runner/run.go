@@ -6,16 +6,6 @@ import (
 	"path/filepath"
 )
 
-// observeCore runs build/test/judge against the work dir. expect and jsonPath drive
-// the judge's expectation layer and JSON output; runDir holds the trajectory.
-func observeCore(work, runDir, judgeBin, scenarioJSON string, expect bool, jsonPath string) Outcome {
-	return Outcome{
-		Build: runGoCmd(work, "build", "./..."),
-		Test:  runGoCmd(work, "test", "./..."),
-		Judge: runJudge(judgeBin, scenarioJSON, work, runDir, expect, jsonPath),
-	}
-}
-
 type scenarioResult struct {
 	id     string
 	runDir string
@@ -40,12 +30,16 @@ func runScenario(s scenario, runsBase, judgeBin string, ag agent, cfg runConfig)
 		return scenarioResult{}, fmt.Errorf("agent: %w", err)
 	}
 
-	core := observeCore(rd.work, rd.path, judgeBin, s.scenarioJSON, true, filepath.Join(rd.path, "judge.json"))
+	core := outcome{
+		Build: runGoCmd(rd.work, "build", "./..."),
+		Test:  runGoCmd(rd.work, "test", "./..."),
+		Judge: runJudge(judgeBin, s.scenarioJSON, rd.work, rd.path, true, filepath.Join(rd.path, "judge.json")),
+	}
 	diff, err := gitDiffStaged(rd.work)
 	if err != nil {
 		return scenarioResult{}, err
 	}
-	obs := observation{Outcome: core, diff: diff}
+	obs := observation{outcome: core, diff: diff}
 	if err := writeObserveArtifacts(rd.path, obs); err != nil {
 		return scenarioResult{}, err
 	}

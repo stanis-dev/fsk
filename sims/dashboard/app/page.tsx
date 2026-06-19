@@ -4,7 +4,6 @@ import { RunTable } from "@/components/RunTable";
 import { RunMenu } from "@/components/RunMenu";
 import { AutoRefresh } from "@/components/AutoRefresh";
 
-// Parity with the Go dashboard's 10s refresh; a later plan replaces this with SWR.
 export const dynamic = "force-dynamic";
 
 export default function Home() {

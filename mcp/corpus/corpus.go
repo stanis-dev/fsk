@@ -1,6 +1,4 @@
-// Package corpus serves the curated fiskaly SIGN IT documentation corpus that is
-// embedded into the MCP binary, so a clean-room consumer agent can search and
-// fetch docs with no filesystem or network access.
+// Package corpus loads and searches the embedded fiskaly SIGN IT documentation corpus.
 package corpus
 
 import (
@@ -42,7 +40,7 @@ func Load() (*Corpus, error) {
 	return New(secs), nil
 }
 
-// New builds a Corpus from sections in memory (used by Load and by tests).
+// New builds a searchable Corpus from sections.
 func New(secs []Section) *Corpus {
 	byID := make(map[string]Section, len(secs))
 	for _, s := range secs {

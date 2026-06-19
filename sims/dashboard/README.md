@@ -19,6 +19,8 @@ Open `http://localhost:3000`.
   `~/.cache/fiskaly-eval`.
 - `FISKALY_RUNNER_DIR`: path to the Go runner module invoked by the trigger
   button. Defaults to `../runner` from this package directory.
+- `FISKALY_SCENARIOS_DIR`: path to the scenario library. Defaults to
+  `../scenarios` from this package directory.
 
 ## What it reads
 
@@ -54,6 +56,3 @@ pnpm test
 pnpm lint
 pnpm build
 ```
-
-`pnpm build` currently passes with a Next.js workspace-root warning on machines
-that also have a lockfile above this repository. The build still succeeds.

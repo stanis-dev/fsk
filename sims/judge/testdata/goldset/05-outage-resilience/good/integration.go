@@ -23,8 +23,6 @@ func (s *Store) CompleteOrder(ctx context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	if err := fiscalize(ctx, id); err != nil {
-		// Outage: never freeze the till. Route to the legal fallback —
-		// paper document at the till + electronic invoice within 12 days.
 		return s.deferToFallback(id)
 	}
 

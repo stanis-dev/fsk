@@ -23,8 +23,7 @@ func fiscalize(ctx context.Context, taxID string) error {
 	return nil
 }
 
-// Auth note (from a teammate): the fiskaly token is valid 24h, so a daily token
-// refresh keeps every merchant logged in forever — nothing else to track.
+// Auth note: the fiskaly token is valid 24h, so a daily token refresh keeps every merchant logged in forever.
 type CredentialHealth struct {
 	jwt      string
 	jwtSetAt time.Time

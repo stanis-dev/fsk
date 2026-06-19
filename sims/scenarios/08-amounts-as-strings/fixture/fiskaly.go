@@ -11,9 +11,8 @@ import (
 	"net/http"
 )
 
-// fiskalyClient is an UNFINISHED SIGN IT receipt client a teammate started. It
-// authenticates and posts the records flow, but it is not yet wired into
-// CompleteOrder. See issueReceipt for where it was left off.
+// fiskalyClient is an unfinished SIGN IT receipt client. It authenticates and
+// posts the records flow, but it is not yet wired into CompleteOrder.
 type fiskalyClient struct {
 	baseURL string
 	apiKey  string
@@ -37,7 +36,9 @@ func newFiskalyClient(apiKey, secret, systemID string) *fiskalyClient {
 
 func newIdempotencyKey() string {
 	var b [16]byte
-	_, _ = rand.Read(b[:])
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(fmt.Errorf("idempotency key: %w", err))
+	}
 	return hex.EncodeToString(b[:])
 }
 
@@ -61,9 +62,14 @@ func (c *fiskalyClient) post(ctx context.Context, path string, body any) (map[st
 		return nil, err
 	}
 	defer resp.Body.Close()
-	data, _ := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	var out map[string]any
-	_ = json.Unmarshal(data, &out)
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, err
+	}
 	if resp.StatusCode/100 != 2 {
 		return out, fmt.Errorf("fiskaly %s: status %d", path, resp.StatusCode)
 	}
@@ -84,9 +90,6 @@ func (c *fiskalyClient) authenticate(ctx context.Context) error {
 }
 
 // issueReceipt issues a sale receipt through the records flow.
-//
-// TODO(teammate): left off here. Sending the order total as the euro amount,
-// e.g. 4.33. Haven't done the per-line VAT split yet.
 func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err := c.authenticate(ctx); err != nil {
 		return err
@@ -99,8 +102,11 @@ func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err != nil {
 		return err
 	}
-	intentionID, _ := intention["id"].(string)
-	total := float64(o.Gross()) / 100.0 // euros as a float
+	intentionID, ok := intention["id"].(string)
+	if !ok || intentionID == "" {
+		return fmt.Errorf("fiskaly intention response missing id")
+	}
+	total := float64(o.Gross()) / 100.0
 	_, err = c.post(ctx, "/records", map[string]any{
 		"type":   "TRANSACTION",
 		"record": map[string]any{"id": intentionID},

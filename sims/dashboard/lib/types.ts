@@ -3,9 +3,9 @@ export type RunStatus = "running" | "done" | "cancelled";
 
 export interface Summary {
   id: string;
-  created: string; // ISO timestamp
+  createdIso: string;
   status: RunStatus;
-  scenario: string; // scenario id from meta.json (e.g. 06-fire-and-forget)
+  scenario: string;
   coder: string;
   harness: string;
   model: string;
@@ -85,7 +85,7 @@ export interface JudgeReport {
 export interface ScenarioConfig {
   id: string;
   title: string;
-  traps: unknown[]; // structured trap docs; not edited in the UI, preserved on save
+  traps: unknown[];
   judge: { checks: JudgeChecks; expectations: Expectation[] };
 }
 

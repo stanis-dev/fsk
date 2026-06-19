@@ -94,7 +94,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       <section className="mt-8">
         <h2 className={cn(LABEL, "mb-2")}>judge verdict</h2>
         <pre className="overflow-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap">
-          {run.judgeLog || "—"}
+          {run.judgeLog || "-"}
         </pre>
       </section>
 

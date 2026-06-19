@@ -11,9 +11,8 @@ import (
 	"net/http"
 )
 
-// fiskalyClient is an UNFINISHED SIGN IT client a teammate started. Auth works
-// through a retry helper; the records flow is not implemented yet. It is not
-// wired into CompleteOrder.
+// fiskalyClient is an unfinished SIGN IT client. Auth works through a retry
+// helper; the records flow is not implemented yet.
 type fiskalyClient struct {
 	baseURL string
 	apiKey  string
@@ -27,7 +26,9 @@ const fiskalyAPIVersion = "2026-02-03"
 
 func newIdempotencyKey() string {
 	var b [16]byte
-	_, _ = rand.Read(b[:])
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(fmt.Errorf("idempotency key: %w", err))
+	}
 	return hex.EncodeToString(b[:]) // lowercase hex
 }
 
@@ -36,8 +37,7 @@ func newFiskalyClient(apiKey, secret string) *fiskalyClient {
 		baseURL: "https://test.api.fiskaly.com",
 		apiKey:  apiKey,
 		secret:  secret,
-		// TODO(teammate): generate the idempotency key once and reuse it so
-		// retries don't double-write.
+		// TODO: generate the idempotency key once and reuse it so retries don't double-write.
 		idemKey: newIdempotencyKey(),
 		hc:      &http.Client{},
 	}
@@ -67,10 +67,21 @@ func (c *fiskalyClient) postWithRetry(ctx context.Context, path string, body any
 			lastErr = err
 			continue
 		}
-		data, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		data, readErr := io.ReadAll(resp.Body)
+		closeErr := resp.Body.Close()
+		if readErr != nil {
+			lastErr = readErr
+			continue
+		}
+		if closeErr != nil {
+			lastErr = closeErr
+			continue
+		}
 		var out map[string]any
-		_ = json.Unmarshal(data, &out)
+		if err := json.Unmarshal(data, &out); err != nil {
+			lastErr = err
+			continue
+		}
 		if resp.StatusCode/100 == 2 {
 			return out, nil
 		}
@@ -94,8 +105,6 @@ func (c *fiskalyClient) authenticate(ctx context.Context) error {
 }
 
 // issueReceipt issues the sale receipt.
-//
-// TODO(teammate): not started. Wire up the records flow here.
 func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	return fmt.Errorf("issueReceipt: not implemented")
 }

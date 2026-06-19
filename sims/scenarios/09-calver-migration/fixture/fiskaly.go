@@ -35,7 +35,9 @@ func newFiskalyClient(apiKey, secret string) *fiskalyClient {
 
 func newIdempotencyKey() string {
 	var b [16]byte
-	_, _ = rand.Read(b[:])
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(fmt.Errorf("idempotency key: %w", err))
+	}
 	return hex.EncodeToString(b[:])
 }
 
@@ -59,9 +61,14 @@ func (c *fiskalyClient) post(ctx context.Context, path string, body any) (map[st
 		return nil, err
 	}
 	defer resp.Body.Close()
-	data, _ := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	var out map[string]any
-	_ = json.Unmarshal(data, &out)
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil, err
+	}
 	if resp.StatusCode/100 != 2 {
 		return out, fmt.Errorf("fiskaly %s: status %d", path, resp.StatusCode)
 	}
@@ -84,8 +91,8 @@ func (c *fiskalyClient) authenticate(ctx context.Context) error {
 // provision creates the merchant. Written against the old resource model:
 // a legal "entity" and its fiscal-device "asset".
 //
-// TODO(teammate): this targets the old API. The entity/asset resources were
-// renamed in a later version — needs updating before it will work today.
+// TODO: this targets the old API. The entity/asset resources were renamed in
+// SIGN IT API version 2026-02-03.
 func (c *fiskalyClient) provision(ctx context.Context) error {
 	if _, err := c.post(ctx, "/entities", map[string]any{
 		"type": "COMPANY",
@@ -114,7 +121,10 @@ func (c *fiskalyClient) issueReceipt(ctx context.Context, o *Order) error {
 	if err != nil {
 		return err
 	}
-	intentionID, _ := intention["id"].(string)
+	intentionID, ok := intention["id"].(string)
+	if !ok || intentionID == "" {
+		return fmt.Errorf("fiskaly intention response missing id")
+	}
 	_, err = c.post(ctx, "/records", map[string]any{
 		"type":   "TRANSACTION",
 		"record": map[string]any{"id": intentionID},

@@ -53,7 +53,7 @@ export function RunTable({ runs }: { runs: Summary[] }) {
             </TableCell>
             <TableCell className={cn(CELL, "font-medium")}>{r.scenario}</TableCell>
             <TableCell className={cn(CELL, "font-mono text-xs tabular-nums text-muted-foreground")}>
-              {formatWhen(r.created)}
+              {formatWhen(r.createdIso)}
             </TableCell>
             <TableCell className={cn(CELL, "text-muted-foreground")}>{r.coder}</TableCell>
             <TableCell className={cn(CELL, "text-muted-foreground")}>{r.harness}</TableCell>

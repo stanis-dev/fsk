@@ -47,16 +47,16 @@ func (li LineItem) Gross() Cents {
 // recorded locally and is not sent to any payment processor.
 type PaymentRecord struct {
 	Method PaymentMethod
-	Amount Cents // gross total collected
+	Amount Cents
 }
 
 // Order is a B2C sale captured at the till.
 type Order struct {
 	ID      string
 	Items   []LineItem
-	Method  PaymentMethod // tender taken at the till
+	Method  PaymentMethod
 	Status  Status
-	Payment *PaymentRecord // set once payment is recorded
+	Payment *PaymentRecord
 }
 
 // Net is the VAT-exclusive total of the order.

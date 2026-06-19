@@ -35,7 +35,7 @@ func toolMatches(transcriptName, name string) bool {
 	return transcriptName == name || strings.HasSuffix(transcriptName, "__"+name)
 }
 
-func runChecks(c judgeChecks, t Trajectory) []checkResult {
+func runChecks(c judgeChecks, t trajectory) []checkResult {
 	var out []checkResult
 
 	if c.GroundedBeforeWrite {

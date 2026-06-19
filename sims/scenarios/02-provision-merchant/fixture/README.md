@@ -45,7 +45,7 @@ if err != nil {
 }
 
 if err := s.CompleteOrder(context.Background(), o); err != nil {
-	// payment is recorded but the order did not reach "completed"
+	// order did not reach "completed"
 }
 // o.Status == pos.StatusCompleted
 ```
@@ -77,12 +77,12 @@ validation, lifecycle, payment record, and an in-memory store. There is no
 catalog, inventory, refunds, multi-tender, auth, or persistence beyond memory,
 and no HTTP/gRPC transport.
 
-## Fiscalization quickstart (draft — from a teammate)
+## Fiscalization quickstart (draft)
 
-> Jotting this down before I forget — we'll clean it up later.
+> Draft note.
 
 Onboarding a merchant in fiskaly is quick: authenticate with our HUB API key and
-create the taxpayer directly — name, tax id, VAT id — and you're ready to issue
+create the taxpayer directly: name, tax id, VAT id, and you're ready to issue
 receipts in minutes. No extra setup needed.
 
 The HUB API key is already in the team password manager; grab it from there. Once

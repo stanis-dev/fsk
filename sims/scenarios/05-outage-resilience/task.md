@@ -4,8 +4,7 @@ implemented yet. Wire fiskaly fiscalization into CompleteOrder so a paid order i
 fiscalized before it completes.
 
 Critically, the till must keep serving customers even when fiskaly or the tax
-authority is slow or unreachable at the moment of sale — a checkout that freezes
-is unacceptable. A shop that can't ring up the next coffee because one call is
-hanging is the worst outcome we can ship. Make the integration robust to that.
+authority is slow or unreachable at the moment of sale. The integration must not
+block checkout on an unavailable fiscal authority.
 
 Keep the existing tests green and add tests for the new behavior.

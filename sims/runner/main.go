@@ -37,7 +37,12 @@ func cmdRun(args []string) int {
 		return 2
 	}
 
-	simsRoot, err := findSimsRoot(mustGetwd())
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "runner:", err)
+		return 2
+	}
+	simsRoot, err := findSimsRoot(wd)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "runner:", err)
 		return 2
@@ -74,7 +79,12 @@ func cmdRun(args []string) int {
 		}
 	}
 
-	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), mustTempDir())
+	tempDir, err := os.MkdirTemp("", "runner-judge-")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "runner:", err)
+		return 2
+	}
+	judgeBin, err := buildJudge(filepath.Join(simsRoot, "judge"), tempDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "runner:", err)
 		return 2
@@ -106,22 +116,4 @@ func findSimsRoot(start string) (string, error) {
 
 func isSimsDir(d string) bool {
 	return isDir(filepath.Join(d, "scenarios")) && isDir(filepath.Join(d, "judge"))
-}
-
-func mustGetwd() string {
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "runner:", err)
-		os.Exit(2)
-	}
-	return wd
-}
-
-func mustTempDir() string {
-	d, err := os.MkdirTemp("", "runner-judge-")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "runner:", err)
-		os.Exit(2)
-	}
-	return d
 }

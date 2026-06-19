@@ -10,13 +10,12 @@ import (
 )
 
 type runDir struct {
-	path string // ~/.cache/fiskaly-eval/run.XXXXXX
-	work string // <path>/pos
+	path string
+	work string
 }
 
-// observation is everything the post-agent observe phase produces.
 type observation struct {
-	Outcome
+	outcome
 	diff string
 }
 
@@ -57,8 +56,7 @@ func gitInitBaseline(work string) error {
 	return nil
 }
 
-// runHandle is the cancellation handle the dashboard reads: the process group to
-// signal and the container to docker-kill. Written before the long docker work.
+// runHandle is written before Docker starts so the dashboard can cancel a live run.
 type runHandle struct {
 	PID       int    `json:"pid"`
 	PGID      int    `json:"pgid"`
@@ -92,8 +90,6 @@ func writeMeta(runPath, scenario string, cfg runConfig) error {
 	return os.WriteFile(filepath.Join(runPath, "meta.json"), append(data, '\n'), 0o644)
 }
 
-// writeObserveArtifacts writes the dashboard-read files; empty build/test output
-// is how the dashboard reads PASS.
 func writeObserveArtifacts(runPath string, o observation) error {
 	files := map[string]string{
 		"build.txt":    o.Build.Output,

@@ -7,7 +7,7 @@ const STYLES = {
 } as const;
 
 export function JudgeBadge({ value }: { value: Check }) {
-  if (value === "") return <span className="text-muted-foreground/50">—</span>;
+  if (value === "") return <span className="text-muted-foreground/50">-</span>;
   const s = STYLES[value];
   return (
     <span className="inline-flex items-center gap-1.5 text-xs font-medium">

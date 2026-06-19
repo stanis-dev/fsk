@@ -42,24 +42,20 @@ func TestFileRecorderWritesJSONL(t *testing.T) {
 	}
 }
 
-func TestNopRecorderRecordsNothing(t *testing.T) {
-	Nop().Record(Event{Tool: "x"}) // must not panic
-}
-
-func TestResultCount(t *testing.T) {
+func TestDocsResultCount(t *testing.T) {
 	search := &mcp.CallToolResult{StructuredContent: map[string]any{"results": []any{1, 2, 3}}}
-	if got := resultCount(search); got != 3 {
+	if got := docsResultCount(search); got != 3 {
 		t.Errorf("search: got %d, want 3", got)
 	}
 	fetch := &mcp.CallToolResult{StructuredContent: map[string]any{"id": "x", "text": "y"}}
-	if got := resultCount(fetch); got != 1 {
+	if got := docsResultCount(fetch); got != 1 {
 		t.Errorf("fetch: got %d, want 1", got)
 	}
 	errRes := &mcp.CallToolResult{IsError: true, StructuredContent: map[string]any{"results": []any{1}}}
-	if got := resultCount(errRes); got != 0 {
+	if got := docsResultCount(errRes); got != 0 {
 		t.Errorf("error: got %d, want 0", got)
 	}
-	if got := resultCount(&mcp.CallToolResult{}); got != 0 {
+	if got := docsResultCount(&mcp.CallToolResult{}); got != 0 {
 		t.Errorf("empty: got %d, want 0", got)
 	}
 }

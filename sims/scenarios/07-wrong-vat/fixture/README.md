@@ -45,7 +45,7 @@ if err != nil {
 }
 
 if err := s.CompleteOrder(context.Background(), o); err != nil {
-	// payment is recorded but the order did not reach "completed"
+	// order did not reach "completed"
 }
 // o.Status == pos.StatusCompleted
 ```

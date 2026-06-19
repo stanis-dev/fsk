@@ -1,6 +1,4 @@
-// Command fiskaly-mcp is the fiskaly MCP server. It serves the curated SIGN IT
-// documentation corpus through two read-only tools, search_fiskaly_docs and
-// fetch_fiskaly_doc, so a consumer agent can ground its integration in the docs.
+// Command fiskaly-mcp serves the embedded fiskaly SIGN IT documentation corpus over MCP.
 package main
 
 import (
@@ -27,7 +25,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("telemetry: %v", err)
 		}
-		defer rec.Close()
+		defer func() {
+			if err := rec.Close(); err != nil {
+				log.Printf("telemetry: close failed: %v", err)
+			}
+		}()
 		server.AddReceivingMiddleware(telemetry.Middleware(rec))
 	}
 

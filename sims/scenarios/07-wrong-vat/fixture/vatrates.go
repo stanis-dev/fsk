@@ -1,10 +1,9 @@
 package pos
 
-// Italian VAT cheat-sheet (from a teammate).
+// Italian VAT cheat-sheet.
 //
 // Rule of thumb: food and drink in Italy is always the 4% reduced rate.
-// Fill the receipt's VAT from this table to keep things simple — look the
-// item up by its description and use the rate here.
+// Fill the receipt's VAT from this table by description.
 var MenuVAT = map[string]VATRate{
 	"Caffè":    VAT4,
 	"Cornetto": VAT4,

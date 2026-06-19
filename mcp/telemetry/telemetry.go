@@ -1,6 +1,4 @@
-// Package telemetry records one structured event per MCP tools/call to a file
-// sink, so the eval harness can see how an agent used the docs tools. It never
-// writes to stdout, which is the MCP stdio protocol channel.
+// Package telemetry records MCP tool-call events without writing to stdout.
 package telemetry
 
 import (
@@ -63,13 +61,6 @@ func (r *FileRecorder) Close() error {
 	return r.f.Close()
 }
 
-type nopRecorder struct{}
-
-func (nopRecorder) Record(Event) {}
-
-// Nop returns a Recorder that discards everything.
-func Nop() Recorder { return nopRecorder{} }
-
 // Middleware records one Event per tools/call. Other methods pass through
 // untouched. The handlers themselves are never modified.
 func Middleware(rec Recorder) mcp.Middleware {
@@ -103,7 +94,7 @@ func Middleware(rec Recorder) mcp.Middleware {
 					if ctr.IsError {
 						ev.Error = contentText(ctr.Content)
 					}
-					ev.ResultCount = resultCount(ctr)
+					ev.ResultCount = docsResultCount(ctr)
 				}
 			}
 			rec.Record(ev)
@@ -112,10 +103,10 @@ func Middleware(rec Recorder) mcp.Middleware {
 	}
 }
 
-// resultCount derives a count from a tool result without importing the server's
+// docsResultCount derives a count from a tool result without importing the server's
 // typed output: a list-returning tool exposes a top-level "results" array; a
 // single-document tool returns one object.
-func resultCount(ctr *mcp.CallToolResult) int {
+func docsResultCount(ctr *mcp.CallToolResult) int {
 	if ctr.IsError || ctr.StructuredContent == nil {
 		return 0
 	}

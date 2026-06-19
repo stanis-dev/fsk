@@ -6,8 +6,8 @@ change the docs corpus, MCP behavior, judge, scenario, or harness; run the eval;
 inspect the result; decide whether the change improved the integration workflow.
 
 The interview task asks for API documentation improvements that move fiskaly's
-mission forward, plus a functional prototype. This prototype answers that by
-making documentation changes measurable. It tests whether an agent can use
+mission forward, plus a functional system. This repo answers that by making
+documentation changes measurable. It tests whether an agent can use
 grounded SIGN IT context to implement fiscalization correctly, avoid planted
 domain traps, and leave enough telemetry for a developer to understand what
 happened.
@@ -47,7 +47,7 @@ questions such as:
 | `sims/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
 | `sims/pos/` | The base POS fixture used to build scenario seeds. |
 
-## Current prototype
+## Implemented system
 
 Implemented:
 
@@ -111,6 +111,7 @@ Open `http://localhost:3000`. The dashboard reads
 
 - `FISKALY_RUNS_DIR`: run artifact directory.
 - `FISKALY_RUNNER_DIR`: path to the Go runner module the trigger button invokes.
+- `FISKALY_SCENARIOS_DIR`: path to the scenario library shown in the dashboard.
 
 ## Iterating
 

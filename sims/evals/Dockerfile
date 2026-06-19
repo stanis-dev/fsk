@@ -4,17 +4,11 @@
 # reaches the coder. The fixture is bind-mounted at runtime; nothing else from the
 # host is visible. Auth is via CLAUDE_CODE_OAUTH_TOKEN passed at `docker run`.
 #
-# Builds on Docker Desktop (linux/arm64): node 22 + claude-code 2.1.177 install clean,
-# the MCP binary lands at /usr/local/bin/fiskaly-mcp, and bind mounts propagate both
-# ways from ~/.cache/fiskaly-eval. A full token-backed eval has not been run here.
-
-# 1) Build the fiskaly MCP binary in isolation.
 FROM golang:1.25-bookworm AS mcpbuild
 WORKDIR /src
 COPY mcp/ ./
 RUN go build -o /fiskaly-mcp .
 
-# 2) Coder runtime: Go (for the coder's own go build/test) + the claude CLI.
 FROM golang:1.25-bookworm
 RUN apt-get update \
  && apt-get install -y --no-install-recommends git ca-certificates curl gnupg \

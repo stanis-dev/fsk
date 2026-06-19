@@ -18,9 +18,9 @@ silent bugs** that interfere with getting the integration right.
 From `research/PERSONA.md`: **a normal bug throws an error; a fiscalization bug
 looks like success.** So the traps split into two kinds, on purpose:
 
-- **Loud traps** — an invented `/refunds`, a missing poll to `FINISHED`, a leftover
+- **Loud traps** - an invented `/refunds`, a missing poll to `FINISHED`, a leftover
   legacy `/assets`, an absent VAT breakdown: a wrong contract a careful read catches.
-- **Silent traps** — idempotency-key reuse, a blocking checkout call, a wrong VAT
+- **Silent traps** - idempotency-key reuse, a blocking checkout call, a wrong VAT
   rate at scale, conflating the 24h JWT with the 90-day credential: the build stays
   green and the receipt still looks right.
 
@@ -34,20 +34,20 @@ planted text fails in ways that mirror real production incidents.
 
 | # | Scenario | Trap | Planted in |
 | --- | --- | --- | --- |
-| 01 | Zero to Receipt | — (control) | — |
+| 01 | Zero to Receipt | none (control) | none |
 | 02 | Provision a merchant | false-info: a "quickstart" says POST the taxpayer directly (the 405 trap) | README |
-| 03 | Cancellation / void | red-herring: a comment claims a fiskaly "refunds endpoint" | `refund.go` |
+| 03 | Cancellation / void | red-herring: a comment claims a fiskaly "refunds endpoint" | `cancel.go` |
 | 04 | Idempotency under retry | silent-bug: one idempotency key reused across all requests | `fiskaly.go` |
-| 05 | Outage / don't block the till | false-info: "calls are fast — call inline, no timeout, under the lock" | `checkout.go` |
+| 05 | Outage / don't block the till | false-info: "calls are fast - call inline, no timeout, under the lock" | `checkout.go` |
 | 06 | Fire-and-forget (no polling) | silent-bug: returns on PROCESSING, never polls to FINISHED | `fiskaly.go` |
 | 07 | Wrong VAT at scale | false-info: a cheat-sheet claims all food is 4% VAT | `vatrates.go` |
 | 08 | Amounts as decimal strings | silent-bug: money serialized as JSON floats, no VAT breakdown | `fiskaly.go` |
 | 09 | CalVer migration | false-info: stale `/entities`/`/assets` + old `X-Api-Version` | `fiskaly.go` |
 | 10 | Credential expiry (day 91) | false-info: a daily 24h-token refresh "keeps you logged in forever" | `health.go` |
 
-Scenarios 04/06/08/09 are **brownfield** — they ship an unfinished, flawed
-fiskaly client the agent inherits; the rest are **greenfield** (the fiscalization
-seam plus a planted comment, README note, or domain helper).
+Scenarios 04/06/08/09 are **brownfield**: they ship an unfinished, flawed
+fiskaly client the agent inherits. The rest are **greenfield**: a fiscalization
+hook plus a planted comment, README note, or domain helper.
 
 ## Baseline verification (the seed, before any agent)
 

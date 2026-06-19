@@ -10,7 +10,7 @@ const cls: Record<DiffLine["cls"], string> = {
 };
 
 export function DiffView({ lines }: { lines: DiffLine[] }) {
-  if (lines.length === 0) return <span className="text-muted-foreground">—</span>;
+  if (lines.length === 0) return <span className="text-muted-foreground">-</span>;
   return (
     <pre className="overflow-auto font-mono text-xs leading-relaxed">
       {lines.map((l, i) => (

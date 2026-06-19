@@ -8,34 +8,22 @@ import (
 	"sort"
 )
 
-// StepResult is the outcome of one check (build, test, or judge): whether the
-// process exited zero, plus its combined output for diagnostics.
-type StepResult struct {
+type stepResult struct {
 	OK     bool
 	Output string
 }
 
-// Outcome is the result of running all three checks against one scenario's work dir.
-type Outcome struct {
-	Build StepResult
-	Test  StepResult
-	Judge StepResult
+type outcome struct {
+	Build stepResult
+	Test  stepResult
+	Judge stepResult
 }
 
-// scenario locates one entry in the scenario library.
 type scenario struct {
 	id           string
 	dir          string
 	fixtureDir   string
 	scenarioJSON string
-}
-
-// verdict translates the judge's exit status into its reported verdict words.
-func verdict(judgeOK bool) string {
-	if judgeOK {
-		return "conformant"
-	}
-	return "NON-COMPLIANT"
 }
 
 var scenarioID = regexp.MustCompile(`^[0-9]`)

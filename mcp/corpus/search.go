@@ -106,13 +106,12 @@ func tokenize(s string) []string {
 	})
 }
 
-// snippet returns a window of text around the first matching query term.
-// It assumes ASCII-ish docs; offsets come from a lowercased copy of equal length.
 func snippet(text string, qterms []string) string {
-	lower := strings.ToLower(text)
+	runes := []rune(text)
+	lower := []rune(strings.ToLower(text))
 	pos := -1
 	for _, t := range qterms {
-		if i := strings.Index(lower, t); i >= 0 && (pos < 0 || i < pos) {
+		if i := indexRunes(lower, []rune(t)); i >= 0 && (pos < 0 || i < pos) {
 			pos = i
 		}
 	}
@@ -121,15 +120,34 @@ func snippet(text string, qterms []string) string {
 		start = pos
 	}
 	end := start + snippetLen
-	if end > len(text) {
-		end = len(text)
+	if end > len(runes) {
+		end = len(runes)
 	}
-	out := strings.TrimSpace(text[start:end])
+	out := strings.TrimSpace(string(runes[start:end]))
 	if start > 0 {
 		out = "…" + out
 	}
-	if end < len(text) {
+	if end < len(runes) {
 		out += "…"
 	}
 	return out
+}
+
+func indexRunes(s, sub []rune) int {
+	if len(sub) == 0 {
+		return 0
+	}
+	for i := 0; i+len(sub) <= len(s); i++ {
+		match := true
+		for j := range sub {
+			if s[i+j] != sub[j] {
+				match = false
+				break
+			}
+		}
+		if match {
+			return i
+		}
+	}
+	return -1
 }
