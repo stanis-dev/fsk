@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Launch the eval dashboard:  ./sims/evals/dashboard.sh   then open http://localhost:8080
+# Launch the eval dashboard:  ./eval-harness/evals/dashboard.sh   then open http://localhost:8080
 #
-# The dashboard is a Next.js app in sims/dashboard/. It reads ~/.cache/fiskaly-eval
-# and triggers runs via the runner (cd sims/runner && go run . run <id>).
+# The dashboard is a Next.js app in eval-harness/dashboard/. It reads ~/.cache/fiskaly-eval
+# and triggers runs via the runner (cd eval-harness/runner && go run . run <id>).
 set -euo pipefail
 sims_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$sims_root/dashboard"

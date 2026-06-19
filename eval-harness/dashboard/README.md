@@ -1,7 +1,7 @@
 # Eval dashboard
 
 The dashboard is the inspection surface for fiskaly eval runs. It reads run
-artifacts produced by the Go runner (`sims/runner/`), then shows the signals
+artifacts produced by the Go runner (`eval-harness/runner/`), then shows the signals
 needed to decide what to change next.
 
 ## Run locally

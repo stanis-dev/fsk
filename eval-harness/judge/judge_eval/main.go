@@ -1,6 +1,6 @@
 // Command judge_eval runs the expectation judge against gold fixtures.
 //
-// Usage: go run ./judge_eval   (from sims/judge)
+// Usage: go run ./judge_eval   (from eval-harness/judge)
 package main
 
 import (

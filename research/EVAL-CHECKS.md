@@ -1,6 +1,6 @@
 # Deterministic and LLM-Judged Checks for the fiskaly SIGN IT Eval Harness
 
-Scope: the agentic-coding eval system under `/Users/stan/code/fsk/sims/` — the runner (`evals/run-scenario.sh`), the deterministic judge (`judge/main.go`, 13 rules), the grounding check (`evals/assert-grounded.sh`), the docs MCP server (`mcp/`), and the 10 scenarios in `scenarios/`. Ground truth for fiskaly facts is `research/api-probes/NOTES.md` (live TEST probe, `X-Api-Version: 2026-02-03`).
+Scope: the agentic-coding eval system under `/Users/stan/code/fsk/eval-harness/` — the runner (`evals/run-scenario.sh`), the deterministic judge (`judge/main.go`, 13 rules), the grounding check (`evals/assert-grounded.sh`), the docs MCP server (`mcp/`), and the 10 scenarios in `scenarios/`. Ground truth for fiskaly facts is `research/api-probes/NOTES.md` (live TEST probe, `X-Api-Version: 2026-02-03`).
 
 Two corrections carried through from verification, stated up front because they change what you should build:
 

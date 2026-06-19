@@ -32,7 +32,7 @@ resulting source. Every scenario encodes both in its `scenario.json`.
 ## Layout
 
 ```
-sims/scenarios/<NN-slug>/
+eval-harness/scenarios/<NN-slug>/
   scenario.json   # metadata + the judge's checks and expectations
   task.md         # the business-framed prompt handed to the agent
   fixture/        # a self-contained Go module (module `pos`), the seed codebase
@@ -94,7 +94,7 @@ exercise. Keep it to the register a senior backend engineer would get in a ticke
 
 ## The judge
 
-`sims/judge` runs two layers; conformance requires both.
+`eval-harness/judge` runs two layers; conformance requires both.
 
 1. **Deterministic checks** (`judge.checks`) - trajectory signals from the agent's
    run, evaluated programmatically. A failing check is a hard gate: the run is
@@ -123,9 +123,9 @@ the trap-specific conformance lives in each scenario's `expectations`.
 ```sh
 # source-only expectation grading of the seed (no trajectory, so the checks gate is
 # skipped; needs the claude CLI):
-cd sims/judge && go run . -scenario ../scenarios/<id>/scenario.json -expect ../scenarios/<id>/fixture
+cd eval-harness/judge && go run . -scenario ../scenarios/<id>/scenario.json -expect ../scenarios/<id>/fixture
 
 # full run in Docker, including the trajectory checks gate (needs CLAUDE_CODE_OAUTH_TOKEN
 # in repo .env and the claude CLI):
-cd sims/runner && go run . run <id>
+cd eval-harness/runner && go run . run <id>
 ```

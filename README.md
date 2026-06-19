@@ -14,7 +14,7 @@ happened.
 
 ## The loop
 
-1. Pick a scenario from `sims/scenarios/`.
+1. Pick a scenario from `eval-harness/scenarios/`.
 2. The runner copies that fixture into an isolated run directory.
 3. The agent gets the business task and a strict docs MCP.
 4. The MCP serves curated SIGN IT facts and records each tool call as JSONL.
@@ -40,12 +40,12 @@ questions such as:
 | `memo/OPPORTUNITIES.md` | The opportunity map and strategic answer. |
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
-| `sims/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
-| `sims/judge/` | Deterministic source-level conformance gate for SIGN IT contract shape. |
-| `sims/evals/` | Docker eval container (Dockerfile and entrypoint); scenario and judge assets. |
-| `sims/runner/` | Go CLI for the eval workbench; `runner run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
-| `sims/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
-| `sims/pos/` | The base POS fixture used to build scenario seeds. |
+| `eval-harness/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
+| `eval-harness/judge/` | Deterministic source-level conformance gate for SIGN IT contract shape. |
+| `eval-harness/evals/` | Docker eval container (Dockerfile and entrypoint); scenario and judge assets. |
+| `eval-harness/runner/` | Go CLI for the eval workbench; `runner run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
+| `eval-harness/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
+| `eval-harness/pos/` | The base POS fixture used to build scenario seeds. |
 
 ## Implemented system
 
@@ -79,7 +79,7 @@ Fast package checks:
 
 ```sh
 cd mcp && go test ./...
-cd ../sims/judge && go test ./...
+cd ../eval-harness/judge && go test ./...
 cd ../pos && go test ./...
 cd ../runner && go test ./...
 cd ../dashboard && pnpm test && pnpm lint && pnpm build
@@ -88,8 +88,8 @@ cd ../dashboard && pnpm test && pnpm lint && pnpm build
 Run the preflight + Docker eval for all scenarios or one:
 
 ```sh
-cd sims/runner && go run . run            # all scenarios
-cd sims/runner && go run . run 06         # one scenario
+cd eval-harness/runner && go run . run            # all scenarios
+cd eval-harness/runner && go run . run 06         # one scenario
 ```
 
 For each scenario the runner copies the fixture, asserts the baseline invariant
@@ -101,7 +101,7 @@ and a valid OAuth token in `.env`.
 ## Inspect runs
 
 ```sh
-cd sims/dashboard
+cd eval-harness/dashboard
 pnpm install
 pnpm dev
 ```
