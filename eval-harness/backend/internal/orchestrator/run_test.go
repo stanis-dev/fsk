@@ -102,7 +102,7 @@ func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildJudge: %v", err)
 	}
-	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestRunScenario_CancelStopsRun(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildJudge: %v", err)
 	}
-	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,7 +5,7 @@ research/
 report/
 memo/
 eval-harness/backend/
-eval-harness/pos/
+!eval-harness/backend/sandbox/
 eval-harness/dashboard/
 .claude/
 .superpowers/

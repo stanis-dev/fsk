@@ -17,7 +17,7 @@ func TestDiscoverScenarios_RealCount(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
 		t.Fatalf("scenarios.Discover: %v", err)
 	}
@@ -51,11 +51,11 @@ func TestRunScenario_RealDocker(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "sandbox", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
+	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "backend", "sandbox", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
 
 	res, err := runScenario(context.Background(), sc[0], t.TempDir(), judgeBin, ag, cfg, true, nil)
 	if err != nil {

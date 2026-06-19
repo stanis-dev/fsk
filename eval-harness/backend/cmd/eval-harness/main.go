@@ -37,7 +37,7 @@ func main() {
 
 func cmdRun(args []string) int {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
-	root := fs.String("root", "", "eval-harness root (dir with scenarios/ and backend/); default: discovered from cwd")
+	root := fs.String("root", "", "eval-harness root (dir with backend/ and dashboard/); default: discovered from cwd")
 	model := fs.String("model", orchestrator.DefaultModel, "coder model")
 	effort := fs.String("effort", orchestrator.DefaultEffort, "coder effort")
 	if err := fs.Parse(args); err != nil {
@@ -56,10 +56,10 @@ func cmdRun(args []string) int {
 		return 2
 	}
 	code, err := orchestrator.Run(orchestrator.Config{
-		ScenariosDir:   filepath.Join(ehRoot, "scenarios"),
+		ScenariosDir:   filepath.Join(ehRoot, "backend", "scenarios"),
 		JudgeDir:       filepath.Join(ehRoot, "backend", "cmd", "judge"),
 		RepoRoot:       filepath.Dir(ehRoot),
-		DockerfilePath: filepath.Join(ehRoot, "sandbox", "Dockerfile"),
+		DockerfilePath: filepath.Join(ehRoot, "backend", "sandbox", "Dockerfile"),
 		RunsBase:       filepath.Join(home, ".cache", "fiskaly-eval"),
 		Image:          "fiskaly-eval",
 		Model:          *model,
@@ -74,7 +74,7 @@ func cmdRun(args []string) int {
 }
 
 // resolveRoot returns the eval-harness root: the -root flag if set, else the
-// nearest ancestor of cwd containing both scenarios/ and backend/.
+// nearest ancestor of cwd containing both backend/ and dashboard/.
 func resolveRoot(flagRoot string) (string, error) {
 	if flagRoot != "" {
 		return filepath.Abs(flagRoot)
@@ -84,12 +84,12 @@ func resolveRoot(flagRoot string) (string, error) {
 		return "", err
 	}
 	for dir := wd; ; {
-		if isDir(filepath.Join(dir, "scenarios")) && isDir(filepath.Join(dir, "backend")) {
+		if isDir(filepath.Join(dir, "backend")) && isDir(filepath.Join(dir, "dashboard")) {
 			return dir, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			return "", fmt.Errorf("could not locate eval-harness root (a dir with scenarios/ and backend/) from %s; pass -root", wd)
+			return "", fmt.Errorf("could not locate eval-harness root (a dir with backend/ and dashboard/) from %s; pass -root", wd)
 		}
 		dir = parent
 	}
@@ -154,10 +154,10 @@ func cmdServe(args []string) int {
 	}
 
 	runner, err := orchestrator.NewRunner(orchestrator.Config{
-		ScenariosDir:   filepath.Join(ehRoot, "scenarios"),
+		ScenariosDir:   filepath.Join(ehRoot, "backend", "scenarios"),
 		JudgeDir:       filepath.Join(ehRoot, "backend", "cmd", "judge"),
 		RepoRoot:       filepath.Dir(ehRoot),
-		DockerfilePath: filepath.Join(ehRoot, "sandbox", "Dockerfile"),
+		DockerfilePath: filepath.Join(ehRoot, "backend", "sandbox", "Dockerfile"),
 		RunsBase:       runsDir,
 		Image:          "fiskaly-eval",
 		Model:          *model,
@@ -173,7 +173,7 @@ func cmdServe(args []string) int {
 
 	h := api.Handler(api.Config{
 		RunsDir:      runsDir,
-		ScenariosDir: filepath.Join(ehRoot, "scenarios"),
+		ScenariosDir: filepath.Join(ehRoot, "backend", "scenarios"),
 		CORSOrigin:   *corsOrigin,
 		Service:      svc,
 	})

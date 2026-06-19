@@ -32,7 +32,7 @@ resulting source. Every scenario encodes both in its `scenario.json`.
 ## Layout
 
 ```
-eval-harness/scenarios/<NN-slug>/
+eval-harness/backend/scenarios/<NN-slug>/
   scenario.json   # metadata + the judge's checks and expectations
   task.md         # the business-framed prompt handed to the agent
   fixture/        # a self-contained Go module (module `pos`), the seed codebase

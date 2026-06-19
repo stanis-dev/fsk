@@ -49,8 +49,7 @@ func main() {
 	}
 	evalDir := filepath.Dir(thisFile)   // .../backend/judge_eval
 	backendDir := filepath.Dir(evalDir) // .../backend
-	ehRoot := filepath.Dir(backendDir)  // .../eval-harness
-	scenariosDir := filepath.Join(ehRoot, "scenarios")
+	scenariosDir := filepath.Join(backendDir, "scenarios")
 	goldDir := filepath.Join(backendDir, "cmd", "judge", "testdata", "goldset")
 
 	// matrix[expected][actual]; index 0 = conformant, 1 = NON-COMPLIANT.

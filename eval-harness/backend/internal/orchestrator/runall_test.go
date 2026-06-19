@@ -36,7 +36,7 @@ func TestRunAll_AllPassExitsZero(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sc, err := scenarios.Discover(filepath.Join(ehRoot, "scenarios"))
+	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
 		t.Fatal(err)
 	}
