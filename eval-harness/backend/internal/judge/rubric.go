@@ -1,5 +1,5 @@
 // rubric.go is the LLM expectation layer behind the deterministic gate.
-package main
+package judge
 
 import (
 	"bytes"
