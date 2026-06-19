@@ -358,6 +358,119 @@ func TestWorkers1Serializes(t *testing.T) {
 	_ = id2
 }
 
+// nextEvent drains one Event from ch with a 5 s timeout.
+func nextEvent(t *testing.T, ch <-chan Event) Event {
+	t.Helper()
+	select {
+	case ev, ok := <-ch:
+		if !ok {
+			t.Fatal("subscriber channel closed unexpectedly")
+		}
+		return ev
+	case <-time.After(5 * time.Second):
+		t.Fatal("timed out waiting for Event")
+		return Event{}
+	}
+}
+
+func TestSubscribeQueuedRunningDone(t *testing.T) {
+	f := newFakeRunner()
+	svc := NewService(f, t.TempDir(), 1)
+	svc.Start()
+
+	ch, unsub := svc.Subscribe()
+	defer unsub()
+
+	id, err := svc.Enqueue("known", "m", "e")
+	if err != nil {
+		t.Fatalf("Enqueue: %v", err)
+	}
+
+	phases := []string{"queued", "running", "done"}
+	for _, want := range phases {
+		ev := nextEvent(t, ch)
+		if ev.RunID != id {
+			t.Errorf("phase %q: got RunID %q, want %q", want, ev.RunID, id)
+		}
+		if ev.ScenarioID != "known" {
+			t.Errorf("phase %q: got ScenarioID %q, want %q", want, ev.ScenarioID, "known")
+		}
+		if ev.Phase != want {
+			t.Errorf("got phase %q, want %q", ev.Phase, want)
+		}
+	}
+}
+
+func TestSubscribeCancelledEvent(t *testing.T) {
+	f := newFakeRunner()
+	f.block = true
+	svc := NewService(f, t.TempDir(), 1)
+	svc.Start()
+
+	ch, unsub := svc.Subscribe()
+	defer unsub()
+
+	id, err := svc.Enqueue("known", "m", "e")
+	if err != nil {
+		t.Fatalf("Enqueue: %v", err)
+	}
+
+	// Drain queued + running before cancelling.
+	ev := nextEvent(t, ch)
+	if ev.Phase != "queued" {
+		t.Fatalf("expected queued, got %q", ev.Phase)
+	}
+	waitActivePhase(t, svc, "running")
+	ev = nextEvent(t, ch)
+	if ev.Phase != "running" {
+		t.Fatalf("expected running, got %q", ev.Phase)
+	}
+
+	ok := svc.Cancel(id)
+	if !ok {
+		t.Fatal("Cancel returned false")
+	}
+
+	ev = nextEvent(t, ch)
+	if ev.RunID != id {
+		t.Errorf("cancelled event: got RunID %q, want %q", ev.RunID, id)
+	}
+	if ev.Phase != "cancelled" {
+		t.Errorf("got phase %q, want cancelled", ev.Phase)
+	}
+}
+
+func TestUnsubscribeStopsDelivery(t *testing.T) {
+	f := newFakeRunner()
+	svc := NewService(f, t.TempDir(), 1)
+	svc.Start()
+
+	ch, unsub := svc.Subscribe()
+
+	// Unsubscribe before any enqueue.
+	unsub()
+	// Idempotent: second call must not panic.
+	unsub()
+
+	// Channel must be closed.
+	select {
+	case _, ok := <-ch:
+		if ok {
+			t.Fatal("expected closed channel, got a value")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("channel not closed after unsubscribe")
+	}
+
+	// Enqueue after unsubscribe; no event should arrive on the closed channel.
+	_, err := svc.Enqueue("known", "m", "e")
+	if err != nil {
+		t.Fatalf("Enqueue: %v", err)
+	}
+	waitActiveEmpty(t, svc)
+	// If we get here without a panic or send-on-closed, unsubscribe is safe.
+}
+
 func TestReattachSkipsCompleted(t *testing.T) {
 	runsBase := t.TempDir()
 

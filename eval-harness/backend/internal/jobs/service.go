@@ -49,6 +49,13 @@ type job struct {
 	effort     string
 }
 
+// Event is emitted at every phase transition and consumed by SSE subscribers.
+type Event struct {
+	RunID      string `json:"runId"`
+	ScenarioID string `json:"scenarioId"`
+	Phase      string `json:"phase"`
+}
+
 // Service is a bounded worker pool with a live-run registry.
 type Service struct {
 	r        Runner
@@ -58,6 +65,8 @@ type Service struct {
 	mu       sync.Mutex
 	live     map[string]*liveRun
 	counter  atomic.Int64
+	subs     map[int]chan Event
+	nextSub  int
 }
 
 // NewService creates a Service. Call Start() to launch workers and reattach.
@@ -68,6 +77,40 @@ func NewService(r Runner, runsBase string, workers int) *Service {
 		workers:  workers,
 		queue:    make(chan job, workers*4),
 		live:     make(map[string]*liveRun),
+		subs:     make(map[int]chan Event),
+	}
+}
+
+// Subscribe returns a buffered channel that receives phase-transition Events and
+// an idempotent unsubscribe func that drains and closes the channel.
+func (s *Service) Subscribe() (<-chan Event, func()) {
+	s.mu.Lock()
+	id := s.nextSub
+	s.nextSub++
+	ch := make(chan Event, 16)
+	s.subs[id] = ch
+	s.mu.Unlock()
+
+	var once sync.Once
+	unsub := func() {
+		once.Do(func() {
+			s.mu.Lock()
+			delete(s.subs, id)
+			s.mu.Unlock()
+			close(ch)
+		})
+	}
+	return ch, unsub
+}
+
+// publish broadcasts ev to every subscriber with a non-blocking send (drops on full).
+// Must be called with s.mu held.
+func (s *Service) publish(ev Event) {
+	for _, ch := range s.subs {
+		select {
+		case ch <- ev:
+		default:
+		}
 	}
 }
 
@@ -102,6 +145,7 @@ func (s *Service) Enqueue(scenarioID, model, effort string) (string, error) {
 
 	s.mu.Lock()
 	s.live[id] = lr
+	s.publish(Event{RunID: id, ScenarioID: scenarioID, Phase: "queued"})
 	s.mu.Unlock()
 
 	s.queue <- job{id: id, scenarioID: scenarioID, model: model, effort: effort}
@@ -117,9 +161,11 @@ func (s *Service) Cancel(runID string) bool {
 		s.mu.Unlock()
 		return false
 	}
+	scenarioID := lr.scenarioID
 	delete(s.live, runID)
 	runDir := lr.runDir
 	container := lr.container
+	s.publish(Event{RunID: runID, ScenarioID: scenarioID, Phase: "cancelled"})
 	s.mu.Unlock()
 
 	lr.cancel()
@@ -176,6 +222,7 @@ func (s *Service) runJob(j job) {
 		return
 	}
 	lr.phase = "running"
+	s.publish(Event{RunID: j.id, ScenarioID: j.scenarioID, Phase: "running"})
 	s.mu.Unlock()
 
 	sc, ok := s.r.Resolve(j.scenarioID)
@@ -210,8 +257,10 @@ func (s *Service) setPhaseAndDeregister(id, phase string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if lr, ok := s.live[id]; ok {
+		scenarioID := lr.scenarioID
 		lr.phase = phase
 		delete(s.live, id)
+		s.publish(Event{RunID: id, ScenarioID: scenarioID, Phase: phase})
 	}
 }
 
