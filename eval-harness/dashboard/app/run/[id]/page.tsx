@@ -1,17 +1,17 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { runsDir } from "@/lib/paths";
-import { loadRun } from "@/lib/runs";
+import { getRun } from "@/lib/api";
 import { JudgeBadge } from "@/components/JudgeBadge";
 import { TranscriptView } from "@/components/TranscriptView";
 import { DiffView } from "@/components/DiffView";
 import { TelemetryView } from "@/components/TelemetryView";
 import { cn } from "@/lib/utils";
-import type { Check, CriterionVerdict } from "@/lib/types";
-
-export const dynamic = "force-dynamic";
+import type { Check, CriterionVerdict, RunDetail } from "@/lib/types";
 
 const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
 
@@ -57,10 +57,41 @@ function Disclosure({ title, open, children }: { title: string; open?: boolean; 
   );
 }
 
-export default async function RunPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const run = loadRun(runsDir(), id);
-  if (!run) notFound();
+export default function RunPage() {
+  const { id } = useParams<{ id: string }>();
+  const [run, setRun] = useState<RunDetail | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getRun(id)
+      .then(setRun)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+  }, [id]);
+
+  if (error) {
+    return (
+      <main className="mx-auto w-full max-w-6xl px-8 py-12">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="size-3.5" />
+          runs
+        </Link>
+        <p className="mt-6 text-sm text-muted-foreground">{error}</p>
+      </main>
+    );
+  }
+
+  if (!run) {
+    return (
+      <main className="mx-auto w-full max-w-6xl px-8 py-12">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="size-3.5" />
+          runs
+        </Link>
+        <p className="mt-6 text-sm text-muted-foreground">loading…</p>
+      </main>
+    );
+  }
+
   const s = run.summary;
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-12">

@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { cancelRun } from "@/app/actions";
+import { cancelRun } from "@/lib/api";
 
 export function CancelButton({ runId }: { runId: string }) {
-  const router = useRouter();
   const [failed, setFailed] = useState(false);
   return (
     <Button
@@ -18,7 +16,6 @@ export function CancelButton({ runId }: { runId: string }) {
         try {
           setFailed(false);
           await cancelRun(runId);
-          router.refresh();
         } catch {
           setFailed(true);
         }

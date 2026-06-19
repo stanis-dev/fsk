@@ -93,3 +93,15 @@ export interface ScenarioDetail {
   config: ScenarioConfig;
   task: string;
 }
+
+export interface RunDetail {
+  summary: Summary;
+  judgeLog: string;
+  judgeReport: JudgeReport | null;
+  buildLog: string;
+  testLog: string;
+  err: string;
+  transcript: TranscriptEvent[];
+  diff: DiffLine[];
+  telemetry: TelemetrySummary;
+}

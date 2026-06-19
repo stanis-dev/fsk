@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { saveScenario } from "@/app/actions";
+import { saveScenario } from "@/lib/api";
 import type { ScenarioDetail, Expectation, ToolReq } from "@/lib/types";
 
 const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
@@ -47,7 +46,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
-  const router = useRouter();
   const [config, setConfig] = useState(detail.config);
   const [task, setTask] = useState(detail.task);
   const [state, setState] = useState<{ kind: "idle" | "saving" | "saved" | "error"; msg?: string }>({ kind: "idle" });
@@ -92,7 +90,6 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
     try {
       await saveScenario(config.id, { config, task });
       setState({ kind: "saved" });
-      router.refresh();
     } catch (e) {
       setState({ kind: "error", msg: e instanceof Error ? e.message : String(e) });
     }

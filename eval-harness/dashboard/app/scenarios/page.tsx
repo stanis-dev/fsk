@@ -1,20 +1,32 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { listScenarios } from "@/lib/scenarios";
-
-export const dynamic = "force-dynamic";
+import { listScenarios } from "@/lib/api";
+import type { ScenarioConfig } from "@/lib/types";
 
 const HEAD = "h-9 px-3 text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
 const CELL = "px-3 py-2.5";
 
 export default function ScenariosPage() {
-  const scenarios = listScenarios();
+  const [scenarios, setScenarios] = useState<ScenarioConfig[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    listScenarios()
+      .then(setScenarios)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+  }, []);
+
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-12">
       <header className="mb-8 border-b border-border pb-5">
         <h1 className="text-2xl font-semibold tracking-tight">scenarios</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{scenarios.length} scenarios</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {error ? <span className="text-danger">{error}</span> : `${scenarios.length} scenarios`}
+        </p>
       </header>
       <Table className="text-sm">
         <TableHeader>
@@ -26,7 +38,7 @@ export default function ScenariosPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {scenarios.length === 0 && (
+          {scenarios.length === 0 && !error && (
             <TableRow>
               <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                 no scenarios found
