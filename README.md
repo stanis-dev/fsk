@@ -39,10 +39,10 @@ questions such as:
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
 | `eval-harness/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
+| `eval-harness/scenarios/seed/` | The canonical seed codebase (Go module `pos`) every scenario fixture is derived from. |
 | `eval-harness/backend/` | Go CLI (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; `eval-harness run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
 | `eval-harness/sandbox/` | Docker sandbox image (Dockerfile and entrypoint) the coder runs inside. |
 | `eval-harness/dashboard/` | Next.js dashboard for browsing eval runs, transcripts, diffs, judge output, and MCP telemetry. |
-| `eval-harness/pos/` | The base POS fixture used to build scenario seeds. |
 
 ## Implemented system
 
@@ -77,8 +77,8 @@ Fast package checks:
 ```sh
 cd mcp && go test ./...
 cd ../eval-harness/backend && go test ./...
-cd ../pos && go test ./...
-cd ../dashboard && pnpm test && pnpm lint && pnpm build
+cd ../scenarios/seed && go test ./...
+cd ../../dashboard && pnpm test && pnpm lint && pnpm build
 ```
 
 Run the preflight + Docker eval for all scenarios or one:
