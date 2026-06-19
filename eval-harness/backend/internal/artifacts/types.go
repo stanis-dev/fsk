@@ -56,13 +56,13 @@ type TelemetrySummary struct {
 }
 
 type RunDetail struct {
-	Summary      Summary          `json:"summary"`
-	JudgeLog     string           `json:"judgeLog"`
-	JudgeReport  *judge.Report    `json:"judgeReport"`
-	BuildLog     string           `json:"buildLog"`
-	TestLog      string           `json:"testLog"`
-	Err          string           `json:"err"`
-	Transcript   []TranscriptEvent `json:"transcript"`
-	Diff         []DiffLine        `json:"diff"`
-	Telemetry    TelemetrySummary  `json:"telemetry"`
+	Summary     Summary           `json:"summary"`
+	JudgeLog    string            `json:"judgeLog"`
+	JudgeReport *judge.Report     `json:"judgeReport"`
+	BuildLog    string            `json:"buildLog"`
+	TestLog     string            `json:"testLog"`
+	Err         string            `json:"err"`
+	Transcript  []TranscriptEvent `json:"transcript"`
+	Diff        []DiffLine        `json:"diff"`
+	Telemetry   TelemetrySummary  `json:"telemetry"`
 }

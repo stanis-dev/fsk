@@ -97,13 +97,13 @@ func messageContent(m map[string]json.RawMessage) []contentItem {
 			continue
 		}
 		out = append(out, contentItem{
-			Type:    c.Type,
+			Type:     c.Type,
 			Thinking: c.Thinking,
-			Text:    c.Text,
-			Name:    c.Name,
-			Input:   c.Input,
-			IsError: c.IsError,
-			Content: c.Content,
+			Text:     c.Text,
+			Name:     c.Name,
+			Input:    c.Input,
+			IsError:  c.IsError,
+			Content:  c.Content,
 		})
 	}
 	return out

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -79,7 +80,7 @@ func TestLoadRunTranscriptDiffJudge(t *testing.T) {
 	if !hasAdd {
 		t.Error("diff has no add lines")
 	}
-	if !contains(rd.JudgeLog, "conformant") {
+	if !strings.Contains(rd.JudgeLog, "conformant") {
 		t.Errorf("judgeLog does not contain 'conformant': %q", rd.JudgeLog)
 	}
 }
@@ -197,16 +198,4 @@ func must(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func contains(s, sub string) bool {
-	return len(s) >= len(sub) && (s == sub || len(sub) == 0 ||
-		func() bool {
-			for i := 0; i <= len(s)-len(sub); i++ {
-				if s[i:i+len(sub)] == sub {
-					return true
-				}
-			}
-			return false
-		}())
 }

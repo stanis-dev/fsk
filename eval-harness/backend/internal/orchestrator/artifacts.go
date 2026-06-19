@@ -95,10 +95,10 @@ func writeMeta(runPath, scenario string, cfg runConfig) error {
 
 func writeObserveArtifacts(runPath string, o observation) error {
 	files := map[string]string{
-		artifacts.BuildFile:  o.Build.Output,
-		artifacts.TestFile:   o.Test.Output,
+		artifacts.BuildFile:    o.Build.Output,
+		artifacts.TestFile:     o.Test.Output,
 		artifacts.JudgeLogFile: o.Judge.Output,
-		artifacts.DiffFile:   o.diff,
+		artifacts.DiffFile:     o.diff,
 	}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(runPath, name), []byte(content), 0o644); err != nil {

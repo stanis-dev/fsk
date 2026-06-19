@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"backend/internal/artifacts"
 	"backend/internal/scenarios"
 )
 
@@ -35,7 +36,7 @@ func runScenario(s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg 
 	core := outcome{
 		Build: runGoCmd(rd.work, "build", "./..."),
 		Test:  runGoCmd(rd.work, "test", "./..."),
-		Judge: runJudge(judgeBin, s.ScenarioJSON, rd.work, rd.path, true, filepath.Join(rd.path, "judge.json")),
+		Judge: runJudge(judgeBin, s.ScenarioJSON, rd.work, rd.path, true, filepath.Join(rd.path, artifacts.JudgeJSONFile)),
 	}
 	diff, err := gitDiffStaged(rd.work)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -197,21 +198,21 @@ func TestValidate_Reject(t *testing.T) {
 	// bad title
 	m := copyMap(base)
 	m["title"] = 1
-	if msg := Validate(marshal(m)); msg == "" || !contains(msg, "title") {
+	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "title") {
 		t.Errorf("bad title: %q", msg)
 	}
 
 	// bad traps
 	m = copyMap(base)
 	m["traps"] = "none"
-	if msg := Validate(marshal(m)); msg == "" || !contains(msg, "traps") {
+	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "traps") {
 		t.Errorf("bad traps: %q", msg)
 	}
 
 	// bad judge (not object)
 	m = copyMap(base)
 	m["judge"] = map[string]any{}
-	if msg := Validate(marshal(m)); msg == "" || !contains(msg, "judge") {
+	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "judge") {
 		t.Errorf("bad judge (missing checks): %q", msg)
 	}
 
@@ -221,7 +222,7 @@ func TestValidate_Reject(t *testing.T) {
 		"checks":       map[string]any{"groundedBeforeWrite": true},
 		"expectations": "not-array",
 	}
-	if msg := Validate(marshal(m)); msg == "" || !contains(msg, "expectations") {
+	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "expectations") {
 		t.Errorf("non-array expectations: %q", msg)
 	}
 
@@ -231,7 +232,7 @@ func TestValidate_Reject(t *testing.T) {
 		"checks":       map[string]any{},
 		"expectations": []any{},
 	}
-	if msg := Validate(marshal(m)); msg == "" || !contains(msg, "judge") {
+	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "judge") {
 		t.Errorf("empty checks+expectations: %q", msg)
 	}
 }
@@ -281,19 +282,6 @@ func TestAssignExpectationIds(t *testing.T) {
 	if input.Judge.Expectations[1].ID != "" {
 		t.Error("input was mutated")
 	}
-}
-
-func contains(s, sub string) bool {
-	return len(s) >= len(sub) && (s == sub || len(s) > 0 && containsRune(s, sub))
-}
-
-func containsRune(s, sub string) bool {
-	for i := range s {
-		if i+len(sub) <= len(s) && s[i:i+len(sub)] == sub {
-			return true
-		}
-	}
-	return false
 }
 
 func writeFile(t *testing.T, path, content string) {
