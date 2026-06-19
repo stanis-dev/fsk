@@ -2,6 +2,7 @@ package scenarios
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -263,7 +264,7 @@ func Save(scenariosDir, id string, config Config, task string) error {
 		return fmt.Errorf("marshaling config: %w", err)
 	}
 	if msg := Validate(raw); msg != "" {
-		return fmt.Errorf("%s", msg)
+		return errors.New(msg)
 	}
 	raw = append(raw, '\n')
 	dir := filepath.Join(scenariosDir, id)

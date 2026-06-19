@@ -12,18 +12,21 @@ export default function Home() {
   const [down, setDown] = useState(false);
 
   useEffect(() => {
+    let es: EventSource | undefined;
+
     Promise.all([listRuns(), listScenarios()])
       .then(([r, s]) => {
         setRuns(r);
         setScenarios(s);
+        es = new EventSource(runsStreamURL());
+        es.onmessage = () => {
+          listRuns().then(setRuns).catch(() => {});
+        };
+        es.onerror = () => es?.close();
       })
       .catch(() => setDown(true));
 
-    const es = new EventSource(runsStreamURL());
-    es.onmessage = () => {
-      listRuns().then(setRuns).catch(() => {});
-    };
-    return () => es.close();
+    return () => es?.close();
   }, []);
 
   if (down) {

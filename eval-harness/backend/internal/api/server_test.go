@@ -490,13 +490,21 @@ func TestPutScenarioOK(t *testing.T) {
 	if resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("want 204, got %d: %s", resp.StatusCode, bodyStr(t, resp))
 	}
-	// Verify file was updated on disk.
+	// Verify scenario.json was updated on disk.
 	raw, err := os.ReadFile(filepath.Join(cfg.ScenariosDir, "01-demo", "scenario.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(raw), `"Updated"`) {
 		t.Errorf("scenario.json not updated: %s", raw)
+	}
+	// Verify task.md was updated on disk.
+	taskRaw, err := os.ReadFile(filepath.Join(cfg.ScenariosDir, "01-demo", "task.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(taskRaw) != "updated task\n" {
+		t.Errorf("task.md not updated: %q", string(taskRaw))
 	}
 }
 
