@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"backend/internal/artifacts"
 )
 
 // agent runs the coder against a prepared work dir. The real implementation
@@ -37,12 +39,12 @@ func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
 		return fmt.Errorf("docker build: %w\n%s", err, out)
 	}
 
-	transcript, err := os.Create(filepath.Join(rd.path, "transcript.jsonl"))
+	transcript, err := os.Create(filepath.Join(rd.path, artifacts.TranscriptFile))
 	if err != nil {
 		return err
 	}
 	defer transcript.Close()
-	stderr, err := os.Create(filepath.Join(rd.path, "claude.err"))
+	stderr, err := os.Create(filepath.Join(rd.path, artifacts.CoderErrFile))
 	if err != nil {
 		return err
 	}
@@ -66,7 +68,7 @@ func (a dockerAgent) run(rd runDir, task string, cfg runConfig) error {
 
 	tele := filepath.Join(rd.work, "mcp-telemetry.jsonl")
 	if _, err := os.Stat(tele); err == nil {
-		if err := os.Rename(tele, filepath.Join(rd.path, "mcp-telemetry.jsonl")); err != nil {
+		if err := os.Rename(tele, filepath.Join(rd.path, artifacts.TelemetryFile)); err != nil {
 			return fmt.Errorf("moving telemetry: %w", err)
 		}
 	}

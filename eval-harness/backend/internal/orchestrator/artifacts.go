@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+
+	"backend/internal/artifacts"
 )
 
 type runDir struct {
@@ -72,7 +74,7 @@ func writeRunHandle(runPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(runPath, "run.json"), append(data, '\n'), 0o644)
+	return os.WriteFile(filepath.Join(runPath, artifacts.RunHandleFile), append(data, '\n'), 0o644)
 }
 
 func writeMeta(runPath, scenario string, cfg runConfig) error {
@@ -87,15 +89,15 @@ func writeMeta(runPath, scenario string, cfg runConfig) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(runPath, "meta.json"), append(data, '\n'), 0o644)
+	return os.WriteFile(filepath.Join(runPath, artifacts.MetaFile), append(data, '\n'), 0o644)
 }
 
 func writeObserveArtifacts(runPath string, o observation) error {
 	files := map[string]string{
-		"build.txt":    o.Build.Output,
-		"test.txt":     o.Test.Output,
-		"judge.txt":    o.Judge.Output,
-		"changes.diff": o.diff,
+		artifacts.BuildFile:  o.Build.Output,
+		artifacts.TestFile:   o.Test.Output,
+		artifacts.JudgeLogFile: o.Judge.Output,
+		artifacts.DiffFile:   o.diff,
 	}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(runPath, name), []byte(content), 0o644); err != nil {
