@@ -1,7 +1,9 @@
 package telemetry
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,8 +18,12 @@ func TestFileRecorderWritesJSONL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rec.Record(Event{TS: "2026-06-18T00:00:00Z", Tool: "search_fiskaly_docs", ResultCount: 3, LatencyMS: 7})
-	rec.Record(Event{TS: "2026-06-18T00:00:01Z", Tool: "fetch_fiskaly_doc", IsError: true, Error: "no doc"})
+	if err := rec.Record(Event{TS: "2026-06-18T00:00:00Z", Tool: "search_fiskaly_docs", ResultCount: 3, LatencyMS: 7}); err != nil {
+		t.Fatal(err)
+	}
+	if err := rec.Record(Event{TS: "2026-06-18T00:00:01Z", Tool: "fetch_fiskaly_doc", IsError: true, Error: "no doc"}); err != nil {
+		t.Fatal(err)
+	}
 	if err := rec.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -64,5 +70,20 @@ func TestContentText(t *testing.T) {
 	r := &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: "boom"}}}
 	if got := contentText(r.Content); got != "boom" {
 		t.Errorf("got %q, want boom", got)
+	}
+}
+
+type failingRecorder struct{}
+
+func (failingRecorder) Record(Event) error { return errors.New("disk full") }
+
+func TestMiddlewareReturnsRecorderError(t *testing.T) {
+	next := func(context.Context, string, mcp.Request) (mcp.Result, error) {
+		return &mcp.CallToolResult{StructuredContent: map[string]any{"results": []any{1}}}, nil
+	}
+	handler := Middleware(failingRecorder{})(next)
+	req := &mcp.CallToolRequest{Params: &mcp.CallToolParamsRaw{Name: "search_fiskaly_docs"}}
+	if _, err := handler(context.Background(), "tools/call", req); err == nil {
+		t.Fatal("expected recorder error")
 	}
 }

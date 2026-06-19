@@ -4,7 +4,7 @@ import "backend/internal/judge"
 
 type Summary struct {
 	ID         string `json:"id"`
-	CreatedIso string `json:"createdIso"`
+	UpdatedIso string `json:"updatedIso"`
 	Status     string `json:"status"`
 	Scenario   string `json:"scenario"`
 	Coder      string `json:"coder"`

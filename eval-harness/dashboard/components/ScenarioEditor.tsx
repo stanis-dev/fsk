@@ -14,7 +14,7 @@ const BUTTON =
 const PRIMARY_BUTTON = cn(BUTTON, "h-8 bg-primary px-2.5 text-primary-foreground hover:bg-primary/80");
 const OUTLINE_BUTTON = cn(BUTTON, "h-7 border border-border px-2.5 text-[0.8rem] hover:bg-muted");
 
-const TRAJECTORY_TOOL_NAMES = [
+const DEFAULT_TOOL_OPTIONS = [
   "search_fiskaly_docs",
   "fetch_fiskaly_doc",
   "Read",
@@ -27,12 +27,14 @@ const TRAJECTORY_TOOL_NAMES = [
   "Task",
 ];
 
-const CORPUS_DOC_IDS = [
+const DEFAULT_DOC_OPTIONS = [
   "probe:auth-and-headers",
   "probe:scoped-subject",
   "probe:provisioning",
   "probe:records-flow",
   "probe:money-model",
+  "research:connection-loss",
+  "research:credential-lifecycle",
 ];
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -73,7 +75,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
   }
 
   function addToolReq() {
-    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: TRAJECTORY_TOOL_NAMES[0], min: 1 }] });
+    setChecks({ toolsCalled: [...(checks.toolsCalled ?? []), { name: DEFAULT_TOOL_OPTIONS[0], min: 1 }] });
   }
 
   function removeToolReq(i: number) {
@@ -122,7 +124,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
                 value={req.name}
                 onChange={(e) => patchToolReq(i, { name: e.target.value })}
               >
-                {(TRAJECTORY_TOOL_NAMES.includes(req.name) ? TRAJECTORY_TOOL_NAMES : [req.name, ...TRAJECTORY_TOOL_NAMES]).map((n) => (
+                {(DEFAULT_TOOL_OPTIONS.includes(req.name) ? DEFAULT_TOOL_OPTIONS : [req.name, ...DEFAULT_TOOL_OPTIONS]).map((n) => (
                   <option key={n} value={n}>
                     {n}
                   </option>
@@ -149,7 +151,7 @@ export function ScenarioEditor({ detail }: { detail: ScenarioDetail }) {
         <div className="space-y-1.5">
           <span className={LABEL}>docs fetched</span>
           <div className="flex flex-col gap-1.5">
-            {[...CORPUS_DOC_IDS, ...(checks.docsFetched ?? []).filter((d) => !CORPUS_DOC_IDS.includes(d))].map((id) => {
+            {[...DEFAULT_DOC_OPTIONS, ...(checks.docsFetched ?? []).filter((d) => !DEFAULT_DOC_OPTIONS.includes(d))].map((id) => {
               const list = checks.docsFetched ?? [];
               return (
                 <label key={id} className="flex items-center gap-2.5 text-sm">

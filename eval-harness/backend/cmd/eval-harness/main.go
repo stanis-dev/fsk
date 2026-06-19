@@ -2,7 +2,7 @@
 //
 // Usage: eval-harness run [-root dir] [-model m] [-effort e] [ids...]
 //
-//	eval-harness serve [-addr host:port] [-root dir] [-cors-origin origin] [-workers n]
+//	eval-harness serve [-addr host:port] [-root dir] [-cors-origin origin] [-model m] [-effort e] [-workers n]
 package main
 
 import (
@@ -50,7 +50,7 @@ func cmdRun(args []string) int {
 		return 2
 	}
 
-	home, err := os.UserHomeDir()
+	runsDir, err := resolveRunsDir()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "eval-harness:", err)
 		return 2
@@ -60,7 +60,7 @@ func cmdRun(args []string) int {
 		JudgeDir:       filepath.Join(ehRoot, "backend", "cmd", "judge"),
 		RepoRoot:       filepath.Dir(ehRoot),
 		DockerfilePath: filepath.Join(ehRoot, "backend", "sandbox", "Dockerfile"),
-		RunsBase:       filepath.Join(home, ".cache", "fiskaly-eval"),
+		RunsBase:       runsDir,
 		Image:          "fiskaly-eval",
 		Model:          *model,
 		Effort:         *effort,
@@ -98,6 +98,17 @@ func resolveRoot(flagRoot string) (string, error) {
 func isDir(p string) bool {
 	fi, err := os.Stat(p)
 	return err == nil && fi.IsDir()
+}
+
+func resolveRunsDir() (string, error) {
+	if runsDir := os.Getenv("FISKALY_RUNS_DIR"); runsDir != "" {
+		return runsDir, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".cache", "fiskaly-eval"), nil
 }
 
 // runnerAdapter wraps *orchestrator.Runner to satisfy jobs.Runner.
@@ -143,14 +154,10 @@ func cmdServe(args []string) int {
 		fmt.Fprintln(os.Stderr, "eval-harness:", err)
 		return 2
 	}
-	runsDir := os.Getenv("FISKALY_RUNS_DIR")
-	if runsDir == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "eval-harness:", err)
-			return 2
-		}
-		runsDir = filepath.Join(home, ".cache", "fiskaly-eval")
+	runsDir, err := resolveRunsDir()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "eval-harness:", err)
+		return 2
 	}
 
 	runner, err := orchestrator.NewRunner(orchestrator.Config{

@@ -18,7 +18,7 @@ type searchInput struct {
 type searchResult struct {
 	ID      string `json:"id" jsonschema:"document id; pass to fetch_fiskaly_doc to read the full section"`
 	Title   string `json:"title" jsonschema:"human-readable title"`
-	URL     string `json:"url" jsonschema:"canonical citation URL"`
+	URI     string `json:"uri" jsonschema:"source URI"`
 	Snippet string `json:"snippet" jsonschema:"best-matching passage from the document"`
 }
 
@@ -40,7 +40,7 @@ type fetchOutput struct {
 	ID       string        `json:"id"`
 	Title    string        `json:"title"`
 	Text     string        `json:"text" jsonschema:"the full document text"`
-	URL      string        `json:"url"`
+	URI      string        `json:"uri"`
 	Metadata fetchMetadata `json:"metadata"`
 }
 
@@ -52,7 +52,7 @@ func handleSearch(c *corpus.Corpus, in searchInput) (searchOutput, error) {
 	out := searchOutput{Results: make([]searchResult, 0, len(hits))}
 	for _, h := range hits {
 		out.Results = append(out.Results, searchResult{
-			ID: h.Section.ID, Title: h.Section.Title, URL: h.Section.URL, Snippet: h.Snippet,
+			ID: h.Section.ID, Title: h.Section.Title, URI: h.Section.URI, Snippet: h.Snippet,
 		})
 	}
 	return out, nil
@@ -64,7 +64,7 @@ func handleFetch(c *corpus.Corpus, in fetchInput) (fetchOutput, error) {
 		return fetchOutput{}, fmt.Errorf("no document with id %q", in.ID)
 	}
 	return fetchOutput{
-		ID: sec.ID, Title: sec.Title, Text: sec.Text, URL: sec.URL,
+		ID: sec.ID, Title: sec.Title, Text: sec.Text, URI: sec.URI,
 		Metadata: fetchMetadata{Source: sec.Source, Path: sec.Path, Version: sec.Version},
 	}, nil
 }
@@ -75,7 +75,7 @@ func registerTools(s *mcp.Server, c *corpus.Corpus) {
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "search_fiskaly_docs",
-		Description: "Search the curated fiskaly SIGN IT documentation by keyword. Returns ranked {id, title, url, snippet}; call fetch_fiskaly_doc with an id to read the full section.",
+		Description: "Search the curated fiskaly SIGN IT documentation by keyword. Returns ranked {id, title, uri, snippet}; call fetch_fiskaly_doc with an id to read the full section.",
 		Annotations: readOnly,
 	}, func(_ context.Context, _ *mcp.CallToolRequest, in searchInput) (*mcp.CallToolResult, searchOutput, error) {
 		out, err := handleSearch(c, in)

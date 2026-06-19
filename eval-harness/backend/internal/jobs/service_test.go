@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -25,7 +26,8 @@ type fakeRunner struct {
 	blockRelease chan struct{}
 
 	// failRun causes RunScenario to return an error.
-	failRun bool
+	failRun  bool
+	failKill bool
 }
 
 func newFakeRunner() *fakeRunner {
@@ -82,6 +84,9 @@ func (f *fakeRunner) KillContainer(container string) error {
 	f.mu.Lock()
 	f.killCalls = append(f.killCalls, container)
 	f.mu.Unlock()
+	if f.failKill {
+		return errors.New("kill failed")
+	}
 	return nil
 }
 
@@ -195,7 +200,10 @@ func TestCancelLiveRun(t *testing.T) {
 
 	// onStart fires before the block, so the registry has the runDir already.
 	// Cancel finds the container name, kills it, and writes the marker.
-	ok := svc.Cancel(id)
+	ok, err := svc.Cancel(id)
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
 	if !ok {
 		t.Fatal("Cancel returned false for live run")
 	}
@@ -209,7 +217,11 @@ func TestCancelUnknown(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	if svc.Cancel("does-not-exist") {
+	ok, err := svc.Cancel("does-not-exist")
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
+	if ok {
 		t.Fatal("Cancel should return false for unknown run")
 	}
 }
@@ -233,7 +245,10 @@ func TestCancelWritesMarker(t *testing.T) {
 
 	// Cancel: ctx is cancelled (unblocks RunScenario), KillContainer called,
 	// and the cancelled marker written to the now-known run dir.
-	ok := svc.Cancel(id)
+	ok, err := svc.Cancel(id)
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
 	if !ok {
 		t.Fatal("Cancel returned false")
 	}
@@ -258,8 +273,12 @@ func TestCancelIdempotent(t *testing.T) {
 	id, _ := svc.Enqueue("known", "m", "e")
 	// First cancel may return true or false depending on timing; second must
 	// return false.
-	svc.Cancel(id)
-	if svc.Cancel(id) {
+	_, _ = svc.Cancel(id)
+	ok, err := svc.Cancel(id)
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
+	if ok {
 		t.Fatal("second Cancel should return false")
 	}
 }
@@ -295,7 +314,10 @@ func TestReattachRegistersInFlight(t *testing.T) {
 	}
 
 	// Cancel should succeed and write a marker.
-	ok := svc.Cancel(found)
+	ok, err := svc.Cancel(found)
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
 	if !ok {
 		t.Fatal("Cancel of reattached run returned false")
 	}
@@ -426,7 +448,10 @@ func TestSubscribeCancelledEvent(t *testing.T) {
 		t.Fatalf("expected running, got %q", ev.Phase)
 	}
 
-	ok := svc.Cancel(id)
+	ok, err := svc.Cancel(id)
+	if err != nil {
+		t.Fatalf("Cancel: %v", err)
+	}
 	if !ok {
 		t.Fatal("Cancel returned false")
 	}
@@ -437,6 +462,28 @@ func TestSubscribeCancelledEvent(t *testing.T) {
 	}
 	if ev.Phase != "cancelled" {
 		t.Errorf("got phase %q, want cancelled", ev.Phase)
+	}
+}
+
+func TestCancelReportsKillFailure(t *testing.T) {
+	f := newFakeRunner()
+	f.block = true
+	f.failKill = true
+	svc := NewService(f, t.TempDir(), 1)
+	svc.Start()
+
+	id, err := svc.Enqueue("known", "m", "e")
+	if err != nil {
+		t.Fatalf("Enqueue: %v", err)
+	}
+	waitRunDir(t, svc, id)
+
+	ok, err := svc.Cancel(id)
+	if !ok {
+		t.Fatal("Cancel returned false")
+	}
+	if err == nil {
+		t.Fatal("expected kill error")
 	}
 }
 

@@ -42,15 +42,14 @@ telemetry summary, not as a dashboard error.
 ## Views
 
 - Run table: scenario, model, effort, build, tests, judge, turns, and cost.
-- Run detail: judge log, build/test logs, transcript, MCP telemetry summary, and
-  diff.
+- Run detail: judge log, build/test logs, transcript, MCP telemetry summary, and diff.
 - Telemetry: total MCP calls, per-tool calls and errors, latency percentiles,
   search queries, and fetched document ids.
+- Scenarios: list, edit, save, run, and cancel scenario runs.
 
 ## Checks
 
 ```sh
-pnpm test
 pnpm lint
 pnpm build
 ```

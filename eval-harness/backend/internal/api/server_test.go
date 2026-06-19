@@ -70,6 +70,7 @@ func mustWrite(t *testing.T, path, content string) {
 type fakeService struct {
 	enqueueErr   error
 	cancelOK     bool
+	cancelErr    error
 	subCh        chan jobs.Event
 	unsubscribed atomic.Bool
 }
@@ -81,7 +82,7 @@ func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) 
 	return "job.1", nil
 }
 
-func (f *fakeService) Cancel(runID string) bool { return f.cancelOK }
+func (f *fakeService) Cancel(runID string) (bool, error) { return f.cancelOK, f.cancelErr }
 
 func (f *fakeService) Subscribe() (<-chan jobs.Event, func()) {
 	ch := f.subCh
@@ -446,6 +447,25 @@ func TestCancelRunNotFound(t *testing.T) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("want 404, got %d", resp.StatusCode)
+	}
+}
+
+func TestCancelRunError(t *testing.T) {
+	root := t.TempDir()
+	svc := &fakeService{cancelOK: true, cancelErr: fmt.Errorf("kill failed")}
+	cfg := Config{
+		RunsDir:      buildRunsDir(t, root),
+		ScenariosDir: buildScenariosDir(t, root),
+		CORSOrigin:   "http://localhost:8080",
+		Service:      svc,
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	resp := post(t, srv, "/runs/job.1/cancel", "")
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Fatalf("want 500, got %d", resp.StatusCode)
 	}
 }
 

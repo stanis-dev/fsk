@@ -5,9 +5,7 @@ finalizes paid business-to-consumer sales: it models an order's line items and
 Italian VAT, validates the order, records the payment taken at the till, and
 moves the order through its lifecycle to `completed`.
 
-This is a Go library package with no HTTP, gRPC, or other transport, covered by
-`go test`. It is meant to run as a service; for now the repository is just the
-checkout logic.
+This is a Go library package covered by `go test`.
 
 ## Fiscalization is not implemented yet
 
@@ -74,5 +72,4 @@ go test ./...
 
 This package is the till-side checkout flow only: order model, Italian VAT,
 validation, lifecycle, payment record, and an in-memory store. There is no
-catalog, inventory, refunds, multi-tender, auth, or persistence beyond memory,
-and no HTTP/gRPC transport.
+catalog, inventory, refunds, multi-tender, auth, or persistence beyond memory.

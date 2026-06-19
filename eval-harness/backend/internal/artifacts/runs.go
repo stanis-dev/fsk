@@ -51,7 +51,7 @@ func ListRuns(dir string) []Summary {
 		out = append(out, SummarizeRun(d))
 	}
 	sort.Slice(out, func(i, j int) bool {
-		return out[i].CreatedIso > out[j].CreatedIso
+		return out[i].UpdatedIso > out[j].UpdatedIso
 	})
 	return out
 }
@@ -60,7 +60,7 @@ func ListRuns(dir string) []Summary {
 func SummarizeRun(dir string) Summary {
 	s := Summary{
 		ID:         filepath.Base(dir),
-		CreatedIso: dirMtime(dir),
+		UpdatedIso: dirMtime(dir),
 		Status:     "running",
 	}
 

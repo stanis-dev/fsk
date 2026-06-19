@@ -29,6 +29,41 @@ func TestParseScenarioExpectationsEmpty(t *testing.T) {
 	}
 }
 
+func TestExpectationsFromScenarioAddsReceiptBaseline(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "scenario.json")
+	data := []byte(`{"judge":{"expectations":[{"id":"scenario-specific","expectation":"does scenario work"}]}}`)
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := expectationsFromScenario(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != len(receiptExpectations)+1 {
+		t.Fatalf("expectation count = %d, want %d", len(got), len(receiptExpectations)+1)
+	}
+	if got[0].ID != receiptExpectations[0].ID {
+		t.Fatalf("first expectation = %q, want %q", got[0].ID, receiptExpectations[0].ID)
+	}
+	if got[len(got)-1].ID != "scenario-specific" {
+		t.Fatalf("last expectation = %q, want scenario-specific", got[len(got)-1].ID)
+	}
+}
+
+func TestExpectationsFromScenarioRejectsReceiptBaselineID(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "scenario.json")
+	data := []byte(`{"judge":{"expectations":[{"id":"real-host","expectation":"duplicate"}]}}`)
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := expectationsFromScenario(path)
+	if err == nil || !strings.Contains(err.Error(), "duplicates") {
+		t.Fatalf("expected duplicate baseline error, got %v", err)
+	}
+}
+
 func TestParseModelJSON(t *testing.T) {
 	cases := []string{
 		`{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"x","reasoning":"r"}]}`,

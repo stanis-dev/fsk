@@ -14,8 +14,8 @@ type Options struct {
 	Expect         bool   // after the gate passes, run the LLM expectation layer
 }
 
-// Evaluate runs the deterministic checks gate and, when Expect is set and the
-// scenario declares expectations, the LLM expectation layer. It writes the
+// Evaluate runs the deterministic checks gate and, when Expect is set, the LLM
+// expectation layer. It writes the
 // human-readable report to out and returns the structured report plus the
 // process exit code: 0 conformant, 1 NON-COMPLIANT, 2 infra error. The returned
 // error is non-nil iff the code is 2.

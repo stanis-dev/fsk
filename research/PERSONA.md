@@ -142,5 +142,5 @@ So *"make receipts easy"* for the implementer means four concrete things:
 The fourth is precisely what a judge that audits the integration is for: it turns
 a quiet "you never confirmed this receipt reached the authority" into a visible,
 cited finding while she is still at her desk — not at the audit. This persona is
-the reason the prototype pairs an action layer (do the work) with a judge layer
+the reason the workbench pairs an action layer (do the work) with a judge layer
 (prove it was done compliantly).

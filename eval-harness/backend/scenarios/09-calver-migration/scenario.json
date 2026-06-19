@@ -26,24 +26,8 @@
     },
     "expectations": [
       {
-        "id": "real-host",
-        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."
-      },
-      {
-        "id": "token-exchange",
-        "expectation": "Exchanges credentials for a JWT at POST /tokens."
-      },
-      {
-        "id": "idempotency",
-        "expectation": "Sets X-Idempotency-Key on every POST."
-      },
-      {
         "id": "api-version-current",
         "expectation": "Sends X-Api-Version pinned to the current dated version (2026-02-03), not the stale 2025-08-12 in the fixture."
-      },
-      {
-        "id": "records-flow",
-        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST."
       },
       {
         "id": "no-legacy-resources",

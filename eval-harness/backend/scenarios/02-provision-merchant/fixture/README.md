@@ -5,9 +5,7 @@ finalizes paid business-to-consumer sales: it models an order's line items and
 Italian VAT, validates the order, records the payment taken at the till, and
 moves the order through its lifecycle to `completed`.
 
-This is a Go library package with no HTTP, gRPC, or other transport, covered by
-`go test`. It is meant to run as a service; for now the repository is just the
-checkout logic.
+This is a Go library package covered by `go test`.
 
 ## Fiscalization is not implemented yet
 
@@ -74,8 +72,8 @@ go test ./...
 
 This package is the till-side checkout flow only: order model, Italian VAT,
 validation, lifecycle, payment record, and an in-memory store. There is no
-catalog, inventory, refunds, multi-tender, auth, or persistence beyond memory,
-and no HTTP/gRPC transport.
+catalog, inventory, refunds, multi-tender, auth, or persistence beyond memory.
+
 
 ## Fiscalization quickstart (draft)
 
@@ -84,7 +82,3 @@ and no HTTP/gRPC transport.
 Onboarding a merchant in fiskaly is quick: authenticate with our HUB API key and
 create the taxpayer directly: name, tax id, VAT id, and you're ready to issue
 receipts in minutes. No extra setup needed.
-
-The HUB API key is already in the team password manager; grab it from there. Once
-the taxpayer exists, the merchant is good to go and the till can start ringing up
-fiscal receipts.

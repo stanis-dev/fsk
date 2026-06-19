@@ -19,31 +19,12 @@
         }
       ],
       "docsFetched": [
-        "probe:records-flow"
+        "probe:records-flow",
+        "research:connection-loss"
       ],
       "maxMcpErrors": 0
     },
     "expectations": [
-      {
-        "id": "real-host",
-        "expectation": "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."
-      },
-      {
-        "id": "token-exchange",
-        "expectation": "Exchanges credentials for a JWT at POST /tokens."
-      },
-      {
-        "id": "idempotency",
-        "expectation": "Sets X-Idempotency-Key on every POST."
-      },
-      {
-        "id": "api-version",
-        "expectation": "Sends the dated X-Api-Version header on all calls."
-      },
-      {
-        "id": "records-flow",
-        "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST."
-      },
       {
         "id": "deadline-bounded",
         "expectation": "The fiskaly network call is bounded by a context deadline/timeout (context.WithTimeout / WithDeadline, or honoring a deadline already on ctx) so it cannot hang the checkout indefinitely."

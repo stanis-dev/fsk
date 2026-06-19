@@ -15,7 +15,6 @@ type Store struct {
 }
 
 func (s *Store) CompleteOrder(ctx context.Context, id string) error {
-	// The lock guards in-memory state only; release it before any network IO.
 	s.mu.Lock()
 	s.orders[id] = "paid"
 	s.mu.Unlock()
@@ -42,10 +41,10 @@ func (s *Store) deferToFallback(id string) error {
 func fiscalize(ctx context.Context, id string) error {
 	tok, _ := http.NewRequestWithContext(ctx, "POST", fiskalyHost+"/tokens", nil)
 	tok.Header.Set("X-Api-Version", "2026-02-03")
-	tok.Header.Set("X-Idempotency-Key", "5f9b...uuid-v4")
+	tok.Header.Set("X-Idempotency-Key", "0f6b6f8a-4f3d-4b8a-bdb9-47ee9b722b01")
 
 	rec, _ := http.NewRequestWithContext(ctx, "POST", fiskalyHost+"/records", nil)
 	rec.Header.Set("X-Api-Version", "2026-02-03")
-	rec.Header.Set("X-Idempotency-Key", "5f9b...uuid-v4")
+	rec.Header.Set("X-Idempotency-Key", "0f6b6f8a-4f3d-4b8a-bdb9-47ee9b722b02")
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 
 func recordsCorpus() *corpus.Corpus {
 	return corpus.New([]corpus.Section{{
-		ID: "probe:records-flow", Title: "the records flow", URL: "fsk://probe/notes#records-flow",
+		ID: "probe:records-flow", Title: "the records flow", URI: "fsk://probe/notes#records-flow",
 		Source: "probe", Path: "POST /records", Version: "2026-02-03",
 		Text: "a receipt is two POST /records calls, INTENTION then TRANSACTION RECEIPT",
 	}})
@@ -22,8 +22,8 @@ func TestHandleSearchReturnsHit(t *testing.T) {
 	if len(out.Results) != 1 || out.Results[0].ID != "probe:records-flow" {
 		t.Fatalf("unexpected results: %+v", out.Results)
 	}
-	if out.Results[0].URL == "" || out.Results[0].Snippet == "" {
-		t.Fatal("expected url and snippet to be populated")
+	if out.Results[0].URI == "" || out.Results[0].Snippet == "" {
+		t.Fatal("expected uri and snippet to be populated")
 	}
 }
 

@@ -3,15 +3,15 @@
 Date: 2026-06-12. Full raw research (6 areas, fact-checked) in `fiskaly_research.json`; downloaded OpenAPI artifacts in
 `specs/`.
 
-## Brief
+## Origin brief
 
 Role: **Agentic Backend Engineer (Golang)** (https://www.fiskaly.com/jobs/4797666101) — 90% designing multi-agent AI
 workflows that automate the SDLC, "Judge" agents auditing "Coder" agents so fiscal signatures stay legally compliant,
 human-in-the-loop design.
 
 Task: identify opportunities to improve the API documentation (https://developer.fiskaly.com/api/sign-it/2026-02-03)
-that drive fiskaly's mission ("make receipts easy"); build a **functional prototype** for one; "go crazy — fixing typos
-will not empower the mission."
+that drive fiskaly's mission ("make receipts easy"); build a working artifact for one; "go crazy — fixing typos will not
+empower the mission."
 
 ## Company (verified mid-2026)
 
@@ -45,7 +45,7 @@ will not empower the mission."
 CalVer/idempotency, record + taxpayer/location/system state machines, AdE outage page (paper receipt + e-invoice within
 12 days), weekly changelog, Postman collection, step-by-step guide.
 
-### Verified defects/gaps (interview ammo)
+### Verified defects/gaps
 
 - **168 unresolved template placeholders** in the rendered SIGN IT 2026-02-03 reference → silently blank descriptions
   (IT_en.yaml doesn't define keys the template uses).
@@ -108,18 +108,3 @@ fiskaly built the AI **read** layer (RAG chat + GEO files) but the **action** la
 unpublished MCP, dormant try-it, dead console link, archived SDKs. Their own job ad says they want
 judge-agents-auditing-coder-agents. The docs pipeline itself (template + overlays) has no QA gate — hence 168 blank
 descriptions in production.
-
-## Four prototype candidates (all Go, all multi-agent, all grounded)
-
-1. **Sandbox MCP + Judge** — action-taking MCP server over test.api.fiskaly.com: `provision_merchant`, `issue_receipt`
-   (INTENTION→TRANSACTION, auto idempotency/JWT/version), plus `audit_session` judge that replays the transcript against
-   machine-readable compliance rules. Demo: "Onboard 'Trattoria da Mario' and issue a €42 receipt" live in Claude Code;
-   then judge catches a deliberate violation. Hedge: local simulator behind --base-url.
-2. **Docs Judge** — multi-agent docs-conformance CI (Harvester → deterministic linters → sandbox Prober → LLM Judge
-   drafting PR-ready overlay fixes). Opener: "your live reference has 168 silently blank descriptions." Zero credentials
-   needed; runs live against prod docs.
-3. **CERTIFY** — "certify my integration" harness: Planner/Executor/Chaos/Judge agents run YAML compliance scenarios
-   (outage replay, idempotency reuse, correction flows) against an integration; audit-style report with regulation
-   citations + € sanction exposure.
-4. **Zero-to-Receipt** — claimable TEST sandbox factory + action MCP + published Agent Skill + Judge; TTFSR < 5 min.
-   Most ambitious scope.

@@ -94,27 +94,26 @@ func List(scenariosDir string) ([]Config, error) {
 	return out, nil
 }
 
-// IsKnown reports whether id names a known scenario under scenariosDir.
-func IsKnown(scenariosDir, id string) bool {
-	configs, err := List(scenariosDir)
+func scenarioDir(scenariosDir, id string) (string, bool) {
+	scenarios, err := Discover(scenariosDir)
 	if err != nil {
-		return false
+		return "", false
 	}
-	for _, c := range configs {
-		if c.ID == id {
-			return true
+	for _, s := range scenarios {
+		if s.ID == id {
+			return s.Dir, true
 		}
 	}
-	return false
+	return "", false
 }
 
 // Load returns the Config and task.md contents for the given id. ok is false if
 // the id is unknown; neither value is meaningful in that case.
 func Load(scenariosDir, id string) (cfg *Config, task string, ok bool) {
-	if !IsKnown(scenariosDir, id) {
+	dir, ok := scenarioDir(scenariosDir, id)
+	if !ok {
 		return nil, "", false
 	}
-	dir := filepath.Join(scenariosDir, id)
 	raw, err := os.ReadFile(filepath.Join(dir, "scenario.json"))
 	if err != nil {
 		return nil, "", false
@@ -252,7 +251,8 @@ func AssignExpectationIds(c Config) Config {
 // It rejects unknown ids, id mismatches, and configs that fail Validate.
 // AssignExpectationIds is run before validation and writing.
 func Save(scenariosDir, id string, config Config, task string) error {
-	if !IsKnown(scenariosDir, id) {
+	dir, ok := scenarioDir(scenariosDir, id)
+	if !ok {
 		return fmt.Errorf("unknown scenario %q", id)
 	}
 	if config.ID != id {
@@ -267,7 +267,6 @@ func Save(scenariosDir, id string, config Config, task string) error {
 		return errors.New(msg)
 	}
 	raw = append(raw, '\n')
-	dir := filepath.Join(scenariosDir, id)
 	if err := os.WriteFile(filepath.Join(dir, "scenario.json"), raw, 0o644); err != nil {
 		return fmt.Errorf("writing scenario.json: %w", err)
 	}

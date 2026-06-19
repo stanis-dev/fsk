@@ -41,6 +41,14 @@ type expectation struct {
 	Expectation string `json:"expectation"`
 }
 
+var receiptExpectations = []expectation{
+	{ID: "real-host", Expectation: "Targets the real fiskaly host (test/live.api.fiskaly.com), not an invented one."},
+	{ID: "token-exchange", Expectation: "Exchanges credentials for a JWT at POST /tokens."},
+	{ID: "idempotency-header", Expectation: "Sets X-Idempotency-Key on every POST."},
+	{ID: "api-version", Expectation: "Sends the dated X-Api-Version header on all calls."},
+	{ID: "records-flow", Expectation: "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST."},
+}
+
 func parseScenarioExpectations(data []byte) ([]expectation, error) {
 	var s struct {
 		Judge struct {
@@ -58,7 +66,28 @@ func expectationsFromScenario(path string) ([]expectation, error) {
 	if err != nil {
 		return nil, fmt.Errorf("reading scenario: %w", err)
 	}
-	return parseScenarioExpectations(data)
+	exps, err := parseScenarioExpectations(data)
+	if err != nil {
+		return nil, err
+	}
+	for _, e := range exps {
+		if isReceiptExpectation(e.ID) {
+			return nil, fmt.Errorf("scenario expectation %q duplicates a receipt baseline expectation", e.ID)
+		}
+	}
+	out := make([]expectation, 0, len(receiptExpectations)+len(exps))
+	out = append(out, receiptExpectations...)
+	out = append(out, exps...)
+	return out, nil
+}
+
+func isReceiptExpectation(id string) bool {
+	for _, e := range receiptExpectations {
+		if e.ID == id {
+			return true
+		}
+	}
+	return false
 }
 
 type verdict struct {

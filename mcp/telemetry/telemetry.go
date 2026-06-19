@@ -28,11 +28,10 @@ type Event struct {
 // Recorder persists telemetry events. Implementations must be safe for
 // concurrent use.
 type Recorder interface {
-	Record(Event)
+	Record(Event) error
 }
 
-// FileRecorder appends one JSON object per line to a file. Writes are
-// best-effort: a failure is logged to stderr and never propagates.
+// FileRecorder appends one JSON object per line to a file.
 type FileRecorder struct {
 	mu  sync.Mutex
 	f   *os.File
@@ -47,12 +46,14 @@ func NewFileRecorder(path string) (*FileRecorder, error) {
 	return &FileRecorder{f: f, enc: json.NewEncoder(f)}, nil
 }
 
-func (r *FileRecorder) Record(e Event) {
+func (r *FileRecorder) Record(e Event) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if err := r.enc.Encode(e); err != nil {
 		log.Printf("telemetry: write failed: %v", err)
+		return err
 	}
+	return nil
 }
 
 func (r *FileRecorder) Close() error {
@@ -75,9 +76,7 @@ func Middleware(rec Recorder) mcp.Middleware {
 				TS:        time.Now().UTC().Format(time.RFC3339),
 				LatencyMS: time.Since(start).Milliseconds(),
 			}
-			if sess := req.GetSession(); sess != nil {
-				ev.SessionID = sess.ID()
-			}
+			ev.SessionID = sessionID(req)
 			if p, ok := req.GetParams().(*mcp.CallToolParamsRaw); ok {
 				ev.Tool = p.Name
 				if len(p.Arguments) > 0 {
@@ -97,9 +96,30 @@ func Middleware(rec Recorder) mcp.Middleware {
 					ev.ResultCount = docsResultCount(ctr)
 				}
 			}
-			rec.Record(ev)
+			if err := rec.Record(ev); err != nil {
+				return nil, err
+			}
 			return res, err
 		}
+	}
+}
+
+func sessionID(req mcp.Request) string {
+	switch sess := req.GetSession().(type) {
+	case nil:
+		return ""
+	case *mcp.ServerSession:
+		if sess == nil {
+			return ""
+		}
+		return sess.ID()
+	case *mcp.ClientSession:
+		if sess == nil {
+			return ""
+		}
+		return sess.ID()
+	default:
+		return sess.ID()
 	}
 }
 

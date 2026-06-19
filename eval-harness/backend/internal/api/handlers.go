@@ -112,7 +112,12 @@ func (cfg Config) cancelRun(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusServiceUnavailable, "no job service")
 		return
 	}
-	if !cfg.Service.Cancel(r.PathValue("id")) {
+	ok, err := cfg.Service.Cancel(r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if !ok {
 		writeError(w, http.StatusNotFound, "no live run to cancel")
 		return
 	}

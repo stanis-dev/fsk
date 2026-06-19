@@ -26,11 +26,10 @@ vendor's AI assistant integrates SIGN IT autonomously against TEST. Completes th
 and one-ups the 2026 benchmark (Stripe/Square/PayPal action MCPs) by adding what none of them have: a compliance judge.
 
 **#2 — The judge: provable compliance as a product** A rule engine that replays everything an integration did against
-machine-readable compliance rules with regulation citations and euro-denominated stakes. The prototype implemented six
-deterministic rules; productized, it's "fiskaly CERTIFY" — scenario packs per country (AdE outage replay, idempotency
-discipline, correction flows), audit-style reports, a CI gate POS vendors run on every release. The same architecture is
-the job ad's mandate: judge agents auditing coder agents so fiscal code stays legally compliant — built first for
-customers, then turned inward.
+machine-readable compliance rules with regulation citations and euro-denominated stakes. Productized, it's "fiskaly
+CERTIFY" — scenario packs per country (AdE outage replay, idempotency discipline, correction flows), audit-style reports,
+a CI gate POS vendors run on every release. The same architecture is the job ad's mandate: judge agents auditing coder
+agents so fiscal code stays legally compliant — built first for customers, then turned inward.
 
 **#3 — Docs CI: the 168 blank descriptions** A conformance pipeline over the docs supply chain: resolve the template
 against every country overlay (catches all 168 unresolved keys — deterministically, no LLM needed), diff documented

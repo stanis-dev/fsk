@@ -8,7 +8,6 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
-export const apiBase = () => BASE;
 export const listRuns = () => req<Summary[]>("/runs");
 export const getRun = (id: string) => req<RunDetail>(`/runs/${id}`);
 export const listScenarios = () => req<ScenarioConfig[]>("/scenarios");

@@ -3,7 +3,7 @@ export type RunStatus = "running" | "done" | "cancelled";
 
 export interface Summary {
   id: string;
-  createdIso: string;
+  updatedIso: string;
   status: RunStatus;
   scenario: string;
   coder: string;
@@ -17,27 +17,16 @@ export interface Summary {
   cost: string;
 }
 
-export type EventKind = "thinking" | "assistant" | "tool" | "result" | "final";
+type EventKind = "thinking" | "assistant" | "tool" | "result" | "final";
 export interface TranscriptEvent {
   kind: EventKind;
   text: string;
 }
 
-export type DiffClass = "meta" | "hunk" | "add" | "del" | "ctx";
+type DiffClass = "meta" | "hunk" | "add" | "del" | "ctx";
 export interface DiffLine {
   cls: DiffClass;
   text: string;
-}
-
-export interface TelemetryEvent {
-  ts: string;
-  sessionId: string;
-  tool: string;
-  args: Record<string, unknown>;
-  resultCount: number;
-  isError: boolean;
-  error: string;
-  latencyMs: number;
 }
 
 export interface TelemetryToolStat {

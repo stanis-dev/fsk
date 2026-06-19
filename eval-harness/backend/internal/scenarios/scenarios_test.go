@@ -107,19 +107,6 @@ func TestList_ErrorOnMalformedJSON(t *testing.T) {
 	}
 }
 
-func TestIsKnown(t *testing.T) {
-	root := buildFixture(t)
-	if !IsKnown(root, "01-demo") {
-		t.Error("IsKnown(01-demo) = false, want true")
-	}
-	if IsKnown(root, "99-nope") {
-		t.Error("IsKnown(99-nope) = true, want false")
-	}
-	if IsKnown(root, "../etc") {
-		t.Error("IsKnown(../etc) = true, want false")
-	}
-}
-
 func TestLoad(t *testing.T) {
 	root := buildFixture(t)
 	cfg, task, ok := Load(root, "01-demo")

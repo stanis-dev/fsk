@@ -20,7 +20,7 @@ func main() {
 	var (
 		scenarioFlag = flag.String("scenario", "", "path to a scenario.json (required)")
 		runFlag      = flag.String("run", "", "path to a run dir with transcript.jsonl + mcp-telemetry.jsonl; omit for source-only evaluation")
-		expectFlag   = flag.Bool("expect", false, "after the gate passes, run the LLM expectation layer (requires the scenario to declare judge.expectations and the claude CLI)")
+		expectFlag   = flag.Bool("expect", false, "after the gate passes, run the LLM expectation layer (requires the claude CLI)")
 		jsonFlag     = flag.String("json", "", "write the structured verdict to this path as JSON")
 	)
 	flag.Parse()

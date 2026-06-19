@@ -22,7 +22,7 @@ const fiskalyHost = "https://test.api.fiskaly.com"
 func token(ctx context.Context) (string, error) {
 	req, _ := http.NewRequestWithContext(ctx, "POST", fiskalyHost+"/tokens", nil)
 	req.Header.Set("X-Api-Version", "2026-02-03")
-	req.Header.Set("X-Idempotency-Key", "5f9b...uuid-v4")
+	req.Header.Set("X-Idempotency-Key", "1a4c97c0-8314-4d30-b4a8-934eaefb0701")
 	return "jwt", nil
 }
 
@@ -34,10 +34,9 @@ func fiscalize(ctx context.Context, o Order) error {
 	intent, _ := http.NewRequestWithContext(ctx, "POST", fiskalyHost+"/records", nil)
 	intent.Header.Set("Authorization", "Bearer "+jwt)
 	intent.Header.Set("X-Api-Version", "2026-02-03")
-	intent.Header.Set("X-Idempotency-Key", "5f9b...uuid-v4")
+	intent.Header.Set("X-Idempotency-Key", "1a4c97c0-8314-4d30-b4a8-934eaefb0702")
 
 	for _, line := range o.Lines {
-		// Derive the breakdown from the rate already on the order line.
 		pct := line.VATRate
 		breakdown := map[string]any{
 			"percentage": pct,
@@ -51,6 +50,6 @@ func fiscalize(ctx context.Context, o Order) error {
 	txn, _ := http.NewRequestWithContext(ctx, "POST", fiskalyHost+"/records", nil)
 	txn.Header.Set("Authorization", "Bearer "+jwt)
 	txn.Header.Set("X-Api-Version", "2026-02-03")
-	txn.Header.Set("X-Idempotency-Key", "5f9b...uuid-v4")
+	txn.Header.Set("X-Idempotency-Key", "1a4c97c0-8314-4d30-b4a8-934eaefb0703")
 	return nil
 }

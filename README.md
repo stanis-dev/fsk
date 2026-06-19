@@ -63,7 +63,7 @@ Implemented:
 Known limits:
 
 - The deterministic checks are necessary, not sufficient; the LLM expectation
-  layer that grades the rest is nondeterministic and conservative to a false PASS.
+  layer is nondeterministic and downgrades uncited `MET` verdicts.
 - `vat-breakdown` proves the VAT fields are constructed, not that the selected
   VAT rate is correct.
 - The judge checks source shape, not live SIGN IT behavior.
@@ -78,7 +78,7 @@ Fast package checks:
 cd mcp && go test ./...
 cd ../eval-harness/backend && go test ./...
 cd scenarios/seed && go test ./...
-cd ../../../dashboard && pnpm test && pnpm lint && pnpm build
+cd ../../../dashboard && pnpm lint && pnpm build
 ```
 
 Run the preflight + Docker eval for all scenarios or one:
@@ -126,7 +126,7 @@ Use the scenario suite as the guardrail for every change:
   scenario baseline still starts non-compliant and a correct fix would flip it.
 - Changing a scenario: keep the seed build/test green, keep the baseline judge
   non-compliant, and encode the catching signal in `judge.checks`/`expectations`.
-- Changing the dashboard: run `pnpm test`, `pnpm lint`, and `pnpm build`.
+- Changing the dashboard: run `pnpm lint` and `pnpm build`.
 
 The project rule is strict: a change is only done when the eval or test that
 exercises it has run in this iteration and passed.

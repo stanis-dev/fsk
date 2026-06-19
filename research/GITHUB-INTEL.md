@@ -27,8 +27,7 @@ coding challenge), not the 30-repo headline — and treat all of this as the
 2. **Strategic arc:** Germany-only SDK company (2019–21) → Go/OpenAPI/Postgres
    platform (2022–23) → **multi-country EU e-invoicing, Italy first via GOBL**
    (2024–26). The German TSE business is mature/archived; **Italy + GOBL is
-   where the new engineering energy is** — i.e. exactly the SIGN IT surface our
-   prototype targets.
+   where the new engineering energy is** — the SIGN IT surface this repo targets.
 3. **How they build country compliance:** not from scratch — they **vendor GOBL
    at a pinned tag, carry the minimum surgical patch for local legal
    correctness, and intend to upstream and delete the fork.** Their moat is
@@ -48,7 +47,7 @@ coding challenge), not the 30-repo headline — and treat all of this as the
 
 ---
 
-## 1. The repo landscape
+## 1. Public repos
 
 Of 30 public repos: ~9 are **vendored forks** (`keycloak`, the three
 `vendor.invopop-*`, `go-crypto`, `cmac`, `gojsonschema`, `TTC`, `airbyte`) whose
@@ -175,7 +174,7 @@ repo's excellent recent support is essentially one engineer on a side-project.
 Overall: moderate-to-good for a deliberately minimal public surface; the
 impressive engineering is private.
 
-## 6. Hiring signal — the coding challenge (directly relevant)
+## 6. Coding challenge signal
 
 `coding-challenges` (59 forks) is the take-home, mapped to roles:
 `signing-service-challenge-go`/`-ts` = **"Mid / Senior Backend developer"**;
@@ -206,33 +205,12 @@ Process & values:
   interview with two developers** where you **defend your design** — they
   optimize for *defensible reasoning*, not a green test suite. (No time budget or
   written rubric is given — thin spot.)
-- **AI policy is the tell for the role you're applying to:** the Go challenge
-  permits AI but requires you to *"reason about the design and implementation
-  choices"* and disclose tools used; the newer fullstack challenge goes further —
-  AI *"permitted and encouraged… At fiskaly, we embrace AI as a productivity
-  tool"* — with a structured `## AI Tools Used` disclosure template. The newest
-  variant adds production realism: PostgreSQL/Drizzle, Docker Compose, explicit
-  thread-safety (mutexes / DB transactions), and a graded `## Caching Strategy`
-  writeup ("correctness of cache invalidation… especially for critical data like
-  signature counters").
-
-## 7. What this implies for the interview
-
-- **The themes we built around are fiskaly's own:** tamper-evident signing,
-  *verifiable correctness*, concurrency/counter integrity, and "prove the system
-  is correct in an automatable way" — that last line is, almost verbatim, the
-  judge-audits-coder idea our prototype embodies. The Zero-to-Receipt judge is a
-  direct answer to a value they put in their own hiring rubric.
-- **They reward AI-with-accountability** — used to move fast, but you must
-  disclose it and defend every choice. Mirrors how this project was built (agentic
-  research + a human-defensible design), which is itself the story to tell.
-- **Speak their stack:** Go, OpenAPI-first codegen, Postgres, GCP/Grafana,
-  GOBL-based country compliance, thin-fork upstream discipline. Our prototype's
-  spec-driven Go + "generate from the OpenAPI spec, regenerate per CalVer"
-  argument lands directly.
-- **Their culture is collegial, candid, design-debate-oriented, JIRA-tracked, and
-  honest about gaps** — match that register: pragmatic, blast-radius-aware, happy
-  to be corrected.
+- **Tool policy is part of the signal:** the Go challenge permits AI but requires
+  candidates to *"reason about the design and implementation choices"* and
+  disclose tools used. The newer fullstack challenge adds production realism:
+  PostgreSQL/Drizzle, Docker Compose, explicit thread-safety (mutexes / DB
+  transactions), and a graded `## Caching Strategy` writeup ("correctness of
+  cache invalidation… especially for critical data like signature counters").
 
 ## Methodology & limitations
 

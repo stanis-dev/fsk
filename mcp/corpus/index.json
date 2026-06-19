@@ -2,7 +2,7 @@
   {
     "id": "probe:auth-and-headers",
     "title": "SIGN IT - authentication, host, and required headers",
-    "url": "fsk://probe/notes#auth-and-headers",
+    "uri": "fsk://probe/notes#auth-and-headers",
     "source": "probe",
     "path": "POST /tokens",
     "version": "2026-02-03",
@@ -11,7 +11,7 @@
   {
     "id": "probe:scoped-subject",
     "title": "SIGN IT - scoping a subject to a unit organization",
-    "url": "fsk://probe/notes#scoped-subject",
+    "uri": "fsk://probe/notes#scoped-subject",
     "source": "probe",
     "path": "POST /subjects",
     "version": "2026-02-03",
@@ -20,7 +20,7 @@
   {
     "id": "probe:provisioning",
     "title": "SIGN IT - provisioning taxpayer, location, and system",
-    "url": "fsk://probe/notes#provisioning",
+    "uri": "fsk://probe/notes#provisioning",
     "source": "probe",
     "path": "POST /taxpayers",
     "version": "2026-02-03",
@@ -29,7 +29,7 @@
   {
     "id": "probe:records-flow",
     "title": "SIGN IT - issuing a receipt: the two-call records flow",
-    "url": "fsk://probe/notes#records-flow",
+    "uri": "fsk://probe/notes#records-flow",
     "source": "probe",
     "path": "POST /records",
     "version": "2026-02-03",
@@ -38,10 +38,28 @@
   {
     "id": "probe:money-model",
     "title": "SIGN IT - VAT, amounts, and value rules",
-    "url": "fsk://probe/notes#money-model",
+    "uri": "fsk://probe/notes#money-model",
     "source": "probe",
     "path": "",
     "version": "2026-02-03",
     "text": "Amounts are decimal STRINGS matching ^(-)?\\d{1,12}(\\.\\d{1,8})?$, not numbers. A VatRateCategory requires ALL of percentage, amount, exclusive, and inclusive - the API derives none of them, so the integration must compute every field. All resource IDs are UUIDv7 (time-ordered). Subject credentials are shown once and are non-recoverable. There is no DELETE; resources are retired via DECOMMISSIONED/DISABLED states."
+  },
+  {
+    "id": "research:connection-loss",
+    "title": "SIGN IT - authority outage path",
+    "uri": "fsk://research/RESEARCH.md#connection-loss",
+    "source": "research",
+    "path": "",
+    "version": "2026-02-03",
+    "text": "During an AdE or fiskaly outage, checkout must not freeze indefinitely. If retry fails, issue the paper document path and ensure compliance by issuing the required electronic invoice within 12 days with the prescribed outage note and receipt data. Do not mark the sale as normally fiscalized when the authority did not accept it."
+  },
+  {
+    "id": "research:credential-lifecycle",
+    "title": "SIGN IT - Fisconline credential lifecycle",
+    "uri": "fsk://research/RESEARCH.md#credentials",
+    "source": "research",
+    "path": "POST /taxpayers",
+    "version": "2026-02-03",
+    "text": "The 24-hour fiskaly JWT and the merchant Fisconline credentials are different lifetimes. Refreshing the JWT does not renew the AdE/Fisconline credential. Italian Fisconline credentials expire after about 90 days, with renewal recommended before expiry, so integrations serving many merchants must track credential age and alert before receipts can no longer be issued."
   }
 ]

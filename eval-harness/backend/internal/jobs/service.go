@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -20,7 +21,7 @@ type Runner interface {
 	KillContainer(container string) error
 }
 
-// ActiveRun is a snapshot of one live run, exported for SSE and tests.
+// ActiveRun is a snapshot of one live run.
 type ActiveRun struct {
 	ID         string
 	ScenarioID string
@@ -78,8 +79,7 @@ func NewService(r Runner, runsBase string, workers int) *Service {
 	}
 }
 
-// Subscribe returns a buffered channel that receives phase-transition Events and
-// an idempotent unsubscribe func that drains and closes the channel.
+// Subscribe returns a buffered phase-event channel and an idempotent unsubscribe.
 func (s *Service) Subscribe() (<-chan Event, func()) {
 	s.mu.Lock()
 	id := s.nextSub
@@ -148,14 +148,13 @@ func (s *Service) Enqueue(scenarioID, model, effort string) (string, error) {
 	return id, nil
 }
 
-// Cancel stops a live run and writes a cancelled marker. Returns false if the
-// run is not found. Idempotent: a second call returns false.
-func (s *Service) Cancel(runID string) bool {
+// Cancel stops a live run and writes a cancelled marker.
+func (s *Service) Cancel(runID string) (bool, error) {
 	s.mu.Lock()
 	lr, ok := s.live[runID]
 	if !ok {
 		s.mu.Unlock()
-		return false
+		return false, nil
 	}
 	scenarioID := lr.scenarioID
 	delete(s.live, runID)
@@ -166,19 +165,24 @@ func (s *Service) Cancel(runID string) bool {
 
 	lr.cancel()
 
+	var errs []error
 	if container == "" && runDir != "" {
 		container = s.r.ContainerName(runDir)
 	}
 	if container != "" {
-		_ = s.r.KillContainer(container)
+		if err := s.r.KillContainer(container); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
 	if runDir != "" {
 		marker := filepath.Join(runDir, artifacts.CancelledFile)
-		_ = os.WriteFile(marker, []byte{}, 0o644)
+		if err := os.WriteFile(marker, []byte{}, 0o644); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
-	return true
+	return true, errors.Join(errs...)
 }
 
 // Active returns a point-in-time snapshot of all live runs.

@@ -11,29 +11,11 @@ Read first: `research/PERSONA.md` (the failure spectrum these scenarios target),
 `research/api-probes/NOTES.md` (the verified SIGN IT contract - the source of
 truth for every domain claim), and `research/OPPORTUNITIES.md`.
 
-## The core design principle
-
-From `PERSONA.md`: **a normal bug throws an error; a fiscalization bug looks like
-success.** The dangerous failures are silent and compliance-shaped - a
-perfect-looking receipt that never reached the tax authority. So the suite mixes
-two kinds of trap on purpose:
-
-- **Loud traps** - an invented `/refunds` endpoint, a missing poll to `FINISHED`,
-  a leftover legacy `/assets`: a wrong contract that a careful read of the code
-  catches.
-- **Silent traps** - idempotency-key reuse, a blocking checkout call, a wrong VAT
-  rate at scale, conflating the 24h JWT with the 90-day credential: the build stays
-  green and the receipt still looks right.
-
-Both kinds are graded the same way (see [The judge](#the-judge)): a deterministic
-`checks` gate over the agent's trajectory, then an LLM `expectations` layer over the
-resulting source. Every scenario encodes both in its `scenario.json`.
-
 ## Layout
 
 ```
 eval-harness/backend/scenarios/<NN-slug>/
-  scenario.json   # metadata + the judge's checks and expectations
+  scenario.json   # metadata + checks + scenario-specific expectations
   task.md         # the business-framed prompt handed to the agent
   fixture/        # a self-contained Go module (module `pos`), the seed codebase
 ```
@@ -47,7 +29,7 @@ eval-harness/backend/scenarios/<NN-slug>/
   the point - it is intentional, not an oversight.
 - The fiscalization hook is `fiscalize(ctx, *Order) error` in `checkout.go`,
   called by `CompleteOrder`, a no-op in greenfield seeds.
-- **Greenfield** seeds (seam only) stay vendor-blind in code; the trap lives in a
+- **Greenfield** seeds (hook only) stay vendor-blind in code; the trap lives in a
   comment, the README, or a plausible-looking domain helper.
 - **Brownfield** seeds ship an unfinished, *flawed* fiskaly client (e.g.
   `fiskaly.go`) that the agent inherits and must finish + fix. It must compile and
@@ -83,14 +65,16 @@ exercise. Keep it to the register a senior backend engineer would get in a ticke
       "maxMcpErrors": 0
     },
     "expectations": [
-      { "id": "records-flow", "expectation": "Issues the receipt as the two-call records flow (INTENTION then TRANSACTION), not a single POST." }
+      { "id": "polling", "expectation": "Polls the record (GET /records/{id}) until it reaches FINISHED." }
     ]
   }
 }
 ```
 
 `traps` is documentation for the author; the judge reads only `judge`. Expectation
-`id`s are assigned automatically when absent.
+`id`s are assigned automatically when absent. The judge adds the shared receipt
+baseline (`real-host`, `token-exchange`, `idempotency-header`, `api-version`,
+`records-flow`) before these scenario-specific expectations.
 
 ## The judge
 
@@ -107,10 +91,11 @@ exercise. Keep it to the register a senior backend engineer would get in a ticke
    - `maxMcpErrors` - caps the MCP error count.
 2. **LLM expectations** (`judge.expectations`) - natural-language conformance
    criteria graded by a stronger model over the source **and** trajectory, run only
-   after the gate passes (`-expect`). Each MET must cite a verbatim `evidence_quote`
-   that actually appears in the source or trajectory; an uncited or absent quote is
-   downgraded to UNMET. Conformance requires every expectation to be a cited MET -
-   the judge is conservative to a false PASS.
+   after the gate passes (`-expect`). The judge prepends the shared receipt
+   baseline, then grades the scenario-specific expectations in `scenario.json`.
+   Each MET must cite a verbatim `evidence_quote` that actually appears in the
+   source or trajectory; an uncited or absent quote is downgraded to UNMET.
+   Conformance requires every expectation to be a cited MET.
 
 The judge reads non-test Go source only (a mock in `_test.go` cannot satisfy a
 criterion), and the citation surface is the comment-stripped source, so a claim
@@ -126,6 +111,6 @@ the trap-specific conformance lives in each scenario's `expectations`.
 cd eval-harness/backend && go run ./cmd/judge -scenario ../scenarios/<id>/scenario.json -expect ../scenarios/<id>/fixture
 
 # full run in Docker, including the trajectory checks gate (needs CLAUDE_CODE_OAUTH_TOKEN
-# in repo .env and the claude CLI):
+# in repo .env):
 cd eval-harness/backend && go run ./cmd/eval-harness run <id>
 ```
