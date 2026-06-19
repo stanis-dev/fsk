@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +12,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
+
+	"backend/internal/jobs"
 )
 
 // buildRunsDir creates a runs/ tree under root with one run.sample directory.
@@ -79,8 +84,9 @@ func mustWrite(t *testing.T, path, content string) {
 
 // fakeService implements RunService for tests.
 type fakeService struct {
-	enqueueErr error // non-nil causes Enqueue to return this error
-	cancelOK   bool  // value returned by Cancel
+	enqueueErr error           // non-nil causes Enqueue to return this error
+	cancelOK   bool            // value returned by Cancel
+	subCh      chan jobs.Event // if set, Subscribe returns this channel
 }
 
 func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) {
@@ -91,6 +97,14 @@ func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) 
 }
 
 func (f *fakeService) Cancel(runID string) bool { return f.cancelOK }
+
+func (f *fakeService) Subscribe() (<-chan jobs.Event, func()) {
+	ch := f.subCh
+	if ch == nil {
+		ch = make(chan jobs.Event, 4)
+	}
+	return ch, func() {}
+}
 
 func newServer(t *testing.T) (*httptest.Server, Config) {
 	t.Helper()
@@ -464,4 +478,111 @@ func TestCORSPreflightIncludesPost(t *testing.T) {
 	if !strings.Contains(methods, "POST") {
 		t.Errorf("want POST in Allow-Methods, got %q", methods)
 	}
+}
+
+func TestStreamRunsSSE(t *testing.T) {
+	root := t.TempDir()
+	evCh := make(chan jobs.Event, 4)
+	svc := &fakeService{cancelOK: true, subCh: evCh}
+	cfg := Config{
+		RunsDir:      buildRunsDir(t, root),
+		ScenariosDir: buildScenariosDir(t, root),
+		CORSOrigin:   "http://localhost:8080",
+		Service:      svc,
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"/runs/stream", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if ct := resp.Header.Get("Content-Type"); ct != "text/event-stream" {
+		t.Fatalf("want Content-Type text/event-stream, got %q", ct)
+	}
+
+	// Push an event through the fake channel.
+	evCh <- jobs.Event{RunID: "job.1", ScenarioID: "01-demo", Phase: "running"}
+
+	// Read lines until we find the data frame or the context expires.
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "data: ") {
+			payload := strings.TrimPrefix(line, "data: ")
+			if !strings.Contains(payload, `"phase":"running"`) {
+				t.Errorf("unexpected payload: %s", payload)
+			}
+			return
+		}
+	}
+	if err := scanner.Err(); err != nil && ctx.Err() == nil {
+		t.Fatalf("scanner error: %v", err)
+	}
+	t.Fatal("no data frame received before timeout")
+}
+
+func TestStreamRunEventsFiltersOtherRuns(t *testing.T) {
+	root := t.TempDir()
+	evCh := make(chan jobs.Event, 4)
+	svc := &fakeService{cancelOK: true, subCh: evCh}
+	cfg := Config{
+		RunsDir:      buildRunsDir(t, root),
+		ScenariosDir: buildScenariosDir(t, root),
+		CORSOrigin:   "http://localhost:8080",
+		Service:      svc,
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"/runs/job.1/events", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if ct := resp.Header.Get("Content-Type"); ct != "text/event-stream" {
+		t.Fatalf("want Content-Type text/event-stream, got %q", ct)
+	}
+
+	// Push an event for a different run (should be filtered) then one for job.1.
+	evCh <- jobs.Event{RunID: "job.99", ScenarioID: "01-demo", Phase: "running"}
+	evCh <- jobs.Event{RunID: "job.1", ScenarioID: "01-demo", Phase: "done"}
+
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+		payload := strings.TrimPrefix(line, "data: ")
+		// The first data frame must be for job.1, not job.99.
+		if strings.Contains(payload, "job.99") {
+			t.Errorf("filtered event for job.99 leaked through: %s", payload)
+			return
+		}
+		if strings.Contains(payload, `"phase":"done"`) {
+			return // correct: job.1 event arrived
+		}
+	}
+	if err := scanner.Err(); err != nil && ctx.Err() == nil {
+		t.Fatalf("scanner error: %v", err)
+	}
+	t.Fatal("no data frame for job.1 received before timeout")
 }

@@ -4,6 +4,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	"backend/internal/jobs"
 )
 
 // RunService is the subset of jobs.Service the API layer depends on.
@@ -11,6 +13,7 @@ import (
 type RunService interface {
 	Enqueue(scenarioID, model, effort string) (string, error)
 	Cancel(runID string) bool
+	Subscribe() (<-chan jobs.Event, func())
 }
 
 // Config is the resolved server configuration.
@@ -34,6 +37,8 @@ func Handler(cfg Config) http.Handler {
 	mux.HandleFunc("GET /scenarios/{id}", cfg.getScenario)
 	mux.HandleFunc("POST /runs", cfg.postRun)
 	mux.HandleFunc("POST /runs/{id}/cancel", cfg.cancelRun)
+	mux.HandleFunc("GET /runs/stream", cfg.streamRuns)
+	mux.HandleFunc("GET /runs/{id}/events", cfg.streamRun)
 	return cors(cfg.CORSOrigin, mux)
 }
 
