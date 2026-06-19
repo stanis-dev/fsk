@@ -9,7 +9,7 @@
 
 | Path                                  | What                                                                               |
 | ------------------------------------- | ---------------------------------------------------------------------------------- |
-| `memo/OPPORTUNITIES.md`               | Opportunity map + why Zero-to-Receipt                                             |
+| `research/OPPORTUNITIES.md`           | Opportunity map + why Zero-to-Receipt                                             |
 | `research/RESEARCH.md`                | Synthesis: company, SIGN IT API, Italy regulation, DX benchmark, docs platforms    |
 | `research/PERSONA.md`                 | Who integrates fiskaly — the implementer persona, pain points, failure spectrum    |
 | `research/PUBLIC-FEEDBACK.md`         | Real-world signal: GitHub issues, the 242-article Zendesk KB, status incidents     |

@@ -3,7 +3,6 @@
 .env.*
 research/
 report/
-memo/
 eval-harness/backend/
 !eval-harness/backend/sandbox/
 eval-harness/dashboard/

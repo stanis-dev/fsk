@@ -35,7 +35,7 @@ questions such as:
 
 | Path | Purpose |
 | --- | --- |
-| `memo/OPPORTUNITIES.md` | The opportunity map and strategic answer. |
+| `research/OPPORTUNITIES.md` | The opportunity map and strategic answer. |
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
 | `eval-harness/backend/` | Go CLI (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; `eval-harness run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |

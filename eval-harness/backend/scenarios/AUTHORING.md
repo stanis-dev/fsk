@@ -9,7 +9,7 @@ getting the integration right.
 
 Read first: `research/PERSONA.md` (the failure spectrum these scenarios target),
 `research/api-probes/NOTES.md` (the verified SIGN IT contract - the source of
-truth for every domain claim), and `memo/OPPORTUNITIES.md`.
+truth for every domain claim), and `research/OPPORTUNITIES.md`.
 
 ## The core design principle
 
