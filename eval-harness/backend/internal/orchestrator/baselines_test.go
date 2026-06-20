@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"backend/internal/scenarios"
@@ -83,15 +84,15 @@ func TestRunGoCmd_PassAndFail(t *testing.T) {
 	good := t.TempDir()
 	writeFile(t, filepath.Join(good, "go.mod"), "module good\n\ngo 1.23\n")
 	writeFile(t, filepath.Join(good, "good.go"), "package good\n\nfunc Add(a, b int) int { return a + b }\n")
-	if r := runGoCmd(good, "build", "./..."); !r.OK {
+	if r := runGoCmd(good, "build", "./..."); strings.TrimSpace(r.Output) != "" {
 		t.Errorf("build of valid module failed: %s", r.Output)
 	}
 
 	bad := t.TempDir()
 	writeFile(t, filepath.Join(bad, "go.mod"), "module bad\n\ngo 1.23\n")
 	writeFile(t, filepath.Join(bad, "bad.go"), "package bad\n\nfunc Broken() int { return }\n")
-	if r := runGoCmd(bad, "build", "./..."); r.OK {
-		t.Errorf("build of broken module unexpectedly succeeded: %s", r.Output)
+	if r := runGoCmd(bad, "build", "./..."); strings.TrimSpace(r.Output) == "" {
+		t.Errorf("build of broken module unexpectedly succeeded")
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 type Hit struct {
@@ -107,21 +108,19 @@ func tokenize(s string) []string {
 
 func snippet(text string, qterms []string) string {
 	runes := []rune(text)
-	lower := []rune(strings.ToLower(text))
-	pos := -1
+	lower := strings.ToLower(text)
+	// earliest byte offset in the lowercased text where any query term occurs
+	bytePos := -1
 	for _, t := range qterms {
-		if i := indexRunes(lower, []rune(t)); i >= 0 && (pos < 0 || i < pos) {
-			pos = i
+		if i := strings.Index(lower, t); i >= 0 && (bytePos < 0 || i < bytePos) {
+			bytePos = i
 		}
 	}
 	start := 0
-	if pos > 0 {
-		start = pos
+	if bytePos > 0 {
+		start = min(utf8.RuneCountInString(lower[:bytePos]), len(runes))
 	}
-	end := start + snippetLen
-	if end > len(runes) {
-		end = len(runes)
-	}
+	end := min(start+snippetLen, len(runes))
 	out := strings.TrimSpace(string(runes[start:end]))
 	if start > 0 {
 		out = "…" + out
@@ -130,23 +129,4 @@ func snippet(text string, qterms []string) string {
 		out += "…"
 	}
 	return out
-}
-
-func indexRunes(s, sub []rune) int {
-	if len(sub) == 0 {
-		return 0
-	}
-	for i := 0; i+len(sub) <= len(s); i++ {
-		match := true
-		for j := range sub {
-			if s[i+j] != sub[j] {
-				match = false
-				break
-			}
-		}
-		if match {
-			return i
-		}
-	}
-	return -1
 }

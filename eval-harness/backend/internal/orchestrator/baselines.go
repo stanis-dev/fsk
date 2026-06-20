@@ -6,7 +6,6 @@ import (
 )
 
 type stepResult struct {
-	OK     bool
 	Output string
 }
 

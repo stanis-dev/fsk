@@ -130,11 +130,6 @@ func flattenContent(raw json.RawMessage) string {
 	return ""
 }
 
-// SummarizeTool produces a short display string for a tool invocation.
-func SummarizeTool(name string, input map[string]any) string {
-	return summarizeTool(name, input)
-}
-
 func summarizeTool(name string, input map[string]any) string {
 	sv := func(k string) string {
 		if v, ok := input[k]; ok {

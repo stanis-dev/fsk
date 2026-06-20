@@ -74,14 +74,12 @@ func (cfg Config) postRun(w http.ResponseWriter, r *http.Request) {
 	}
 	var body struct {
 		ScenarioID string `json:"scenarioId"`
-		Model      string `json:"model"`
-		Effort     string `json:"effort"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ScenarioID == "" {
 		writeError(w, http.StatusBadRequest, "scenarioId required")
 		return
 	}
-	id, err := cfg.Service.Enqueue(body.ScenarioID, body.Model, body.Effort)
+	id, err := cfg.Service.Enqueue(body.ScenarioID)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return

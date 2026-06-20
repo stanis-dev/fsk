@@ -128,100 +128,46 @@ func TestLoad(t *testing.T) {
 }
 
 func TestValidate_Accept(t *testing.T) {
-	good := func(judge map[string]any) []byte {
-		raw, _ := json.Marshal(map[string]any{
-			"id": "01-demo", "title": "Demo", "traps": []any{},
-			"judge": judge,
-		})
-		return raw
+	good := func(checks string, exps []Expectation) Config {
+		return Config{
+			ID: "01-demo", Title: "Demo", Traps: []any{},
+			Judge: JudgeSpec{Checks: json.RawMessage(checks), Expectations: exps},
+		}
 	}
 
-	// good config
-	if msg := Validate(good(map[string]any{
-		"checks":       map[string]any{"groundedBeforeWrite": true},
-		"expectations": []any{map[string]any{"id": "x", "expectation": "y"}},
-	})); msg != "" {
+	// full good
+	if msg := Validate(good(`{"groundedBeforeWrite":true}`, []Expectation{{ID: "x", Expectation: "y"}})); msg != "" {
 		t.Errorf("full good: %q", msg)
 	}
 
 	// only checks, no expectations
-	if msg := Validate(good(map[string]any{
-		"checks":       map[string]any{"groundedBeforeWrite": true},
-		"expectations": []any{},
-	})); msg != "" {
+	if msg := Validate(good(`{"groundedBeforeWrite":true}`, nil)); msg != "" {
 		t.Errorf("only-checks: %q", msg)
 	}
 
 	// only expectations, empty checks
-	if msg := Validate(good(map[string]any{
-		"checks":       map[string]any{},
-		"expectations": []any{map[string]any{"id": "x", "expectation": "y"}},
-	})); msg != "" {
+	if msg := Validate(good(`{}`, []Expectation{{ID: "x", Expectation: "y"}})); msg != "" {
 		t.Errorf("only-expectations: %q", msg)
 	}
 }
 
 func TestValidate_Reject(t *testing.T) {
-	base := map[string]any{
-		"id": "01-demo", "title": "Demo", "traps": []any{},
-		"judge": map[string]any{
-			"checks":       map[string]any{"groundedBeforeWrite": true},
-			"expectations": []any{map[string]any{"id": "x", "expectation": "y"}},
-		},
+	// empty checks + empty expectations: the judge would have nothing to assert
+	empty := Config{
+		ID: "01-demo", Title: "Demo", Traps: []any{},
+		Judge: JudgeSpec{Checks: json.RawMessage(`{}`), Expectations: []Expectation{}},
 	}
-	marshal := func(m map[string]any) []byte { b, _ := json.Marshal(m); return b }
-	copyMap := func(m map[string]any) map[string]any {
-		out := map[string]any{}
-		for k, v := range m {
-			out[k] = v
-		}
-		return out
-	}
-
-	// null / non-object
-	if msg := Validate([]byte("null")); msg == "" {
-		t.Error("null: expected error")
-	}
-
-	// bad title
-	m := copyMap(base)
-	m["title"] = 1
-	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "title") {
-		t.Errorf("bad title: %q", msg)
-	}
-
-	// bad traps
-	m = copyMap(base)
-	m["traps"] = "none"
-	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "traps") {
-		t.Errorf("bad traps: %q", msg)
-	}
-
-	// bad judge (not object)
-	m = copyMap(base)
-	m["judge"] = map[string]any{}
-	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "judge") {
-		t.Errorf("bad judge (missing checks): %q", msg)
-	}
-
-	// non-array expectations
-	m = copyMap(base)
-	m["judge"] = map[string]any{
-		"checks":       map[string]any{"groundedBeforeWrite": true},
-		"expectations": "not-array",
-	}
-	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "expectations") {
-		t.Errorf("non-array expectations: %q", msg)
-	}
-
-	// empty checks + empty expectations
-	m = copyMap(base)
-	m["judge"] = map[string]any{
-		"checks":       map[string]any{},
-		"expectations": []any{},
-	}
-	if msg := Validate(marshal(m)); msg == "" || !strings.Contains(msg, "judge") {
+	if msg := Validate(empty); msg == "" || !strings.Contains(msg, "judge") {
 		t.Errorf("empty checks+expectations: %q", msg)
+	}
+
+	// checks that is not an object
+	badChecks := Config{
+		ID: "01-demo", Title: "Demo", Traps: []any{},
+		Judge: JudgeSpec{Checks: json.RawMessage(`"not-an-object"`), Expectations: []Expectation{{ID: "x", Expectation: "y"}}},
+	}
+	if msg := Validate(badChecks); msg == "" || !strings.Contains(msg, "checks") {
+		t.Errorf("non-object checks: %q", msg)
 	}
 }
 

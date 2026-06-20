@@ -69,7 +69,7 @@ func Evaluate(opts Options, out io.Writer) (Report, int, error) {
 			if err != nil {
 				return infra(scenarioName, cr, err)
 			}
-			r, err := runExpectations(traj, raw, stripCommentsKeepLayout(raw), exps, claudeModel, rubricModelID)
+			r, err := runExpectations(traj, raw, stripCommentsKeepLayout(raw), exps, claudeModel)
 			if err != nil {
 				return infra(scenarioName, cr, fmt.Errorf("expectation layer: %w", err))
 			}

@@ -11,8 +11,8 @@ import (
 func runGoCmd(dir string, args ...string) stepResult {
 	cmd := exec.Command("go", args...)
 	cmd.Dir = dir
-	out, err := cmd.CombinedOutput()
-	return stepResult{OK: err == nil, Output: string(out)}
+	out, _ := cmd.CombinedOutput()
+	return stepResult{Output: string(out)}
 }
 
 // runJudge evaluates sourceDir (the agent's work dir) with trajectory files read
@@ -21,7 +21,7 @@ func runGoCmd(dir string, args ...string) stepResult {
 // given, writes the structured verdict there.
 func runJudge(scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) stepResult {
 	var buf bytes.Buffer
-	report, code, err := judge.Evaluate(judge.Options{
+	report, _, err := judge.Evaluate(judge.Options{
 		ScenarioPath:   scenarioJSON,
 		RunDir:         runDir,
 		IntegrationDir: sourceDir,
@@ -33,10 +33,10 @@ func runJudge(scenarioJSON, sourceDir, runDir string, expect bool, jsonPath stri
 	if jsonPath != "" {
 		if err := judge.WriteReport(jsonPath, report); err != nil {
 			fmt.Fprintln(&buf, "judge: writing report:", err)
-			return stepResult{OK: false, Output: buf.String()}
+			return stepResult{Output: buf.String()}
 		}
 	}
-	return stepResult{OK: code == 0, Output: buf.String()}
+	return stepResult{Output: buf.String()}
 }
 
 // gitDiffStaged stages all changes in work and returns the diff against the

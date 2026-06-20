@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sort"
+	"slices"
 	"strings"
 	"unicode"
 )
@@ -97,13 +97,20 @@ type verdict struct {
 	Reasoning     string `json:"reasoning"`
 }
 
+// parseModelJSON extracts the first JSON object with a non-empty "criteria"
+// array from noisy model output, skipping any surrounding prose. It lets
+// encoding/json do the brace/string/escape balancing: at each '{' it decodes one
+// value and stops, so leading text and trailing fences are ignored.
 func parseModelJSON(text string) ([]verdict, error) {
 	var lastErr error = fmt.Errorf("no JSON object found")
-	for _, obj := range jsonCandidates(text) {
+	for i := 0; i < len(text); i++ {
+		if text[i] != '{' {
+			continue
+		}
 		var payload struct {
 			Criteria []verdict `json:"criteria"`
 		}
-		if err := json.Unmarshal([]byte(obj), &payload); err != nil {
+		if err := json.NewDecoder(strings.NewReader(text[i:])).Decode(&payload); err != nil {
 			lastErr = err
 			continue
 		}
@@ -112,51 +119,6 @@ func parseModelJSON(text string) ([]verdict, error) {
 		}
 	}
 	return nil, fmt.Errorf("parsing model JSON: %w", lastErr)
-}
-
-func jsonCandidates(s string) []string {
-	var out []string
-	for i := 0; i < len(s); i++ {
-		if s[i] == '{' {
-			if obj := balancedFrom(s, i); obj != "" {
-				out = append(out, obj)
-			}
-		}
-	}
-	return out
-}
-
-// balancedFrom returns the brace-balanced object starting at s[start] ('{'),
-// tracking string literals and escapes so a brace inside a quoted value does not
-// end it. Returns "" if it never balances before EOF.
-func balancedFrom(s string, start int) string {
-	depth, inStr, esc := 0, false, false
-	for i := start; i < len(s); i++ {
-		c := s[i]
-		if inStr {
-			switch {
-			case esc:
-				esc = false
-			case c == '\\':
-				esc = true
-			case c == '"':
-				inStr = false
-			}
-			continue
-		}
-		switch c {
-		case '"':
-			inStr = true
-		case '{':
-			depth++
-		case '}':
-			depth--
-			if depth == 0 {
-				return s[start : i+1]
-			}
-		}
-	}
-	return ""
 }
 
 type modelFn func(prompt string) (string, error)
@@ -179,7 +141,7 @@ func transcriptText(traj trajectory) string {
 	return b.String()
 }
 
-func runExpectations(traj trajectory, source, stripped string, exps []expectation, model modelFn, modelName string) (rubricReport, error) {
+func runExpectations(traj trajectory, source, stripped string, exps []expectation, model modelFn) (rubricReport, error) {
 	prompt := buildExpectationPrompt(traj, source, exps)
 	const maxAttempts = 3
 	var vs []verdict
@@ -215,7 +177,7 @@ func runExpectations(traj trajectory, source, stripped string, exps []expectatio
 	}
 	citeSrc := stripped + "\n" + transcriptText(traj)
 	out = citationCheck(out, citeSrc)
-	return rubricReport{Model: modelName, Criteria: out}, nil
+	return rubricReport{Model: rubricModelID, Criteria: out}, nil
 }
 
 // citationCheck downgrades uncited or ungrounded MET verdicts.
@@ -296,7 +258,7 @@ func telemetrySummary(traj trajectory) string {
 	for tool, n := range counts {
 		parts = append(parts, fmt.Sprintf("%sx%d", tool, n))
 	}
-	sort.Strings(parts)
+	slices.Sort(parts)
 	return fmt.Sprintf("%s; errors: %d", strings.Join(parts, ", "), errors)
 }
 

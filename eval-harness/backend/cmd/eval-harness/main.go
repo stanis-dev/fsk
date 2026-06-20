@@ -112,12 +112,8 @@ type runnerAdapter struct {
 	r *orchestrator.Runner
 }
 
-func (a runnerAdapter) RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, onStart func(runDir string)) (string, error) {
-	return a.r.RunScenario(ctx, s, orchestrator.RunOptions{
-		Model:   model,
-		Effort:  effort,
-		OnStart: onStart,
-	})
+func (a runnerAdapter) RunScenario(ctx context.Context, s scenarios.Scenario, onStart func(runDir string)) (string, error) {
+	return a.r.RunScenario(ctx, s, orchestrator.RunOptions{OnStart: onStart})
 }
 
 func (a runnerAdapter) Resolve(id string) (scenarios.Scenario, bool) {

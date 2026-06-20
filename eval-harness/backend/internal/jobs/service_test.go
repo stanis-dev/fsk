@@ -42,7 +42,7 @@ func (f *fakeRunner) Resolve(id string) (scenarios.Scenario, bool) {
 	return scenarios.Scenario{}, false
 }
 
-func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, onStart func(runDir string)) (string, error) {
+func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, onStart func(runDir string)) (string, error) {
 	// Create a temp run dir to simulate the real runner creating it before the
 	// long coder step. Call onStart immediately so the registry records the dir
 	// while the run is still in flight (mirrors the real runner's behaviour).
@@ -158,7 +158,7 @@ func TestEnqueueUnknown(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	_, err := svc.Enqueue("unknown", "m", "e")
+	_, err := svc.Enqueue("unknown")
 	if err == nil {
 		t.Fatal("expected error for unknown scenario")
 	}
@@ -178,7 +178,7 @@ func TestEnqueueRunsToCompletion(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	id, err := svc.Enqueue("known", "m", "e")
+	id, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestCancelLiveRun(t *testing.T) {
 	svc := NewService(f, runsBase, 1)
 	svc.Start()
 
-	id, err := svc.Enqueue("known", "m", "e")
+	id, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}
@@ -240,7 +240,7 @@ func TestCancelWritesMarker(t *testing.T) {
 	svc := NewService(f, runsBase, 1)
 	svc.Start()
 
-	id, err := svc.Enqueue("known", "m", "e")
+	id, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}
@@ -276,7 +276,7 @@ func TestCancelIdempotent(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	id, _ := svc.Enqueue("known", "m", "e")
+	id, _ := svc.Enqueue("known")
 	// First cancel may return true or false depending on timing; second must
 	// return false.
 	_, _ = svc.Cancel(id)
@@ -339,11 +339,11 @@ func TestWorkers1Serializes(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	id1, err := svc.Enqueue("known", "m", "e")
+	id1, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue 1: %v", err)
 	}
-	id2, err := svc.Enqueue("known2", "m", "e")
+	id2, err := svc.Enqueue("known2")
 	if err != nil {
 		t.Fatalf("Enqueue 2: %v", err)
 	}
@@ -402,7 +402,7 @@ func TestSubscribeQueuedRunningDone(t *testing.T) {
 	ch, unsub := svc.Subscribe()
 	defer unsub()
 
-	id, err := svc.Enqueue("known", "m", "e")
+	id, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}
@@ -431,7 +431,7 @@ func TestSubscribeCancelledEvent(t *testing.T) {
 	ch, unsub := svc.Subscribe()
 	defer unsub()
 
-	id, err := svc.Enqueue("known", "m", "e")
+	id, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}
@@ -471,7 +471,7 @@ func TestCancelReportsKillFailure(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	id, err := svc.Enqueue("known", "m", "e")
+	id, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}
@@ -508,7 +508,7 @@ func TestUnsubscribeStopsDelivery(t *testing.T) {
 		t.Fatal("channel not closed after unsubscribe")
 	}
 
-	_, err := svc.Enqueue("known", "m", "e")
+	_, err := svc.Enqueue("known")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
 	}

@@ -7,11 +7,15 @@ import type { Summary } from "@/lib/types";
 const HEAD = "h-9 whitespace-nowrap px-3 text-left text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
 const CELL = "whitespace-nowrap px-3 py-2.5";
 
+// Two formatters (not one) because the "·" separator is intentional and Intl has
+// no option to set a custom date/time separator. Hoisted so they are built once
+// rather than per row.
+const DATE_FMT = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+const TIME_FMT = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" });
+
 function formatWhen(iso: string): string {
   const d = new Date(iso);
-  const day = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-  return `${day} · ${time}`;
+  return `${DATE_FMT.format(d)} · ${TIME_FMT.format(d)}`;
 }
 
 export function RunTable({ runs }: { runs: Summary[] }) {

@@ -8,10 +8,8 @@ import (
 	"backend/internal/scenarios"
 )
 
-// RunOptions are per-run inputs. Empty Model/Effort fall back to the Runner's defaults.
+// RunOptions are per-run inputs.
 type RunOptions struct {
-	Model  string
-	Effort string
 	// OnStart is called once, right after the run dir is created and before the
 	// long coder run. The caller can use it to record the run dir while the run
 	// is in flight (e.g. so a concurrent Cancel knows where to write a marker).
@@ -67,15 +65,7 @@ func NewRunner(cfg Config) (*Runner, error) {
 // RunScenario runs one scenario through the pipeline. The image is already
 // built; this call only runs the container. ctx cancellation kills the run.
 func (r *Runner) RunScenario(ctx context.Context, s scenarios.Scenario, opts RunOptions) (runDir string, err error) {
-	model := opts.Model
-	if model == "" {
-		model = r.defaultModel
-	}
-	effort := opts.Effort
-	if effort == "" {
-		effort = r.defaultEffort
-	}
-	rc := runConfig{model: model, effort: effort, token: r.token}
+	rc := runConfig{model: r.defaultModel, effort: r.defaultEffort, token: r.token}
 	res, err := runScenario(ctx, s, r.runsBase, r.ag, rc, opts.OnStart)
 	if err != nil {
 		return "", err

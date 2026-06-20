@@ -12,9 +12,9 @@ func TestWriteObserveArtifacts_DashboardContract(t *testing.T) {
 	runPath := t.TempDir()
 	o := observation{
 		outcome: outcome{
-			Build: stepResult{OK: true, Output: ""},
-			Test:  stepResult{OK: true, Output: "ok  \tpos\t0.1s\n"},
-			Judge: stepResult{OK: false, Output: "VERDICT: NON-COMPLIANT (5 failures). exit 1\n"},
+			Build: stepResult{Output: ""},
+			Test:  stepResult{Output: "ok  \tpos\t0.1s\n"},
+			Judge: stepResult{Output: "VERDICT: NON-COMPLIANT (5 failures). exit 1\n"},
 		},
 		diff: "diff --git a/x b/x\n",
 	}

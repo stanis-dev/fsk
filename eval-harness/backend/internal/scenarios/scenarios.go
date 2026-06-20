@@ -1,13 +1,14 @@
 package scenarios
 
 import (
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
+	"slices"
 )
 
 var ErrScenarioNotFound = errors.New("scenario not found")
@@ -67,7 +68,7 @@ func Discover(scenariosDir string) ([]Scenario, error) {
 	if len(out) == 0 {
 		return nil, fmt.Errorf("no runnable scenarios found under %s", scenariosDir)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	slices.SortFunc(out, func(a, b Scenario) int { return cmp.Compare(a.ID, b.ID) })
 	return out, nil
 }
 
@@ -125,87 +126,33 @@ func Load(scenariosDir, id string) (*Config, string, error) {
 	return &c, string(taskBytes), nil
 }
 
-func Validate(raw []byte) string {
-	var obj any
-	if err := json.Unmarshal(raw, &obj); err != nil {
-		return "config must be an object"
+// checksSpec mirrors the recognised judge.checks fields. It is used to validate
+// the otherwise-untyped Checks payload and to tell whether any check is active.
+type checksSpec struct {
+	GroundedBeforeWrite bool     `json:"groundedBeforeWrite"`
+	ToolsCalled         []string `json:"toolsCalled"`
+	DocsFetched         []string `json:"docsFetched"`
+	MaxMcpErrors        *int     `json:"maxMcpErrors"`
+}
+
+func (c checksSpec) active() bool {
+	return c.GroundedBeforeWrite || len(c.ToolsCalled) > 0 || len(c.DocsFetched) > 0 || c.MaxMcpErrors != nil
+}
+
+// Validate reports why config is not a usable scenario, or "" if it is valid.
+// Field types are guaranteed by the Config type, so the only rule left to enforce
+// is that the judge has something to assert: a non-empty check or an expectation.
+func Validate(config Config) string {
+	var checks checksSpec
+	if len(config.Judge.Checks) > 0 {
+		if err := json.Unmarshal(config.Judge.Checks, &checks); err != nil {
+			return "judge.checks must be an object"
+		}
 	}
-	m, ok := obj.(map[string]any)
-	if !ok {
-		return "config must be an object"
-	}
-	if _, ok := m["id"].(string); !ok {
-		return "id must be a string"
-	}
-	if _, ok := m["title"].(string); !ok {
-		return "title must be a string"
-	}
-	if _, ok := m["traps"].([]any); !ok {
-		return "traps must be an array"
-	}
-	judgeAny, exists := m["judge"]
-	if !exists {
-		return "judge must be an object"
-	}
-	judge, ok := judgeAny.(map[string]any)
-	if !ok {
-		return "judge must be an object"
-	}
-	checksAny, exists := judge["checks"]
-	if !exists {
-		return "judge.checks must be an object"
-	}
-	checks, ok := checksAny.(map[string]any)
-	if !ok {
-		return "judge.checks must be an object"
-	}
-	expsAny, exists := judge["expectations"]
-	if !exists {
-		return "judge.expectations must be an array"
-	}
-	exps, ok := expsAny.([]any)
-	if !ok {
-		return "judge.expectations must be an array"
-	}
-	if !isExpectationArray(exps) {
-		return "judge.expectations must be an array of {id, expectation}"
-	}
-	if !hasNonEmptyChecks(checks) && len(exps) == 0 {
+	if !checks.active() && len(config.Judge.Expectations) == 0 {
 		return "judge must have at least one non-empty checks field or a non-empty expectations array"
 	}
 	return ""
-}
-
-func isExpectationArray(v []any) bool {
-	for _, x := range v {
-		m, ok := x.(map[string]any)
-		if !ok {
-			return false
-		}
-		if _, ok := m["id"].(string); !ok {
-			return false
-		}
-		if _, ok := m["expectation"].(string); !ok {
-			return false
-		}
-	}
-	return true
-}
-
-func hasNonEmptyChecks(checks map[string]any) bool {
-	if v, ok := checks["groundedBeforeWrite"].(bool); ok && v {
-		return true
-	}
-	if arr, ok := checks["toolsCalled"].([]any); ok && len(arr) > 0 {
-		return true
-	}
-	if arr, ok := checks["docsFetched"].([]any); ok && len(arr) > 0 {
-		return true
-	}
-	if _, ok := checks["maxMcpErrors"].(float64); ok {
-		return true
-	}
-	return false
 }
 
 // AssignExpectationIds returns a new Config with empty expectation IDs filled in
@@ -256,12 +203,12 @@ func Save(scenariosDir, id string, config Config, task string) error {
 		return fmt.Errorf("config.id %q does not match path id %q", config.ID, id)
 	}
 	config = AssignExpectationIds(config)
+	if msg := Validate(config); msg != "" {
+		return errors.New(msg)
+	}
 	raw, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshaling config: %w", err)
-	}
-	if msg := Validate(raw); msg != "" {
-		return errors.New(msg)
 	}
 	raw = append(raw, '\n')
 	if err := os.WriteFile(filepath.Join(dir, "scenario.json"), raw, 0o644); err != nil {

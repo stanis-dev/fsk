@@ -2,9 +2,9 @@ package artifacts
 
 import (
 	"bufio"
+	"cmp"
 	"encoding/json"
-	"math"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -95,11 +95,11 @@ func SummarizeTelemetry(events []TelemetryEvent) TelemetrySummary {
 	for _, t := range toolOrder {
 		sorted = append(sorted, *byTool[t])
 	}
-	sort.SliceStable(sorted, func(i, j int) bool {
-		return sorted[i].Calls > sorted[j].Calls
+	slices.SortStableFunc(sorted, func(a, b TelemetryToolStat) int {
+		return cmp.Compare(b.Calls, a.Calls)
 	})
 
-	sort.Ints(latencies)
+	slices.Sort(latencies)
 
 	if queries == nil {
 		queries = []string{}
@@ -123,6 +123,5 @@ func percentile(sorted []int, p int) int {
 	if len(sorted) == 0 {
 		return 0
 	}
-	idx := int(math.Min(float64(len(sorted)-1), math.Floor(float64(p)/100.0*float64(len(sorted)))))
-	return sorted[idx]
+	return sorted[min(len(sorted)-1, p*len(sorted)/100)]
 }

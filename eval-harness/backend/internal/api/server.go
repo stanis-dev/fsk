@@ -10,7 +10,7 @@ import (
 
 // RunService is the subset of jobs.Service the API layer depends on.
 type RunService interface {
-	Enqueue(scenarioID, model, effort string) (string, error)
+	Enqueue(scenarioID string) (string, error)
 	Cancel(runID string) (bool, error)
 	Subscribe() (<-chan jobs.Event, func())
 }

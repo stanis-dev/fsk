@@ -15,7 +15,7 @@ import (
 )
 
 type Runner interface {
-	RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, onStart func(runDir string)) (string, error)
+	RunScenario(ctx context.Context, s scenarios.Scenario, onStart func(runDir string)) (string, error)
 	Resolve(id string) (scenarios.Scenario, bool)
 	ContainerName(runDir string) string
 	KillContainer(container string) error
@@ -43,8 +43,6 @@ type liveRun struct {
 type job struct {
 	id         string
 	scenarioID string
-	model      string
-	effort     string
 }
 
 // Event is emitted at every phase transition and consumed by SSE subscribers.
@@ -124,7 +122,7 @@ func (s *Service) Start() {
 
 // Enqueue validates the scenario, registers a queued liveRun, and pushes the
 // job. Returns an opaque run id, or an error if the scenario is unknown.
-func (s *Service) Enqueue(scenarioID, model, effort string) (string, error) {
+func (s *Service) Enqueue(scenarioID string) (string, error) {
 	if _, ok := s.r.Resolve(scenarioID); !ok {
 		return "", fmt.Errorf("unknown scenario %q", scenarioID)
 	}
@@ -147,7 +145,7 @@ func (s *Service) Enqueue(scenarioID, model, effort string) (string, error) {
 	s.publish(Event{RunID: id, ScenarioID: scenarioID, Phase: "queued"})
 	s.mu.Unlock()
 
-	s.queue <- job{id: id, scenarioID: scenarioID, model: model, effort: effort}
+	s.queue <- job{id: id, scenarioID: scenarioID}
 	return id, nil
 }
 
@@ -242,7 +240,7 @@ func (s *Service) runJob(j job) {
 		s.mu.Unlock()
 	}
 
-	_, runErr := s.r.RunScenario(lr.ctx, sc, j.model, j.effort, onStart)
+	_, runErr := s.r.RunScenario(lr.ctx, sc, onStart)
 
 	if runErr != nil {
 		s.setPhaseAndDeregister(j.id, "error")

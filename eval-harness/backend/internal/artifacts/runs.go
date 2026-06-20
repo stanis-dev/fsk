@@ -2,12 +2,13 @@ package artifacts
 
 import (
 	"bufio"
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"math"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 
 	"backend/internal/judge"
@@ -49,8 +50,8 @@ func ListRuns(dir string) ([]Summary, error) {
 		}
 		out = append(out, SummarizeRun(d))
 	}
-	sort.Slice(out, func(i, j int) bool {
-		return out[i].UpdatedIso > out[j].UpdatedIso
+	slices.SortFunc(out, func(a, b Summary) int {
+		return cmp.Compare(b.UpdatedIso, a.UpdatedIso)
 	})
 	return out, nil
 }
@@ -65,13 +66,13 @@ func SummarizeRun(dir string) Summary {
 
 	log := logInfo(filepath.Join(dir, TranscriptFile))
 	meta := readMeta(dir)
-	s.Scenario = or(meta.scenario, "-")
-	s.Effort = or(meta.effort, "-")
-	s.Model = or(log.model, meta.model)
+	s.Scenario = cmp.Or(meta.scenario, "-")
+	s.Effort = cmp.Or(meta.effort, "-")
+	s.Model = cmp.Or(log.model, meta.model)
 	if log.ccver != "" {
 		s.Coder = "claude-code"
 	} else {
-		s.Coder = or(meta.coder, "?")
+		s.Coder = cmp.Or(meta.coder, "?")
 	}
 	switch {
 	case log.cwd == "/work":
@@ -79,7 +80,7 @@ func SummarizeRun(dir string) Summary {
 	case log.cwd != "":
 		s.Harness = "local"
 	default:
-		s.Harness = or(meta.harness, "?")
+		s.Harness = cmp.Or(meta.harness, "?")
 	}
 
 	if _, err := os.Stat(filepath.Join(dir, CancelledFile)); err == nil {
@@ -258,16 +259,5 @@ func dirMtime(dir string) string {
 	if err != nil {
 		return "1970-01-01T00:00:00.000Z"
 	}
-	t := fi.ModTime().UTC()
-	return fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d.%03dZ",
-		t.Year(), t.Month(), t.Day(),
-		t.Hour(), t.Minute(), t.Second(),
-		t.Nanosecond()/1e6)
-}
-
-func or(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
+	return fi.ModTime().UTC().Format("2006-01-02T15:04:05.000Z07:00")
 }

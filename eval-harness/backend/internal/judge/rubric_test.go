@@ -139,7 +139,7 @@ func TestRunExpectationsStub(t *testing.T) {
 	stub := func(string) (string, error) {
 		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
 	}
-	rep, err := runExpectations(trajectory{}, "keep this", "keep this", exps, stub, rubricModelID)
+	rep, err := runExpectations(trajectory{}, "keep this", "keep this", exps, stub)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestRunExpectationsMissingIsCannotAssess(t *testing.T) {
 	stub := func(string) (string, error) {
 		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
 	}
-	rep, err := runExpectations(trajectory{}, "keep", "keep", exps, stub, "m")
+	rep, err := runExpectations(trajectory{}, "keep", "keep", exps, stub)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +177,7 @@ func TestRunExpectationsRetriesOnBadJSON(t *testing.T) {
 		}
 		return `{"criteria":[{"id":"c1","verdict":"MET","evidence_quote":"keep","reasoning":"ok"}]}`, nil
 	}
-	rep, err := runExpectations(trajectory{}, "keep", "keep", []expectation{{ID: "c1"}}, stub, "m")
+	rep, err := runExpectations(trajectory{}, "keep", "keep", []expectation{{ID: "c1"}}, stub)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func TestRunExpectationsRetriesOnBadJSON(t *testing.T) {
 
 func TestRunExpectationsModelError(t *testing.T) {
 	stub := func(string) (string, error) { return "", errStub }
-	if _, err := runExpectations(trajectory{}, "s", "s", []expectation{{ID: "c1"}}, stub, "m"); err == nil {
+	if _, err := runExpectations(trajectory{}, "s", "s", []expectation{{ID: "c1"}}, stub); err == nil {
 		t.Fatal("model error must propagate")
 	}
 }
@@ -203,7 +203,7 @@ func TestRunExpectations_CitesTranscript(t *testing.T) {
 		return `{"criteria":[{"id":"used-search","verdict":"MET","evidence_quote":"search_fiskaly_docs","reasoning":"called it"}]}`, nil
 	}
 	exps := []expectation{{ID: "used-search", Expectation: "calls the docs search"}}
-	rep, err := runExpectations(traj, "package x", "package x", exps, stub, "stub")
+	rep, err := runExpectations(traj, "package x", "package x", exps, stub)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +217,7 @@ func TestRunExpectations_DowngradesUncitedQuote(t *testing.T) {
 		return `{"criteria":[{"id":"x","verdict":"MET","evidence_quote":"nowhere in evidence","reasoning":"r"}]}`, nil
 	}
 	exps := []expectation{{ID: "x", Expectation: "does y"}}
-	rep, err := runExpectations(trajectory{}, "package x", "package x", exps, stub, "stub")
+	rep, err := runExpectations(trajectory{}, "package x", "package x", exps, stub)
 	if err != nil {
 		t.Fatal(err)
 	}

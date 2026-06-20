@@ -75,7 +75,7 @@ type fakeService struct {
 	unsubscribed atomic.Bool
 }
 
-func (f *fakeService) Enqueue(scenarioID, model, effort string) (string, error) {
+func (f *fakeService) Enqueue(scenarioID string) (string, error) {
 	if f.enqueueErr != nil {
 		return "", f.enqueueErr
 	}

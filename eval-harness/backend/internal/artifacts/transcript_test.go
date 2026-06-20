@@ -57,7 +57,7 @@ func TestParseTranscriptToolResultErrorPrefix(t *testing.T) {
 }
 
 func TestSummarizeToolBashFormat(t *testing.T) {
-	got := SummarizeTool("Bash", map[string]any{"command": "go test ./..."})
+	got := summarizeTool("Bash", map[string]any{"command": "go test ./..."})
 	want := "Bash  $ go test ./..."
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
