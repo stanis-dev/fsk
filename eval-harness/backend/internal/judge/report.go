@@ -1,6 +1,7 @@
 package judge
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/scanner"
 	"go/token"
@@ -22,6 +23,15 @@ type Report struct {
 	Checks       checksReport  `json:"checks"`
 	Expectations *rubricReport `json:"expectations"`
 	Note         string        `json:"note"`
+}
+
+// WriteReport marshals r as indented JSON (with a trailing newline) to path.
+func WriteReport(path string, r Report) error {
+	data, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(data, '\n'), 0o644)
 }
 
 func buildReport(scenario string, checks checksReport, rep *rubricReport, verdict string) Report {

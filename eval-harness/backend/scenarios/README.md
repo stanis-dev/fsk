@@ -60,11 +60,9 @@ so they apply to an agent run; a bare seed is graded by the source-only
 ## Running
 
 ```sh
-# One scenario, end to end in Docker (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env):
-cd eval-harness/backend && go run ./cmd/eval-harness run 06-fire-and-forget
-
-# All scenarios:
-cd eval-harness/backend && go run ./cmd/eval-harness run
+# Run scenarios end to end in Docker: start the server, then launch runs from the
+# dashboard (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env):
+cd eval-harness/backend && go run ./cmd/eval-harness
 
 # Source-only expectation grading of a seed (no trajectory; needs the claude CLI):
 cd eval-harness/backend && go run ./cmd/judge -scenario scenarios/06-fire-and-forget/scenario.json -expect \

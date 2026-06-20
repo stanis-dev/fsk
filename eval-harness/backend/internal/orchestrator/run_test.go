@@ -2,7 +2,6 @@ package orchestrator
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -42,65 +41,13 @@ func TestContainerName(t *testing.T) {
 	}
 }
 
-func TestWriteRunHandle_Detached(t *testing.T) {
-	rp := filepath.Join(t.TempDir(), "run.ZZZ")
-	if err := os.MkdirAll(rp, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := writeRunHandle(rp, true); err != nil {
-		t.Fatal(err)
-	}
-	data, err := os.ReadFile(filepath.Join(rp, "run.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var h runHandle
-	if err := json.Unmarshal(data, &h); err != nil {
-		t.Fatal(err)
-	}
-	if h.Container != "fiskaly-eval-run.ZZZ" {
-		t.Errorf("container = %q", h.Container)
-	}
-	if h.PID == 0 || h.PGID == 0 {
-		t.Errorf("pid/pgid not set for detached=true: %+v", h)
-	}
-}
-
-func TestWriteRunHandle_NotDetached(t *testing.T) {
-	rp := filepath.Join(t.TempDir(), "run.AAA")
-	if err := os.MkdirAll(rp, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := writeRunHandle(rp, false); err != nil {
-		t.Fatal(err)
-	}
-	data, err := os.ReadFile(filepath.Join(rp, "run.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	var h runHandle
-	if err := json.Unmarshal(data, &h); err != nil {
-		t.Fatal(err)
-	}
-	if h.Container != "fiskaly-eval-run.AAA" {
-		t.Errorf("container = %q", h.Container)
-	}
-	if h.PID != 0 || h.PGID != 0 {
-		t.Errorf("pid/pgid must be zero for detached=false: %+v", h)
-	}
-}
-
 func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	if testing.Short() {
-		t.Skip("requires building the judge")
+		t.Skip("requires the go toolchain and the judge")
 	}
 	ehRoot, err := filepath.Abs("../../..")
 	if err != nil {
 		t.Fatal(err)
-	}
-	judgeBin, err := buildJudge(filepath.Join(ehRoot, "backend", "cmd", "judge"), t.TempDir())
-	if err != nil {
-		t.Fatalf("buildJudge: %v", err)
 	}
 	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
@@ -108,7 +55,7 @@ func TestRunScenario_ArtifactsWritten(t *testing.T) {
 	}
 	one := sc[0] // 01-zero-to-receipt
 
-	res, err := runScenario(context.Background(), one, t.TempDir(), judgeBin, fakeAgent{}, runConfig{model: "m", effort: "e"}, false, nil)
+	res, err := runScenario(context.Background(), one, t.TempDir(), fakeAgent{}, runConfig{model: "m", effort: "e"}, nil)
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}
@@ -130,16 +77,9 @@ func (b blockingAgent) run(ctx context.Context, rd runDir, task string, cfg runC
 }
 
 func TestRunScenario_CancelStopsRun(t *testing.T) {
-	if testing.Short() {
-		t.Skip("requires building the judge")
-	}
 	ehRoot, err := filepath.Abs("../../..")
 	if err != nil {
 		t.Fatal(err)
-	}
-	judgeBin, err := buildJudge(filepath.Join(ehRoot, "backend", "cmd", "judge"), t.TempDir())
-	if err != nil {
-		t.Fatalf("buildJudge: %v", err)
 	}
 	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
 	if err != nil {
@@ -155,7 +95,7 @@ func TestRunScenario_CancelStopsRun(t *testing.T) {
 		err error
 	}, 1)
 	go func() {
-		res, err := runScenario(ctx, one, runsBase, judgeBin, blockingAgent{}, runConfig{model: "m", effort: "e"}, false, nil)
+		res, err := runScenario(ctx, one, runsBase, blockingAgent{}, runConfig{model: "m", effort: "e"}, nil)
 		done <- struct {
 			res scenarioResult
 			err error

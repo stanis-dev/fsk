@@ -4,7 +4,6 @@ package artifacts
 
 const (
 	MetaFile       = "meta.json"
-	RunHandleFile  = "run.json"
 	BuildFile      = "build.txt"
 	TestFile       = "test.txt"
 	JudgeLogFile   = "judge.txt"

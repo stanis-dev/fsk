@@ -31,7 +31,6 @@ func Handler(cfg Config) http.Handler {
 	})
 	mux.HandleFunc("GET /runs", cfg.listRuns)
 	mux.HandleFunc("GET /runs/{id}", cfg.getRun)
-	mux.HandleFunc("GET /runs/{id}/logs/{name}", cfg.getRunLog)
 	mux.HandleFunc("GET /scenarios", cfg.listScenarios)
 	mux.HandleFunc("GET /scenarios/{id}", cfg.getScenario)
 	mux.HandleFunc("PUT /scenarios/{id}", cfg.putScenario)

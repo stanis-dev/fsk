@@ -16,7 +16,7 @@ type scenarioResult struct {
 	obs    observation
 }
 
-func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin string, ag agent, cfg runConfig, detached bool, onStart func(string)) (scenarioResult, error) {
+func runScenario(ctx context.Context, s scenarios.Scenario, runsBase string, ag agent, cfg runConfig, onStart func(string)) (scenarioResult, error) {
 	taskBytes, err := os.ReadFile(filepath.Join(s.Dir, "task.md"))
 	if err != nil {
 		return scenarioResult{}, fmt.Errorf("reading task: %w", err)
@@ -26,10 +26,6 @@ func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin s
 	if err != nil {
 		return scenarioResult{}, fmt.Errorf("prepareRun: %w", err)
 	}
-	if err := writeRunHandle(rd.path, detached); err != nil {
-		return scenarioResult{}, fmt.Errorf("writeRunHandle: %w", err)
-	}
-
 	if onStart != nil {
 		onStart(rd.path)
 	}
@@ -41,7 +37,7 @@ func runScenario(ctx context.Context, s scenarios.Scenario, runsBase, judgeBin s
 	core := outcome{
 		Build: runGoCmd(rd.work, "build", "./..."),
 		Test:  runGoCmd(rd.work, "test", "./..."),
-		Judge: runJudge(judgeBin, s.ScenarioJSON, rd.work, rd.path, true, filepath.Join(rd.path, artifacts.JudgeJSONFile)),
+		Judge: runJudge(s.ScenarioJSON, rd.work, rd.path, true, filepath.Join(rd.path, artifacts.JudgeJSONFile)),
 	}
 	diff, err := gitDiffStaged(rd.work)
 	if err != nil {

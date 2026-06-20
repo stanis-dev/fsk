@@ -3,7 +3,6 @@ package orchestrator
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"backend/internal/scenarios"
@@ -11,30 +10,28 @@ import (
 
 // RunOptions are per-run inputs. Empty Model/Effort fall back to the Runner's defaults.
 type RunOptions struct {
-	Model    string
-	Effort   string
-	Detached bool
+	Model  string
+	Effort string
 	// OnStart is called once, right after the run dir is created and before the
 	// long coder run. The caller can use it to record the run dir while the run
 	// is in flight (e.g. so a concurrent Cancel knows where to write a marker).
 	OnStart func(runDir string)
 }
 
-// Runner holds a fully-initialised pipeline: toolchain verified, judge built,
-// Docker image built once. Multiple scenarios can be run without rebuilding.
+// Runner holds a fully-initialised pipeline: toolchain verified, Docker image
+// built once. Multiple scenarios can be run without rebuilding.
 type Runner struct {
 	defaultModel  string
 	defaultEffort string
 	token         string
 	ag            agent
-	judgeBin      string
 	runsBase      string
 	dockerCtx     string
 	scenariosDir  string
 }
 
-// NewRunner validates the toolchain, loads config, builds the judge binary, and
-// builds the Docker image. All subsequent RunScenario calls reuse the image.
+// NewRunner validates the toolchain, loads config, and builds the Docker image.
+// All subsequent RunScenario calls reuse the image.
 func NewRunner(cfg Config) (*Runner, error) {
 	ctx := dockerContext()
 	if err := checkBinaries("docker", "go", "git"); err != nil {
@@ -44,14 +41,6 @@ func NewRunner(cfg Config) (*Runner, error) {
 		return nil, err
 	}
 	rc, err := loadConfig(cfg.RepoRoot, cfg.Model, cfg.Effort)
-	if err != nil {
-		return nil, err
-	}
-	tempDir, err := os.MkdirTemp("", "runner-judge-")
-	if err != nil {
-		return nil, err
-	}
-	judgeBin, err := buildJudge(cfg.JudgeDir, tempDir)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +58,6 @@ func NewRunner(cfg Config) (*Runner, error) {
 		defaultEffort: rc.effort,
 		token:         rc.token,
 		ag:            ag,
-		judgeBin:      judgeBin,
 		runsBase:      cfg.RunsBase,
 		dockerCtx:     ctx,
 		scenariosDir:  cfg.ScenariosDir,
@@ -88,7 +76,7 @@ func (r *Runner) RunScenario(ctx context.Context, s scenarios.Scenario, opts Run
 		effort = r.defaultEffort
 	}
 	rc := runConfig{model: model, effort: effort, token: r.token}
-	res, err := runScenario(ctx, s, r.runsBase, r.judgeBin, r.ag, rc, opts.Detached, opts.OnStart)
+	res, err := runScenario(ctx, s, r.runsBase, r.ag, rc, opts.OnStart)
 	if err != nil {
 		return "", err
 	}

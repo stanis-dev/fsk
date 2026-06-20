@@ -37,7 +37,7 @@ questions such as:
 | --- | --- |
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
-| `eval-harness/backend/` | Go CLI (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; `eval-harness run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
+| `eval-harness/backend/` | Go server (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; the server runs scenarios through the Docker eval on request and writes dashboard artifacts for each. |
 | `eval-harness/backend/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
 | `eval-harness/backend/scenarios/seed/` | The canonical seed codebase (Go module `pos`) every scenario fixture is derived from. |
 | `eval-harness/backend/sandbox/` | Docker sandbox image (Dockerfile and entrypoint) the coder runs inside. |
@@ -74,19 +74,13 @@ cd scenarios/seed && go test ./...
 cd ../../../dashboard && pnpm lint && pnpm build
 ```
 
-Run the preflight + Docker eval for all scenarios or one:
-
-```sh
-cd eval-harness/backend && go run ./cmd/eval-harness run            # all scenarios
-cd eval-harness/backend && go run ./cmd/eval-harness run 06         # one scenario
-```
-
-For each scenario the runner copies the fixture, runs the agent inside Docker,
+Scenario evals run inside Docker and are launched from the dashboard (below).
+For each scenario the server copies the fixture, runs the agent inside Docker,
 then collects the transcript, diff, build output, test output, and judge verdict
 under `~/.cache/fiskaly-eval/run.*`. Needs Docker and a valid OAuth token in
 `.env`.
 
-## Inspect runs
+## Run and inspect scenarios
 
 ```sh
 cd eval-harness/dashboard
@@ -99,7 +93,7 @@ Open `http://localhost:8080`. The dashboard reads the API at
 
 ```sh
 cd eval-harness/backend
-go run ./cmd/eval-harness serve
+go run ./cmd/eval-harness
 ```
 
 Configuration:

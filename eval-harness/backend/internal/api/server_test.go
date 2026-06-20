@@ -219,62 +219,6 @@ func TestGetRunNotFound(t *testing.T) {
 	resp.Body.Close()
 }
 
-func TestGetRunLog(t *testing.T) {
-	srv, _ := newServer(t)
-	defer srv.Close()
-
-	resp := get(t, srv, "/runs/run.sample/logs/judge.txt")
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("want 200, got %d", resp.StatusCode)
-	}
-	body := bodyStr(t, resp)
-	if body != "judge output line\n" {
-		t.Errorf("unexpected body: %q", body)
-	}
-	ct := resp.Header.Get("Content-Type")
-	if ct != "text/plain; charset=utf-8" {
-		t.Errorf("want text/plain content-type, got %q", ct)
-	}
-}
-
-func TestGetRunLogNotAllowlisted(t *testing.T) {
-	srv, _ := newServer(t)
-	defer srv.Close()
-
-	resp := get(t, srv, "/runs/run.sample/logs/secret")
-	if resp.StatusCode != http.StatusNotFound {
-		t.Fatalf("want 404 for non-allowlisted name, got %d", resp.StatusCode)
-	}
-	resp.Body.Close()
-}
-
-func TestGetRunLogTraversalID(t *testing.T) {
-	srv, _ := newServer(t)
-	defer srv.Close()
-
-	// /runs/../evil/logs/judge.txt — Go's http.ServeMux path-cleans the URL before
-	// dispatch, so this resolves to /evil/logs/judge.txt and 404s at the router
-	// (no matching pattern), never reaching the handler's ".." guard.
-	resp := get(t, srv, "/runs/../evil/logs/judge.txt")
-	if resp.StatusCode != http.StatusNotFound {
-		t.Fatalf("want 404 for mux path-cleaned traversal, got %d", resp.StatusCode)
-	}
-	resp.Body.Close()
-}
-
-func TestGetRunLogTraversalIDInSegment(t *testing.T) {
-	srv, _ := newServer(t)
-	defer srv.Close()
-
-	// run..evil has the "run." prefix and no "/" so it reaches getRunLog,
-	// where the strings.Contains(id, "..") guard must reject it.
-	resp := get(t, srv, "/runs/run..evil/logs/judge.txt")
-	if resp.StatusCode != http.StatusNotFound {
-		t.Fatalf("want 404 for run..evil id (handler guard), got %d", resp.StatusCode)
-	}
-	resp.Body.Close()
-}
-
 func TestListScenarios(t *testing.T) {
 	srv, _ := newServer(t)
 	defer srv.Close()

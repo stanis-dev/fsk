@@ -8,7 +8,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -44,19 +43,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, "judge:", err)
 	}
 	if *jsonFlag != "" {
-		writeReport(*jsonFlag, report)
+		if err := judge.WriteReport(*jsonFlag, report); err != nil {
+			fmt.Fprintln(os.Stderr, "judge: writing report:", err)
+			os.Exit(2)
+		}
 	}
 	os.Exit(code)
-}
-
-func writeReport(path string, report judge.Report) {
-	data, err := json.MarshalIndent(report, "", "  ")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "judge: marshaling report:", err)
-		os.Exit(2)
-	}
-	if err := os.WriteFile(path, append(data, '\n'), 0o644); err != nil {
-		fmt.Fprintln(os.Stderr, "judge: writing report:", err)
-		os.Exit(2)
-	}
 }

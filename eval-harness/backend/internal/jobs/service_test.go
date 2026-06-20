@@ -42,7 +42,7 @@ func (f *fakeRunner) Resolve(id string) (scenarios.Scenario, bool) {
 	return scenarios.Scenario{}, false
 }
 
-func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, detached bool, onStart func(runDir string)) (string, error) {
+func (f *fakeRunner) RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, onStart func(runDir string)) (string, error) {
 	// Create a temp run dir to simulate the real runner creating it before the
 	// long coder step. Call onStart immediately so the registry records the dir
 	// while the run is still in flight (mirrors the real runner's behaviour).

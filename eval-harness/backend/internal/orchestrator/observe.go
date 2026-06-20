@@ -1,9 +1,11 @@
 package orchestrator
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
-	"path/filepath"
+
+	"backend/internal/judge"
 )
 
 func runGoCmd(dir string, args ...string) stepResult {
@@ -13,32 +15,28 @@ func runGoCmd(dir string, args ...string) stepResult {
 	return stepResult{OK: err == nil, Output: string(out)}
 }
 
-// runJudge runs the judge against sourceDir (the agent's work dir) with
-// trajectory files read from runDir. With expect set (and a scenario that
-// declares judge.expectations), the judge adds its LLM expectation layer behind
-// the gate and, when jsonPath is given, writes the structured verdict there.
-func runJudge(judgeBin, scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) stepResult {
-	args := []string{"-scenario", scenarioJSON, "-run", runDir}
-	if expect {
-		args = append(args, "-expect")
+// runJudge evaluates sourceDir (the agent's work dir) with trajectory files read
+// from runDir. With expect set (and a scenario that declares judge.expectations),
+// the judge adds its LLM expectation layer behind the gate and, when jsonPath is
+// given, writes the structured verdict there.
+func runJudge(scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) stepResult {
+	var buf bytes.Buffer
+	report, code, err := judge.Evaluate(judge.Options{
+		ScenarioPath:   scenarioJSON,
+		RunDir:         runDir,
+		IntegrationDir: sourceDir,
+		Expect:         expect,
+	}, &buf)
+	if err != nil {
+		fmt.Fprintln(&buf, "judge:", err)
 	}
 	if jsonPath != "" {
-		args = append(args, "-json", jsonPath)
+		if err := judge.WriteReport(jsonPath, report); err != nil {
+			fmt.Fprintln(&buf, "judge: writing report:", err)
+			return stepResult{OK: false, Output: buf.String()}
+		}
 	}
-	args = append(args, sourceDir)
-	cmd := exec.Command(judgeBin, args...)
-	out, err := cmd.CombinedOutput()
-	return stepResult{OK: err == nil, Output: string(out)}
-}
-
-func buildJudge(judgeDir, outDir string) (string, error) {
-	bin := filepath.Join(outDir, "judge")
-	cmd := exec.Command("go", "build", "-o", bin, ".")
-	cmd.Dir = judgeDir
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return "", fmt.Errorf("building judge: %w\n%s", err, out)
-	}
-	return bin, nil
+	return stepResult{OK: code == 0, Output: buf.String()}
 }
 
 // gitDiffStaged stages all changes in work and returns the diff against the

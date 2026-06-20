@@ -9,7 +9,7 @@ import (
 
 type Hit struct {
 	Section Section
-	Score   float64
+	score   float64
 	Snippet string
 }
 
@@ -83,10 +83,10 @@ func (c *Corpus) Search(query string, limit int) []Hit {
 		}
 		if score > 0 {
 			sec := c.sections[i]
-			hits = append(hits, Hit{Section: sec, Score: score, Snippet: snippet(sec.Text, qterms)})
+			hits = append(hits, Hit{Section: sec, score: score, Snippet: snippet(sec.Text, qterms)})
 		}
 	}
-	sort.SliceStable(hits, func(i, j int) bool { return hits[i].Score > hits[j].Score })
+	sort.SliceStable(hits, func(i, j int) bool { return hits[i].score > hits[j].score })
 	if len(hits) > limit {
 		hits = hits[:limit]
 	}

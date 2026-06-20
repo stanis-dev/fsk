@@ -37,7 +37,7 @@ export default function Home() {
     return (
       <main className="mx-auto w-full max-w-6xl px-8 py-12">
         <p className="text-sm text-muted-foreground">
-          Backend unreachable: <code className="font-mono">eval-harness serve</code>
+          Backend unreachable: <code className="font-mono">go run ./cmd/eval-harness</code>
         </p>
         <p className="mt-2 font-mono text-xs text-danger">{apiError}</p>
       </main>

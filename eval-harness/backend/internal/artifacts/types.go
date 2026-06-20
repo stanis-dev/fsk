@@ -30,7 +30,6 @@ type DiffLine struct {
 
 type TelemetryEvent struct {
 	Ts          string         `json:"ts"`
-	SessionID   string         `json:"sessionId"`
 	Tool        string         `json:"tool"`
 	Args        map[string]any `json:"args"`
 	ResultCount int            `json:"resultCount"`

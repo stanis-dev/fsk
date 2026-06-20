@@ -16,7 +16,6 @@ import (
 // Event is one tools/call observation. Field names are the on-disk JSONL schema.
 type Event struct {
 	TS          string          `json:"ts"`
-	SessionID   string          `json:"session_id,omitempty"`
 	Tool        string          `json:"tool"`
 	Args        json.RawMessage `json:"args,omitempty"`
 	ResultCount int             `json:"result_count"`
@@ -75,7 +74,6 @@ func Middleware(rec Recorder) mcp.Middleware {
 				TS:        time.Now().UTC().Format(time.RFC3339),
 				LatencyMS: time.Since(start).Milliseconds(),
 			}
-			ev.SessionID = sessionID(req)
 			if p, ok := req.GetParams().(*mcp.CallToolParamsRaw); ok {
 				ev.Tool = p.Name
 				if len(p.Arguments) > 0 {
@@ -100,25 +98,6 @@ func Middleware(rec Recorder) mcp.Middleware {
 			}
 			return res, err
 		}
-	}
-}
-
-func sessionID(req mcp.Request) string {
-	switch sess := req.GetSession().(type) {
-	case nil:
-		return ""
-	case *mcp.ServerSession:
-		if sess == nil {
-			return ""
-		}
-		return sess.ID()
-	case *mcp.ClientSession:
-		if sess == nil {
-			return ""
-		}
-		return sess.ID()
-	default:
-		return sess.ID()
 	}
 }
 

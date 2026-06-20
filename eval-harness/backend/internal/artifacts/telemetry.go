@@ -27,9 +27,6 @@ func ParseTelemetry(jsonl string) []TelemetryEvent {
 		if v, ok := r["ts"]; ok {
 			_ = json.Unmarshal(v, &e.Ts)
 		}
-		if v, ok := r["session_id"]; ok {
-			_ = json.Unmarshal(v, &e.SessionID)
-		}
 		if v, ok := r["tool"]; ok {
 			_ = json.Unmarshal(v, &e.Tool)
 		}

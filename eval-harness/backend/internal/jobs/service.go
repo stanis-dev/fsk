@@ -15,7 +15,7 @@ import (
 )
 
 type Runner interface {
-	RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, detached bool, onStart func(runDir string)) (string, error)
+	RunScenario(ctx context.Context, s scenarios.Scenario, model, effort string, onStart func(runDir string)) (string, error)
 	Resolve(id string) (scenarios.Scenario, bool)
 	ContainerName(runDir string) string
 	KillContainer(container string) error
@@ -242,7 +242,7 @@ func (s *Service) runJob(j job) {
 		s.mu.Unlock()
 	}
 
-	_, runErr := s.r.RunScenario(lr.ctx, sc, j.model, j.effort, false, onStart)
+	_, runErr := s.r.RunScenario(lr.ctx, sc, j.model, j.effort, onStart)
 
 	if runErr != nil {
 		s.setPhaseAndDeregister(j.id, "error")

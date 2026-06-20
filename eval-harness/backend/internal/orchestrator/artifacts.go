@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"syscall"
 
 	"backend/internal/artifacts"
 	"backend/internal/scenarios"
@@ -57,30 +56,6 @@ func gitInitBaseline(work string) error {
 		}
 	}
 	return nil
-}
-
-// runHandle is written before Docker starts so the dashboard can cancel a live run.
-type runHandle struct {
-	PID       int    `json:"pid"`
-	PGID      int    `json:"pgid"`
-	Container string `json:"container"`
-}
-
-func writeRunHandle(runPath string, detached bool) error {
-	h := runHandle{Container: containerName(runPath)}
-	if detached {
-		pgid, err := syscall.Getpgid(0)
-		if err != nil {
-			return fmt.Errorf("getpgid: %w", err)
-		}
-		h.PID = os.Getpid()
-		h.PGID = pgid
-	}
-	data, err := json.Marshal(h)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filepath.Join(runPath, artifacts.RunHandleFile), append(data, '\n'), 0o644)
 }
 
 func writeMeta(runPath, scenario string, cfg runConfig) error {
