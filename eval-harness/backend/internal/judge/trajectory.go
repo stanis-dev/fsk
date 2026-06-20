@@ -55,7 +55,13 @@ func parseToolUses(path string) ([]string, error) {
 	sc.Buffer(make([]byte, 1024*1024), 16*1024*1024)
 	for sc.Scan() {
 		var ev transcriptEvent
-		if json.Unmarshal(sc.Bytes(), &ev) != nil || ev.Type != "assistant" {
+		if len(sc.Bytes()) == 0 {
+			continue
+		}
+		if err := json.Unmarshal(sc.Bytes(), &ev); err != nil {
+			return nil, fmt.Errorf("malformed transcript line: %w", err)
+		}
+		if ev.Type != "assistant" {
 			continue
 		}
 		for _, c := range ev.Message.Content {

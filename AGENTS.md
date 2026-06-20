@@ -3,7 +3,8 @@
 - Every iteration on the project must have eval scenario that will exercise it before implementation starts.
 - A feature/fix is only considered done when evals exercise it and pass eval criteria, with no regressions.
 
-- Domain is extremely sensitive
+- Treat SIGN IT facts as compliance-sensitive: ground changes in probes, specs,
+  research, or eval artifacts.
 
 ## Where the knowledge lives
 

@@ -7,7 +7,6 @@ import (
 	"unicode"
 )
 
-// Hit is one ranked search result.
 type Hit struct {
 	Section Section
 	Score   float64

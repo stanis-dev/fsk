@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { listRuns, listScenarios, runsStreamURL } from "@/lib/api";
 import { RunTable } from "@/components/RunTable";
-import { RunMenu } from "@/components/RunMenu";
+import { RunLauncher } from "@/components/RunLauncher";
 import type { Summary, ScenarioConfig } from "@/lib/types";
 
 export default function Home() {
@@ -53,7 +53,7 @@ export default function Home() {
             agentic coding eval workbench · {runs.length} runs
           </p>
         </div>
-        <RunMenu scenarios={scenarios} />
+        <RunLauncher scenarios={scenarios} />
       </header>
       <RunTable runs={runs} />
     </main>

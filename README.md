@@ -35,7 +35,6 @@ questions such as:
 
 | Path | Purpose |
 | --- | --- |
-| `research/OPPORTUNITIES.md` | The opportunity map and strategic answer. |
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
 | `eval-harness/backend/` | Go CLI (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; `eval-harness run` runs preflight + Docker eval + writes dashboard artifacts for each scenario. |
@@ -46,13 +45,9 @@ questions such as:
 
 ## Implemented system
 
-Implemented:
-
 - Curated local docs MCP with `search_fiskaly_docs` and `fetch_fiskaly_doc`.
 - Server-side MCP telemetry controlled by `FISKALY_MCP_TELEMETRY`.
-- Ten eval scenarios covering zero-to-receipt, provisioning, cancellation,
-  idempotency, outage behavior, polling, VAT, amount encoding, CalVer migration,
-  and credential expiry.
+- Ten eval scenarios covering the SIGN IT integration failure spectrum.
 - Scenario-aware deterministic judge with rule subsets selected from
   `scenario.json`.
 - Local runner with clean HOME, strict MCP config, diff capture, transcript
@@ -67,8 +62,6 @@ Known limits:
 - `vat-breakdown` proves the VAT fields are constructed, not that the selected
   VAT rate is correct.
 - The judge checks source shape, not live SIGN IT behavior.
-- `go run ./cmd/eval-harness run` is the eval entrypoint. It needs Docker and a
-  valid OAuth token in `.env`.
 
 ## Run the checks
 

@@ -3,16 +3,6 @@
 Date: 2026-06-12. Full raw research (6 areas, fact-checked) in `fiskaly_research.json`; downloaded OpenAPI artifacts in
 `specs/`.
 
-## Origin brief
-
-Role: **Agentic Backend Engineer (Golang)** (https://www.fiskaly.com/jobs/4797666101) — 90% designing multi-agent AI
-workflows that automate the SDLC, "Judge" agents auditing "Coder" agents so fiscal signatures stay legally compliant,
-human-in-the-loop design.
-
-Task: identify opportunities to improve the API documentation (https://developer.fiskaly.com/api/sign-it/2026-02-03)
-that drive fiskaly's mission ("make receipts easy"); build a working artifact for one; "go crazy — fixing typos will not
-empower the mission."
-
 ## Company (verified mid-2026)
 
 - fiskaly GmbH, Vienna, founded 2019 (Ferner/Tragatschnig/Gaubatz). ~110–120 employees, 1,600+ B2B customers, 1M+ active

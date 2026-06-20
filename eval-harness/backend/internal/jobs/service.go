@@ -69,6 +69,9 @@ type Service struct {
 
 // NewService creates a Service. Call Start() to launch workers and reattach.
 func NewService(r Runner, runsBase string, workers int) *Service {
+	if workers < 1 {
+		panic("workers must be at least 1")
+	}
 	return &Service{
 		r:        r,
 		runsBase: runsBase,

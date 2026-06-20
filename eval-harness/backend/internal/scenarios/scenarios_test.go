@@ -2,6 +2,7 @@ package scenarios
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -109,9 +110,9 @@ func TestList_ErrorOnMalformedJSON(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	root := buildFixture(t)
-	cfg, task, ok := Load(root, "01-demo")
-	if !ok {
-		t.Fatal("Load(01-demo) ok = false")
+	cfg, task, err := Load(root, "01-demo")
+	if err != nil {
+		t.Fatalf("Load(01-demo): %v", err)
 	}
 	if cfg.Title != "Demo" {
 		t.Errorf("Title = %q, want Demo", cfg.Title)
@@ -120,9 +121,9 @@ func TestLoad(t *testing.T) {
 		t.Errorf("task = %q, want 'do the task'", task)
 	}
 
-	_, _, ok2 := Load(root, "99-nope")
-	if ok2 {
-		t.Error("Load(99-nope) ok = true, want false")
+	_, _, err = Load(root, "99-nope")
+	if !errors.Is(err, ErrScenarioNotFound) {
+		t.Fatalf("Load(99-nope) error = %v, want ErrScenarioNotFound", err)
 	}
 }
 
@@ -285,9 +286,9 @@ func TestSave_ValidRoundtrip(t *testing.T) {
 		t.Fatalf("Save: %v", err)
 	}
 	// both files must be present and reloadable
-	loaded, task, ok := Load(root, "01-demo")
-	if !ok {
-		t.Fatal("Load after Save: ok = false")
+	loaded, task, err := Load(root, "01-demo")
+	if err != nil {
+		t.Fatalf("Load after Save: %v", err)
 	}
 	if loaded.Title != "Updated" {
 		t.Errorf("Title = %q, want Updated", loaded.Title)

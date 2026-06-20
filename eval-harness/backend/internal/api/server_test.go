@@ -165,6 +165,24 @@ func TestListRuns(t *testing.T) {
 	}
 }
 
+func TestListRunsDirError(t *testing.T) {
+	root := t.TempDir()
+	cfg := Config{
+		RunsDir:      filepath.Join(root, "missing"),
+		ScenariosDir: buildScenariosDir(t, root),
+		CORSOrigin:   "http://localhost:8080",
+		Service:      &fakeService{cancelOK: true},
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	resp := get(t, srv, "/runs")
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Fatalf("want 500, got %d", resp.StatusCode)
+	}
+	resp.Body.Close()
+}
+
 func TestGetRun(t *testing.T) {
 	srv, _ := newServer(t)
 	defer srv.Close()
@@ -185,7 +203,6 @@ func TestGetRun(t *testing.T) {
 	if summary["id"] != "run.sample" {
 		t.Errorf("want summary.id=run.sample, got %v", summary["id"])
 	}
-	// judgeReport must be parsed (verdict=conformant).
 	if detail["judgeReport"] == nil {
 		t.Error("want non-nil judgeReport")
 	}
@@ -316,6 +333,26 @@ func TestGetScenarioNotFound(t *testing.T) {
 	resp.Body.Close()
 }
 
+func TestGetScenarioMalformedJSON(t *testing.T) {
+	root := t.TempDir()
+	scenariosDir := buildScenariosDir(t, root)
+	mustWrite(t, filepath.Join(scenariosDir, "01-demo", "scenario.json"), "{ not json")
+	cfg := Config{
+		RunsDir:      buildRunsDir(t, root),
+		ScenariosDir: scenariosDir,
+		CORSOrigin:   "http://localhost:8080",
+		Service:      &fakeService{cancelOK: true},
+	}
+	srv := httptest.NewServer(Handler(cfg))
+	defer srv.Close()
+
+	resp := get(t, srv, "/scenarios/01-demo")
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Fatalf("want 500, got %d", resp.StatusCode)
+	}
+	resp.Body.Close()
+}
+
 func TestCORSPreflight(t *testing.T) {
 	srv, _ := newServer(t)
 	defer srv.Close()
@@ -421,7 +458,7 @@ func TestPostRunUnknownScenario(t *testing.T) {
 }
 
 func TestCancelRunOK(t *testing.T) {
-	srv, _ := newServer(t) // fakeService.cancelOK = true
+	srv, _ := newServer(t)
 	defer srv.Close()
 
 	resp := post(t, srv, "/runs/job.1/cancel", "")
@@ -493,7 +530,6 @@ func TestPutScenarioOK(t *testing.T) {
 	if resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("want 204, got %d: %s", resp.StatusCode, bodyStr(t, resp))
 	}
-	// Verify scenario.json was updated on disk.
 	raw, err := os.ReadFile(filepath.Join(cfg.ScenariosDir, "01-demo", "scenario.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -501,7 +537,6 @@ func TestPutScenarioOK(t *testing.T) {
 	if !strings.Contains(string(raw), `"Updated"`) {
 		t.Errorf("scenario.json not updated: %s", raw)
 	}
-	// Verify task.md was updated on disk.
 	taskRaw, err := os.ReadFile(filepath.Join(cfg.ScenariosDir, "01-demo", "task.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -596,7 +631,6 @@ func TestStreamRunsSSE(t *testing.T) {
 		t.Fatalf("want Content-Type text/event-stream, got %q", ct)
 	}
 
-	// Push an event through the fake channel.
 	evCh <- jobs.Event{RunID: "job.1", ScenarioID: "01-demo", Phase: "running"}
 
 	// Read lines until we find the data frame or the context expires.
@@ -627,7 +661,6 @@ func TestStreamRunsSSE(t *testing.T) {
 		t.Fatal("no data frame received before timeout")
 	}
 
-	// After the client closes, the handler's defer unsubscribe() must fire.
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
 		if svc.unsubscribed.Load() {
@@ -668,7 +701,6 @@ func TestStreamRunEventsFiltersOtherRuns(t *testing.T) {
 		t.Fatalf("want Content-Type text/event-stream, got %q", ct)
 	}
 
-	// Push an event for a different run (should be filtered) then one for job.1.
 	evCh <- jobs.Event{RunID: "job.99", ScenarioID: "01-demo", Phase: "running"}
 	evCh <- jobs.Event{RunID: "job.1", ScenarioID: "01-demo", Phase: "done"}
 
@@ -679,13 +711,12 @@ func TestStreamRunEventsFiltersOtherRuns(t *testing.T) {
 			continue
 		}
 		payload := strings.TrimPrefix(line, "data: ")
-		// The first data frame must be for job.1, not job.99.
 		if strings.Contains(payload, "job.99") {
 			t.Errorf("filtered event for job.99 leaked through: %s", payload)
 			return
 		}
 		if strings.Contains(payload, `"phase":"done"`) {
-			return // correct: job.1 event arrived
+			return
 		}
 	}
 	if err := scanner.Err(); err != nil && ctx.Err() == nil {

@@ -33,22 +33,16 @@ SIGN IT facts is `research/api-probes/NOTES.md`.
 - The judge checks source shape and trajectory, not live SIGN IT behavior.
 - `vat-breakdown` proves the VAT fields exist; it does not prove the selected
   VAT rate is correct.
-- Money for SIGN IT records must be decimal strings, not JSON floats and not
-  integer cents.
 - Scenario 04 still needs stronger checking for idempotency key lifecycle:
   fresh key per distinct write, same key across retries of that write.
-- Scenario 05 still needs a stronger outage behavior check than source-shape
-  review.
-- Scenario 10 checks credential-health behavior more than true 90-day expiry
-  alerting.
 - No `gofmt`, `go vet`, lint, pass@k, or MCP protocol conformance gate is wired
   into the runner.
 
 ## Priority Checks To Add
 
 1. Baseline-invariant CI assertion for every scenario fixture.
-2. Money decimal-string source check for scenario 08.
-3. VAT rate correctness check for scenario 07.
+2. VAT rate correctness check for scenario 07.
+3. Idempotency-key lifecycle check for scenario 04.
 4. Two-call record back-reference and scoped-subject sequence checks.
 5. MCP protocol conformance for tool names, schemas, output shape, and error
    channel behavior.

@@ -10,19 +10,18 @@ import (
 	"sort"
 )
 
-// Expectation is a single judge expectation with an id and description.
+var ErrScenarioNotFound = errors.New("scenario not found")
+
 type Expectation struct {
 	ID          string `json:"id"`
 	Expectation string `json:"expectation"`
 }
 
-// JudgeSpec holds the judge's checks (opaque) and expectations list.
 type JudgeSpec struct {
 	Checks       json.RawMessage `json:"checks"`
 	Expectations []Expectation   `json:"expectations"`
 }
 
-// Config mirrors the ScenarioConfig type from dashboard/lib/types.ts.
 type Config struct {
 	ID    string    `json:"id"`
 	Title string    `json:"title"`
@@ -30,7 +29,6 @@ type Config struct {
 	Judge JudgeSpec `json:"judge"`
 }
 
-// Scenario is the result of discovering a runnable scenario on disk.
 type Scenario struct {
 	ID           string
 	Dir          string
@@ -94,43 +92,39 @@ func List(scenariosDir string) ([]Config, error) {
 	return out, nil
 }
 
-func scenarioDir(scenariosDir, id string) (string, bool) {
+func scenarioDir(scenariosDir, id string) (string, error) {
 	scenarios, err := Discover(scenariosDir)
 	if err != nil {
-		return "", false
+		return "", err
 	}
 	for _, s := range scenarios {
 		if s.ID == id {
-			return s.Dir, true
+			return s.Dir, nil
 		}
 	}
-	return "", false
+	return "", ErrScenarioNotFound
 }
 
-// Load returns the Config and task.md contents for the given id. ok is false if
-// the id is unknown; neither value is meaningful in that case.
-func Load(scenariosDir, id string) (cfg *Config, task string, ok bool) {
-	dir, ok := scenarioDir(scenariosDir, id)
-	if !ok {
-		return nil, "", false
+func Load(scenariosDir, id string) (*Config, string, error) {
+	dir, err := scenarioDir(scenariosDir, id)
+	if err != nil {
+		return nil, "", err
 	}
 	raw, err := os.ReadFile(filepath.Join(dir, "scenario.json"))
 	if err != nil {
-		return nil, "", false
+		return nil, "", fmt.Errorf("reading scenario.json: %w", err)
 	}
 	var c Config
 	if err := json.Unmarshal(raw, &c); err != nil {
-		return nil, "", false
+		return nil, "", fmt.Errorf("parsing scenario.json: %w", err)
 	}
 	taskBytes, err := os.ReadFile(filepath.Join(dir, "task.md"))
 	if err != nil {
-		return nil, "", false
+		return nil, "", fmt.Errorf("reading task.md: %w", err)
 	}
-	return &c, string(taskBytes), true
+	return &c, string(taskBytes), nil
 }
 
-// Validate returns "" if raw is a valid scenario.json, otherwise a human-readable
-// error message.
 func Validate(raw []byte) string {
 	var obj any
 	if err := json.Unmarshal(raw, &obj); err != nil {
@@ -251,9 +245,12 @@ func AssignExpectationIds(c Config) Config {
 // It rejects unknown ids, id mismatches, and configs that fail Validate.
 // AssignExpectationIds is run before validation and writing.
 func Save(scenariosDir, id string, config Config, task string) error {
-	dir, ok := scenarioDir(scenariosDir, id)
-	if !ok {
+	dir, err := scenarioDir(scenariosDir, id)
+	if errors.Is(err, ErrScenarioNotFound) {
 		return fmt.Errorf("unknown scenario %q", id)
+	}
+	if err != nil {
+		return err
 	}
 	if config.ID != id {
 		return fmt.Errorf("config.id %q does not match path id %q", config.ID, id)

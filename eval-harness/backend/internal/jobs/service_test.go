@@ -25,7 +25,6 @@ type fakeRunner struct {
 	block        bool
 	blockRelease chan struct{}
 
-	// failRun causes RunScenario to return an error.
 	failRun  bool
 	failKill bool
 }
@@ -165,6 +164,15 @@ func TestEnqueueUnknown(t *testing.T) {
 	}
 }
 
+func TestNewServiceRejectsInvalidWorkers(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected panic for workers=0")
+		}
+	}()
+	_ = NewService(newFakeRunner(), t.TempDir(), 0)
+}
+
 func TestEnqueueRunsToCompletion(t *testing.T) {
 	f := newFakeRunner()
 	svc := NewService(f, t.TempDir(), 1)
@@ -178,7 +186,6 @@ func TestEnqueueRunsToCompletion(t *testing.T) {
 		t.Fatal("Enqueue returned empty id")
 	}
 
-	// Wait for the run to finish (Active() becomes empty).
 	waitActiveEmpty(t, svc)
 }
 
@@ -208,7 +215,6 @@ func TestCancelLiveRun(t *testing.T) {
 		t.Fatal("Cancel returned false for live run")
 	}
 
-	// Active() should now be empty.
 	waitActiveEmpty(t, svc)
 }
 
@@ -296,7 +302,6 @@ func TestReattachRegistersInFlight(t *testing.T) {
 	svc := NewService(f, runsBase, 1)
 	svc.Start()
 
-	// reattach should have registered the orphan dir.
 	active := svc.Active()
 	if len(active) == 0 {
 		t.Fatal("expected at least one reattached run")
@@ -313,7 +318,6 @@ func TestReattachRegistersInFlight(t *testing.T) {
 		t.Fatal("no reattached running run found in Active()")
 	}
 
-	// Cancel should succeed and write a marker.
 	ok, err := svc.Cancel(found)
 	if err != nil {
 		t.Fatalf("Cancel: %v", err)
@@ -322,7 +326,6 @@ func TestReattachRegistersInFlight(t *testing.T) {
 		t.Fatal("Cancel of reattached run returned false")
 	}
 
-	// Marker must exist.
 	marker := filepath.Join(orphan, artifacts.CancelledFile)
 	if _, err := os.Stat(marker); err != nil {
 		t.Fatalf("cancelled marker not written: %v", err)
@@ -336,7 +339,6 @@ func TestWorkers1Serializes(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	// Enqueue two jobs. With workers=1, the second must wait.
 	id1, err := svc.Enqueue("known", "m", "e")
 	if err != nil {
 		t.Fatalf("Enqueue 1: %v", err)
@@ -346,7 +348,6 @@ func TestWorkers1Serializes(t *testing.T) {
 		t.Fatalf("Enqueue 2: %v", err)
 	}
 
-	// Wait for the first to be running.
 	waitActivePhase(t, svc, "running")
 
 	// The second should still be queued (or not yet reached by the worker).
@@ -362,7 +363,6 @@ func TestWorkers1Serializes(t *testing.T) {
 		t.Fatalf("workers=1 but %d runs in phase 'running'", runningCount)
 	}
 
-	// Unblock the first run.
 	f.blockRelease <- struct{}{}
 
 	// After first finishes, unblock the second.
@@ -373,7 +373,6 @@ func TestWorkers1Serializes(t *testing.T) {
 
 	f.blockRelease <- struct{}{}
 
-	// Both should finish.
 	waitActiveEmpty(t, svc)
 
 	_ = id1
@@ -509,7 +508,6 @@ func TestUnsubscribeStopsDelivery(t *testing.T) {
 		t.Fatal("channel not closed after unsubscribe")
 	}
 
-	// Enqueue after unsubscribe; no event should arrive on the closed channel.
 	_, err := svc.Enqueue("known", "m", "e")
 	if err != nil {
 		t.Fatalf("Enqueue: %v", err)
@@ -543,7 +541,6 @@ func TestReattachSkipsCompleted(t *testing.T) {
 	svc := NewService(f, runsBase, 1)
 	svc.Start()
 
-	// Active() should be empty (no in-flight dirs).
 	if got := svc.Active(); len(got) != 0 {
 		t.Fatalf("expected 0 active, got %d", len(got))
 	}

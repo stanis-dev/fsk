@@ -67,8 +67,8 @@ cd eval-harness/backend && go run ./cmd/eval-harness run 06-fire-and-forget
 cd eval-harness/backend && go run ./cmd/eval-harness run
 
 # Source-only expectation grading of a seed (no trajectory; needs the claude CLI):
-cd eval-harness/backend && go run ./cmd/judge -scenario ../scenarios/06-fire-and-forget/scenario.json -expect \
-                                    ../scenarios/06-fire-and-forget/fixture
+cd eval-harness/backend && go run ./cmd/judge -scenario scenarios/06-fire-and-forget/scenario.json -expect \
+                                    scenarios/06-fire-and-forget/fixture
 ```
 
 Each scenario directory holds `task.md` (the prompt), `fixture/` (the seed), and

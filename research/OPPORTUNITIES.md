@@ -1,4 +1,4 @@
-# Initial Research
+# Original Opportunity Map
 
 **1. The docs pipeline has no QA gate.** The SIGN IT reference is built from one templated OpenAPI spec shared by four
 products, with per-country text overlays merged at render time. The IT overlay fails to define **168 template keys**, so
@@ -43,8 +43,6 @@ server-side, with `400` error bodies embedding unresolved `{{>...}}` partials, c
 spec diff is machine-readable; agent-generated migration guides and codemods per version bump are the multi-country
 scale story ("you integrated SIGN ES — here's your exact delta to SIGN IT").
 
-The strongest demo path is an agent provisioning a merchant, issuing a multi-VAT
-receipt with a real AdE document reference from fiskaly's TEST environment,
-cancelling it, and being audited. A weaker POS integration should meet the judge
-during an AdE outage and leave with concrete violations, citations, and a CI-grade
-exit code.
+The delivered workbench now exercises this direction through local fixtures,
+the docs MCP, the runner, the judge, and the dashboard. Current system details
+live in the root `README.md`.

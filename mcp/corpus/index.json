@@ -6,7 +6,7 @@
     "source": "probe",
     "path": "POST /tokens",
     "version": "2026-02-03",
-    "text": "Host: all calls go to https://test.api.fiskaly.com (TEST) or https://live.api.fiskaly.com (LIVE). Required on every call: header X-Api-Version: 2026-02-03. Required on every POST (including POST /tokens): header X-Idempotency-Key, a lowercase-hex UUID v4 (uppercase from uuidgen is rejected). Request/header validation runs BEFORE auth, so a missing idempotency key returns 400 even with an invalid bearer. Authenticate by POST /tokens with the API key/secret (fields key and secret); the JWT is returned under content.authentication (NOT content.access_token) and is valid 24h. Send it as Authorization: Bearer <jwt> on subsequent calls."
+    "text": "Host: all calls go to https://test.api.fiskaly.com (TEST) or https://live.api.fiskaly.com (LIVE). Required on every call: header X-Api-Version: 2026-02-03. Required on every POST (including POST /tokens): header X-Idempotency-Key, a lowercase-hex UUID v3/v4 (uppercase from uuidgen is rejected). Request/header validation runs BEFORE auth, so a missing idempotency key returns 400 even with an invalid bearer. Authenticate by POST /tokens with the API key/secret (fields key and secret); the JWT is returned under content.authentication (NOT content.access_token) and is valid 24h. Send it as Authorization: Bearer <jwt> on subsequent calls."
   },
   {
     "id": "probe:scoped-subject",
@@ -47,7 +47,7 @@
   {
     "id": "research:connection-loss",
     "title": "SIGN IT - authority outage path",
-    "uri": "fsk://research/RESEARCH.md#connection-loss",
+    "uri": "fsk://research/RESEARCH.md",
     "source": "research",
     "path": "",
     "version": "2026-02-03",
@@ -56,7 +56,7 @@
   {
     "id": "research:credential-lifecycle",
     "title": "SIGN IT - Fisconline credential lifecycle",
-    "uri": "fsk://research/RESEARCH.md#credentials",
+    "uri": "fsk://research/RESEARCH.md",
     "source": "research",
     "path": "POST /taxpayers",
     "version": "2026-02-03",

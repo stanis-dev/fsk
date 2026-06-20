@@ -10,41 +10,23 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"fiskaly-mcp/corpus"
 	"fiskaly-mcp/telemetry"
 )
 
 func connectWithTelemetry(t *testing.T, recPath string) (*mcp.ClientSession, context.Context) {
 	t.Helper()
-	ctx := context.Background()
-	c, err := corpus.Load()
-	if err != nil {
-		t.Fatalf("corpus.Load: %v", err)
-	}
-	server := mcp.NewServer(&mcp.Implementation{Name: "fiskaly", Version: "test"}, nil)
-	registerTools(server, c)
-	rec, err := telemetry.NewFileRecorder(recPath)
-	if err != nil {
-		t.Fatalf("NewFileRecorder: %v", err)
-	}
-	t.Cleanup(func() {
-		if err := rec.Close(); err != nil {
-			t.Errorf("rec.Close: %v", err)
+	return connectTestServer(t, func(server *mcp.Server) {
+		rec, err := telemetry.NewFileRecorder(recPath)
+		if err != nil {
+			t.Fatalf("NewFileRecorder: %v", err)
 		}
+		t.Cleanup(func() {
+			if err := rec.Close(); err != nil {
+				t.Errorf("rec.Close: %v", err)
+			}
+		})
+		server.AddReceivingMiddleware(telemetry.Middleware(rec))
 	})
-	server.AddReceivingMiddleware(telemetry.Middleware(rec))
-
-	st, ct := mcp.NewInMemoryTransports()
-	if _, err := server.Connect(ctx, st, nil); err != nil {
-		t.Fatalf("server.Connect: %v", err)
-	}
-	client := mcp.NewClient(&mcp.Implementation{Name: "test", Version: "0"}, nil)
-	session, err := client.Connect(ctx, ct, nil)
-	if err != nil {
-		t.Fatalf("client.Connect: %v", err)
-	}
-	t.Cleanup(func() { session.Close() })
-	return session, ctx
 }
 
 type teleEvent struct {

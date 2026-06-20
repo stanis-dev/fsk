@@ -32,11 +32,10 @@ func ParseJudgeReport(jsonText string) *judge.Report {
 	return &r
 }
 
-// ListRuns returns summaries for all run.* subdirectories under dir, newest first.
-func ListRuns(dir string) []Summary {
+func ListRuns(dir string) ([]Summary, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return []Summary{}
+		return nil, fmt.Errorf("reading runs dir: %w", err)
 	}
 	var out []Summary
 	for _, e := range entries {
@@ -53,7 +52,7 @@ func ListRuns(dir string) []Summary {
 	sort.Slice(out, func(i, j int) bool {
 		return out[i].UpdatedIso > out[j].UpdatedIso
 	})
-	return out
+	return out, nil
 }
 
 // SummarizeRun derives a Summary from the run directory.

@@ -107,7 +107,7 @@ docs drift, auth opacity, version migration, enterprise proxies — recur in the
 
 ## 3. Status page & incident history (what breaks in production)
 
-Current status at time of research: **all systems operational.** Components tracked: Management API, Dashboard,
+On 2026-06-12, all systems were operational. Components tracked: Management API, Dashboard,
 Authentication Server, SAFE (global); SIGN DE, DSFINVK DE, SUBMIT DE, fiskalcheck; SIGN AT; SIGN ES; SIGN IT; SIGN FR;
 RECEIPT. Incident feed (last ~3 months) shows clear patterns:
 

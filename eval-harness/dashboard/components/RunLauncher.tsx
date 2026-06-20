@@ -5,7 +5,7 @@ import { Play } from "lucide-react";
 import { postRun } from "@/lib/api";
 import type { ScenarioConfig } from "@/lib/types";
 
-export function RunMenu({ scenarios }: { scenarios: ScenarioConfig[] }) {
+export function RunLauncher({ scenarios }: { scenarios: ScenarioConfig[] }) {
   const [error, setError] = useState<string | null>(null);
   const [scenarioID, setScenarioID] = useState("");
   const selectedID = scenarioID || scenarios[0]?.id || "";

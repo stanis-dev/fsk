@@ -159,6 +159,10 @@ func cmdServe(args []string) int {
 		fmt.Fprintln(os.Stderr, "eval-harness:", err)
 		return 2
 	}
+	if *workers < 1 {
+		fmt.Fprintln(os.Stderr, "eval-harness: -workers must be at least 1")
+		return 2
+	}
 
 	runner, err := orchestrator.NewRunner(orchestrator.Config{
 		ScenariosDir:   filepath.Join(ehRoot, "backend", "scenarios"),

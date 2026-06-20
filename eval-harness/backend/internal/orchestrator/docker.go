@@ -80,8 +80,9 @@ func (a dockerAgent) run(ctx context.Context, rd runDir, task string, cfg runCon
 	cmd.Env = dockerEnv(a.context)
 	cmd.Stdout = transcript
 	cmd.Stderr = stderr
-	// An agent failure is a result to observe, not a harness failure.
-	_ = cmd.Run()
+	if err := cmd.Run(); err != nil && ctx.Err() != nil {
+		return ctx.Err()
+	}
 
 	tele := filepath.Join(rd.work, "mcp-telemetry.jsonl")
 	if _, err := os.Stat(tele); err == nil {

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,7 +13,12 @@ import (
 )
 
 func (cfg Config) listRuns(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, artifacts.ListRuns(cfg.RunsDir))
+	runs, err := artifacts.ListRuns(cfg.RunsDir)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, runs)
 }
 
 func (cfg Config) getRun(w http.ResponseWriter, r *http.Request) {
@@ -64,9 +70,13 @@ type scenarioDetail struct {
 }
 
 func (cfg Config) getScenario(w http.ResponseWriter, r *http.Request) {
-	c, task, ok := scenarios.Load(cfg.ScenariosDir, r.PathValue("id"))
-	if !ok {
+	c, task, err := scenarios.Load(cfg.ScenariosDir, r.PathValue("id"))
+	if errors.Is(err, scenarios.ErrScenarioNotFound) {
 		writeError(w, http.StatusNotFound, "scenario not found")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	writeJSON(w, http.StatusOK, scenarioDetail{Config: c, Task: task})

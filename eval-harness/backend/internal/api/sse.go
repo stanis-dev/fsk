@@ -45,10 +45,7 @@ func (cfg Config) stream(w http.ResponseWriter, r *http.Request, filter string) 
 			if filter != "" && ev.RunID != filter {
 				continue
 			}
-			data, err := json.Marshal(ev)
-			if err != nil {
-				continue
-			}
+			data, _ := json.Marshal(ev)
 			fmt.Fprintf(w, "data: %s\n\n", data)
 			flusher.Flush()
 		}

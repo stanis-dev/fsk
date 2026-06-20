@@ -169,7 +169,10 @@ func TestLoadRunJudgeReport(t *testing.T) {
 
 func TestListRunsFindsFixture(t *testing.T) {
 	fixtures := fixtureDir(t)
-	runs := ListRuns(fixtures)
+	runs, err := ListRuns(fixtures)
+	if err != nil {
+		t.Fatalf("ListRuns: %v", err)
+	}
 	found := false
 	for _, s := range runs {
 		if s.ID == "run.sample" {
@@ -179,6 +182,12 @@ func TestListRunsFindsFixture(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("run.sample not found in %v", runs)
+	}
+}
+
+func TestListRunsErrorsOnMissingDir(t *testing.T) {
+	if _, err := ListRuns(filepath.Join(t.TempDir(), "missing")); err == nil {
+		t.Fatal("expected error for missing runs dir")
 	}
 }
 

@@ -31,7 +31,6 @@ type Recorder interface {
 	Record(Event) error
 }
 
-// FileRecorder appends one JSON object per line to a file.
 type FileRecorder struct {
 	mu  sync.Mutex
 	f   *os.File

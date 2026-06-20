@@ -66,3 +66,11 @@ func TestParseTrajectory_MalformedTelemetryErrors(t *testing.T) {
 		t.Fatal("expected error for malformed telemetry line")
 	}
 }
+
+func TestParseTrajectory_MalformedTranscriptErrors(t *testing.T) {
+	dir := t.TempDir()
+	writeFileT(t, filepath.Join(dir, "transcript.jsonl"), "{ not json\n")
+	if _, err := parseTrajectory(dir); err == nil {
+		t.Fatal("expected error for malformed transcript line")
+	}
+}

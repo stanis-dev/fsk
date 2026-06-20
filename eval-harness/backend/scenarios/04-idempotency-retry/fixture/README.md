@@ -7,12 +7,10 @@ moves the order through its lifecycle to `completed`.
 
 This is a Go library package covered by `go test`.
 
-## Fiscalization is not implemented yet
+## Fiskaly client
 
-Under Italian law a B2C sale cannot be legally completed until it has been
-fiscalized. That step is not implemented yet: the `fiscalize` function in
-[`checkout.go`](checkout.go) is currently a no-op, and `CompleteOrder` already
-calls it during completion.
+`fiskaly.go` contains an unfinished SIGN IT client that still needs to be wired
+into `CompleteOrder`.
 
 ## Model
 

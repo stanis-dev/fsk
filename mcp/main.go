@@ -1,4 +1,3 @@
-// Command fiskaly-mcp serves the embedded fiskaly SIGN IT documentation corpus over MCP.
 package main
 
 import (

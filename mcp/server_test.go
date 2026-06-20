@@ -10,7 +10,7 @@ import (
 	"fiskaly-mcp/corpus"
 )
 
-func connectTestServer(t *testing.T) (*mcp.ClientSession, context.Context) {
+func connectTestServer(t *testing.T, configure func(*mcp.Server)) (*mcp.ClientSession, context.Context) {
 	t.Helper()
 	ctx := context.Background()
 	c, err := corpus.Load()
@@ -19,6 +19,9 @@ func connectTestServer(t *testing.T) (*mcp.ClientSession, context.Context) {
 	}
 	server := mcp.NewServer(&mcp.Implementation{Name: "fiskaly", Version: "test"}, nil)
 	registerTools(server, c)
+	if configure != nil {
+		configure(server)
+	}
 	st, ct := mcp.NewInMemoryTransports()
 	if _, err := server.Connect(ctx, st, nil); err != nil {
 		t.Fatalf("server.Connect: %v", err)
@@ -43,7 +46,7 @@ func resultText(res *mcp.CallToolResult) string {
 }
 
 func TestServerListsBothTools(t *testing.T) {
-	session, ctx := connectTestServer(t)
+	session, ctx := connectTestServer(t, nil)
 	res, err := session.ListTools(ctx, nil)
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
@@ -58,7 +61,7 @@ func TestServerListsBothTools(t *testing.T) {
 }
 
 func TestServerSearchAndFetch(t *testing.T) {
-	session, ctx := connectTestServer(t)
+	session, ctx := connectTestServer(t, nil)
 
 	sr, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name: "search_fiskaly_docs", Arguments: map[string]any{"query": "idempotency key"},
@@ -85,7 +88,7 @@ func TestServerSearchAndFetch(t *testing.T) {
 }
 
 func TestServerFetchUnknownIsError(t *testing.T) {
-	session, ctx := connectTestServer(t)
+	session, ctx := connectTestServer(t, nil)
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name: "fetch_fiskaly_doc", Arguments: map[string]any{"id": "does-not-exist"},
 	})
