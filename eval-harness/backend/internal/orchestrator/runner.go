@@ -28,36 +28,31 @@ type Runner struct {
 	scenariosDir  string
 }
 
-// NewRunner validates the toolchain, loads config, and builds the Docker image.
-// All subsequent RunScenario calls reuse the image.
+// NewRunner validates the toolchain and builds the Docker image. All subsequent
+// RunScenario calls reuse the image.
 func NewRunner(cfg Config) (*Runner, error) {
-	ctx := dockerContext()
 	if err := checkBinaries("docker", "go", "git"); err != nil {
 		return nil, err
 	}
-	if err := dockerReachable(ctx); err != nil {
-		return nil, err
-	}
-	rc, err := loadConfig(cfg.RepoRoot, cfg.Model, cfg.Effort)
-	if err != nil {
+	if err := dockerReachable(cfg.DockerContext); err != nil {
 		return nil, err
 	}
 	ag := dockerAgent{
 		repoRoot:       cfg.RepoRoot,
 		dockerfilePath: cfg.DockerfilePath,
-		context:        ctx,
+		context:        cfg.DockerContext,
 		image:          cfg.Image,
 	}
 	if err := ag.build(context.Background()); err != nil {
 		return nil, fmt.Errorf("building image: %w", err)
 	}
 	return &Runner{
-		defaultModel:  rc.model,
-		defaultEffort: rc.effort,
-		token:         rc.token,
+		defaultModel:  cfg.Model,
+		defaultEffort: cfg.Effort,
+		token:         cfg.Token,
 		ag:            ag,
 		runsBase:      cfg.RunsBase,
-		dockerCtx:     ctx,
+		dockerCtx:     cfg.DockerContext,
 		scenariosDir:  cfg.ScenariosDir,
 	}, nil
 }

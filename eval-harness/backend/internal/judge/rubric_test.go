@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"backend/internal/config"
 )
 
 var errStub = errors.New("stub")
@@ -143,7 +145,7 @@ func TestRunExpectationsStub(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rep.Model != rubricModelID || len(rep.Criteria) != 1 {
+	if rep.Model != config.JudgeModel || len(rep.Criteria) != 1 {
 		t.Fatalf("bad report %+v", rep)
 	}
 	if !conformant(rep.Criteria) {

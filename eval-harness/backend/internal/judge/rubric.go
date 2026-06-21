@@ -9,14 +9,12 @@ import (
 	"slices"
 	"strings"
 	"unicode"
+
+	"backend/internal/config"
 )
 
-const rubricModelID = "claude-opus-4-8"
-
-const judgeEffort = "high"
-
 func claudeModel(prompt string) (string, error) {
-	cmd := exec.Command("claude", "-p", "--model", rubricModelID, "--effort", judgeEffort, "--output-format", "json")
+	cmd := exec.Command("claude", "-p", "--model", config.JudgeModel, "--effort", config.JudgeEffort, "--output-format", "json")
 	cmd.Stdin = strings.NewReader(prompt)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -177,7 +175,7 @@ func runExpectations(traj trajectory, source, stripped string, exps []expectatio
 	}
 	citeSrc := stripped + "\n" + transcriptText(traj)
 	out = citationCheck(out, citeSrc)
-	return rubricReport{Model: rubricModelID, Criteria: out}, nil
+	return rubricReport{Model: config.JudgeModel, Criteria: out}, nil
 }
 
 // citationCheck downgrades uncited or ungrounded MET verdicts.

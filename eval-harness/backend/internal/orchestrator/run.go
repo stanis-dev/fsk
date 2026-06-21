@@ -10,6 +10,13 @@ import (
 	"backend/internal/scenarios"
 )
 
+// runConfig is the per-run model, effort, and OAuth token handed to the agent.
+type runConfig struct {
+	model  string
+	effort string
+	token  string
+}
+
 type scenarioResult struct {
 	id     string
 	runDir string

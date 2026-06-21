@@ -1,10 +1,24 @@
 # Project Rules
 
-- Every iteration on the project must have eval scenario that will exercise it before implementation starts.
-- A feature/fix is only considered done when evals exercise it and pass eval criteria, with no regressions.
+- Every iteration on the MCP must have eval scenario that will exercise it before implementation starts.
 
-- Treat SIGN IT facts as compliance-sensitive: ground changes in probes, specs,
-  research, or eval artifacts.
+## Code Rules - never tolerate
+
+- comments that: 
+  - say what code does not do
+  - context irrelevant to consumers
+  - context of a specific implementation
+  - information that can be inferred from the code itself
+  - information that should be expressed through naming conventions
+- backwards compatibility
+- "just in case" logic of any kind
+- dead code of any kind 
+- overengineering
+- non-idiomatic code
+- non-standard approaches unless justified (which must be confirmed with user)
+- configurability without clear purpose
+- manual implementation of standard libraries or what can be solved though a package
+- naming conventions that express context aplicable only to the implementer
 
 ## Where the knowledge lives
 

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"backend/internal/config"
 	"backend/internal/scenarios"
 )
 
@@ -34,26 +35,21 @@ func TestRunScenario_RealDocker(t *testing.T) {
 		t.Skip("docker not available")
 	}
 
-	if err := dockerReachable(dockerContext()); err != nil {
-		t.Skipf("docker daemon not reachable: %v", err)
-	}
-
-	ehRoot, err := filepath.Abs("../../..")
-	if err != nil {
-		t.Fatal(err)
-	}
-	repoRoot := filepath.Dir(ehRoot)
-	cfg, err := loadConfig(repoRoot, "claude-sonnet-4-6", "low")
+	c, err := config.Load()
 	if err != nil {
 		t.Skipf("no usable config (.env token): %v", err)
 	}
-	sc, err := scenarios.Discover(filepath.Join(ehRoot, "backend", "scenarios"))
+	if err := dockerReachable(c.DockerContext); err != nil {
+		t.Skipf("docker daemon not reachable: %v", err)
+	}
+	sc, err := scenarios.Discover(c.ScenariosDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ag := dockerAgent{repoRoot: repoRoot, dockerfilePath: filepath.Join(ehRoot, "backend", "sandbox", "Dockerfile"), context: dockerContext(), image: "fiskaly-eval"}
+	ag := dockerAgent{repoRoot: c.RepoRoot, dockerfilePath: c.DockerfilePath, context: c.DockerContext, image: c.Image}
+	rc := runConfig{model: c.Model, effort: "low", token: c.Token}
 
-	res, err := runScenario(context.Background(), sc[0], t.TempDir(), ag, cfg, nil)
+	res, err := runScenario(context.Background(), sc[0], t.TempDir(), ag, rc, nil)
 	if err != nil {
 		t.Fatalf("runScenario: %v", err)
 	}
