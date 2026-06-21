@@ -19,6 +19,8 @@
 - configurability without clear purpose
 - manual implementation of standard libraries or what can be solved though a package
 - naming conventions that express context aplicable only to the implementer
+- functionality mocking. If feature doesn't exist - code must never lie about it
+- code not covered by tests
 
 ## Where the knowledge lives
 
