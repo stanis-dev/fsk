@@ -4,12 +4,12 @@
 # reaches the coder. The fixture is bind-mounted at runtime; nothing else from the
 # host is visible. Auth is via CLAUDE_CODE_OAUTH_TOKEN passed at `docker run`.
 #
-FROM golang:1.23-bookworm AS mcpbuild
+FROM golang:1.26.4-bookworm AS mcpbuild
 WORKDIR /src
 COPY mcp/ ./
 RUN go build -o /fiskaly-mcp .
 
-FROM golang:1.23-bookworm
+FROM golang:1.26.4-bookworm
 RUN apt-get update \
  && apt-get install -y --no-install-recommends git ca-certificates curl gnupg \
  && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \

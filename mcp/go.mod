@@ -1,6 +1,6 @@
 module fiskaly-mcp
 
-go 1.23.0
+go 1.26.4
 
 require github.com/modelcontextprotocol/go-sdk v1.2.0
 

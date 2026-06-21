@@ -121,7 +121,7 @@ func readEnvToken(envPath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("reading %s: %w", envPath, err)
 	}
-	for _, line := range strings.Split(string(data), "\n") {
+	for line := range strings.Lines(string(data)) {
 		v, ok := strings.CutPrefix(strings.TrimSpace(line), "CLAUDE_CODE_OAUTH_TOKEN=")
 		if !ok {
 			continue

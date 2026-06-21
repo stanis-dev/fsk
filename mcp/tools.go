@@ -70,8 +70,7 @@ func handleFetch(c *corpus.Corpus, in fetchInput) (fetchOutput, error) {
 }
 
 func registerTools(s *mcp.Server, c *corpus.Corpus) {
-	openWorld := false
-	readOnly := &mcp.ToolAnnotations{ReadOnlyHint: true, OpenWorldHint: &openWorld}
+	readOnly := &mcp.ToolAnnotations{ReadOnlyHint: true, OpenWorldHint: new(false)}
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "search_fiskaly_docs",

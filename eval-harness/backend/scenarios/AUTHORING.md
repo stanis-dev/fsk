@@ -22,7 +22,7 @@ eval-harness/backend/scenarios/<NN-slug>/
 
 ## Fixture invariants (hold for every scenario)
 
-- Module `pos`, Go 1.23, **standard library only** (no third-party imports - runs
+- Module `pos`, Go 1.26.4, **standard library only** (no third-party imports - runs
   offline, hermetically).
 - `go build ./...` and `go test ./...` are **green at baseline.** A silent bug is
   silent: no seed test reveals it. Where a trap needs a coverage gap, the gap is
