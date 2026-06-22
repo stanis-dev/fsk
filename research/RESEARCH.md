@@ -44,7 +44,8 @@ CalVer/idempotency, record + taxpayer/location/system state machines, AdE outage
   `/api/sign-it/local` dev page.
 - No rate-limit numbers, no Retry-After; webhooks mentioned once in changelog, never documented.
 - Breaking rename between versions: `/assets`→`/organizations`, `/entities`→`/taxpayers`+`/locations`
-  (2025-08-12→2026-02-03); 4 versions in 17 months; migration guidance only as Zendesk article.
+  (at 2026-02-03); 3 versions in ~15 months (2024-10-31, 2025-08-12, 2026-02-03); rename documented in the spec
+  changelog, no migration guide.
 
 ## Docs platforms — what fiskaly ALREADY has (don't propose these)
 
@@ -53,7 +54,7 @@ quickstart, no llms.txt.
 
 **New preview (workspace.fiskaly.com, Astro/Starlight)** — already shipped:
 
-- Full GEO/AI stack: `/llms.txt`, `/llms-full.txt` (8.5MB), `/CLAUDE.md` (agent integration guide incl. anti-patterns),
+- Full GEO/AI stack: `/llms.txt`, `/llms-full.txt` (~9MB), `/CLAUDE.md` (agent integration guide incl. anti-patterns),
   `/products.json`, `/regulatory.json`, `/human-interventions.json`, `/.well-known/ai-plugin.json`, `/specs/` raw
   downloads.
 - Working RAG "Ask AI" chat (Hono.js + Vertex AI, Gemini 2.5 Pro/2.0 Flash, citations, groundedness, personas, admin
@@ -63,7 +64,9 @@ quickstart, no llms.txt.
 
 **Built but NOT shipped (the open gap):**
 
-- `@fiskaly/docs-mcp` documented (9 docs-only tools) but **404 on npm** — unpublished, and docs-only even as designed.
+- `@fiskaly/docs-mcp` (9 docs-only tools) is documented but **404 on npm**. The only official fiskaly MCP published is
+  `@fiskaly/ui-mcp` for the design system; the only docs/API MCPs on npm are community packages
+  (`fiskaly-docs-mcp-community`, `fiskaly-chat-mcp`).
 - `ApiTryIt` try-it component ships in the JS bundle but **never renders** (mount condition never true); `/api/console/`
   is a **404**.
 - No SDKs at all: all GitHub SDK repos archived (READMEs still point at SIGN DE v1), Go SDK gone; official stance "use
@@ -73,11 +76,12 @@ quickstart, no llms.txt.
 ## Italy context (why this matters now)
 
 - Provv. AdE n. 111204 (7 Mar 2025): certified **software solutions** for corrispettivi (PEM/PEL, MF1/MF2 modules);
-  specs iterated v1.0→v1.3 (annexes Apr 2026); full market operation **from 2027**; fiskaly publicly in certification
-  pipeline.
+  specs iterated v1.0→v1.3 (annexes Apr 2026); software transmission begins **from 2027** as a 4th option supplementing
+  hardware (not a replacement; adoption optional); fiskaly publicly in certification pipeline.
 - Budget Law 2025: **POS-RT linkage mandatory from 1 Jan 2026** (provv. 424470, portal live 5 Mar 2026; €1,000–4,000
   fines + license suspension) → SUBMIT IT.
-- ~1.7M hardware RTs, **~80% end-of-life by 2027** (fiskaly/Format Research) → the commercial window for SIGN IT.
+- ~1.7M hardware RTs, **~80% of the installed base** reaching end-of-life by 2027 (fiskaly/Format Research) → the
+  commercial window for SIGN IT.
 - Sanctions: 70% of VAT (min €300) for omitted memorization/transmission; €100/transmission late (capped
   €1,000/quarter). 12-day transmission window; lottery codes; emergency procedures.
 
@@ -94,7 +98,8 @@ quickstart, no llms.txt.
 
 ## The strategic read
 
-fiskaly built the AI **read** layer (RAG chat + GEO files) but the **action** layer is conspicuously missing:
-unpublished MCP, dormant try-it, dead console link, archived SDKs. Their own job ad says they want
+fiskaly built the AI **read** layer (RAG chat + GEO files) but the **action** layer is conspicuously missing: no official
+API/action MCP (only `@fiskaly/ui-mcp` for the design system is published; docs MCPs are community-built), dormant
+try-it, dead console link, archived SDKs. Their own job ad says they want
 judge-agents-auditing-coder-agents. The docs pipeline itself (template + overlays) has no QA gate — hence 168 blank
 descriptions in production.

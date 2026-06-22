@@ -5,15 +5,17 @@ products, with per-country text overlays merged at render time. The IT overlay f
 the live 2026-02-03 reference silently renders 168 blank descriptions. The same defect lives server-side: API _error
 responses_ embed schema descriptions with unresolved `{{>...}}` partials. Nobody noticed, because nothing checks.
 
-**2. AI enablement - read layer already built** - workspace.fiskaly.com ships llms.txt, an 8.5MB llms-full.txt, a
+**2. AI enablement - read layer already built** - workspace.fiskaly.com ships llms.txt, an ~9MB llms-full.txt, a
 CLAUDE.md agent guide, machine-readable product/regulatory manifests, and a working RAG chat. The documented
-`@fiskaly/docs-mcp` is not on npm, the try-it component ships in the bundle but never renders, `/api/console` is a 404,
-every SDK repo is archived, and the spec has no authored request examples: only field-level values a renderer stitches
+`@fiskaly/docs-mcp` is not on npm (fiskaly's only published npm MCP is `@fiskaly/ui-mcp` for the design system; an
+API/docs MCP exists only as community packages such as `fiskaly-docs-mcp-community`), the try-it component ships in the
+bundle but never renders, `/api/console` is a 404, every SDK repo is archived, and the spec has no authored request examples: only field-level values a renderer stitches
 into samples that don't encode the required-together fields or call ordering the compositional flows (e.g. `POST /records`)
 need. An AI agent can _read about_ fiskaly perfectly and still can't _do_ anything.
 
 **3. The customer buys certainty, not endpoints.** Italy makes this concrete: software fiscalization goes fully
-operational in 2027 (provv. 111204/2025), ~80% of Italy's 1.7M hardware registers reach end-of-life by then, and
+begins in 2027 as a 4th option supplementing hardware (tech specs in provv. 111204/2025, 7 Mar 2025; adoption optional),
+~80% of Italy's ~1.7M installed hardware registers reach end-of-life by then, and
 non-compliance is priced in law — 70% of VAT (min €300) for omitted transmission, €100/transmission late, €1,000–4,000
 for missing POS-RT linkage. The integration funnel that wins that window is the one that gets a POS vendor from docs to
 _provable compliance_ fastest.
@@ -38,8 +40,8 @@ regex, `legal`+`trade` required, the record-type taxonomy; what the diff catches
 server-side, with `400` error bodies embedding unresolved `{{>...}}` partials, confirmed live; see
 `research/api-probes/NOTES.md`), and gate releases on zero placeholders. The launch checklist for Sweden and Poland overlays writes itself.
 
-**#4 — CalVer migration tooling** SIGN IT shipped four date versions in 17 months, one of which renamed core resources
-(`entities`/`assets` → `taxpayers`/`locations`/`organizations`) with migration notes living in a Zendesk article. The
+**#4 — CalVer migration tooling** SIGN IT shipped three date versions in ~15 months (2024-10-31, 2025-08-12, 2026-02-03), one of which renamed core resources
+(`entities`/`assets` → `taxpayers`/`locations`/`organizations`) with the rename documented in the spec changelog. The
 spec diff is machine-readable; agent-generated migration guides and codemods per version bump are the multi-country
 scale story ("you integrated SIGN ES — here's your exact delta to SIGN IT").
 
