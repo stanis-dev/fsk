@@ -54,8 +54,8 @@ trap lives in a comment, README note, or domain helper.
 Every fixture builds and tests green and judges **NON-COMPLIANT** at baseline:
 either the receipt baseline is missing or the trap is unaddressed, so a correct
 solution has something to flip. The deterministic `checks` are trajectory-derived,
-so they apply to an agent run; a bare seed is graded by the source-only
-`expectations` layer (`go run . -scenario … -expect …/fixture`).
+so they apply to an agent run; the `expectations` layer grades the source produced
+by that run.
 
 ## Running
 
@@ -63,10 +63,6 @@ so they apply to an agent run; a bare seed is graded by the source-only
 # Run scenarios end to end in Docker: start the server, then launch runs from the
 # dashboard (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env):
 cd eval-harness/backend && go run ./cmd/eval-harness
-
-# Source-only expectation grading of a seed (no trajectory; needs the claude CLI):
-cd eval-harness/backend && go run ./cmd/judge -scenario scenarios/06-fire-and-forget/scenario.json -expect \
-                                    scenarios/06-fire-and-forget/fixture
 ```
 
 Each scenario directory holds `task.md` (the prompt), `fixture/` (the seed), and

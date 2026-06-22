@@ -78,7 +78,8 @@ baseline (`real-host`, `token-exchange`, `idempotency-header`, `api-version`,
 
 ## The judge
 
-`eval-harness/backend/cmd/judge` runs two layers; conformance requires both.
+The judge (`eval-harness/backend/internal/judge`, run by the harness for each
+scenario) runs two layers; conformance requires both.
 
 1. **Deterministic checks** (`judge.checks`) - trajectory signals from the agent's
    run, evaluated programmatically. A failing check is a hard gate: the run is
@@ -106,9 +107,6 @@ the trap-specific conformance lives in each scenario's `expectations`.
 ## Run and verify a scenario
 
 ```sh
-# source-only expectation grading of the seed (no trajectory, so the checks gate is skipped; needs the claude CLI):
-cd eval-harness/backend && go run ./cmd/judge -scenario scenarios/<id>/scenario.json -expect scenarios/<id>/fixture
-
 # full run in Docker, including the trajectory checks gate: start the server and
 # launch the scenario from the dashboard (needs CLAUDE_CODE_OAUTH_TOKEN in repo .env):
 cd eval-harness/backend && go run ./cmd/eval-harness

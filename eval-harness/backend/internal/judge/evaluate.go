@@ -15,11 +15,10 @@ type Options struct {
 }
 
 // Evaluate runs the deterministic checks gate and, when Expect is set, the LLM
-// expectation layer. It writes the
-// human-readable report to out and returns the structured report plus the
-// process exit code: 0 conformant, 1 NON-COMPLIANT, 2 infra error. The returned
-// error is non-nil iff the code is 2.
-func Evaluate(opts Options, out io.Writer) (Report, int, error) {
+// expectation layer. It writes the human-readable report to out and returns the
+// structured report. The returned error is non-nil only on an infra failure, in
+// which case the report's Verdict is NON-COMPLIANT and its Note records the cause.
+func Evaluate(opts Options, out io.Writer) (Report, error) {
 	scenarioName := filepath.Base(filepath.Dir(opts.ScenarioPath))
 
 	var traj trajectory
@@ -49,12 +48,11 @@ func Evaluate(opts Options, out io.Writer) (Report, int, error) {
 	cr := checksReport{Passed: gatePassed, Results: results}
 
 	if !gatePassed {
-		fmt.Fprintln(out, "VERDICT: NON-COMPLIANT (gate). exit 1")
-		return buildReport(scenarioName, cr, nil, "NON-COMPLIANT"), 1, nil
+		fmt.Fprintln(out, "VERDICT: NON-COMPLIANT (gate)")
+		return buildReport(scenarioName, cr, nil, "NON-COMPLIANT"), nil
 	}
 
 	verdict := "conformant"
-	exitCode := 0
 	var rep *rubricReport
 	var exps []expectation
 
@@ -77,7 +75,6 @@ func Evaluate(opts Options, out io.Writer) (Report, int, error) {
 			fmt.Fprint(out, renderExpectations(r))
 			if !conformant(r.Criteria) {
 				verdict = "NON-COMPLIANT"
-				exitCode = 1
 			}
 		}
 	}
@@ -86,18 +83,18 @@ func Evaluate(opts Options, out io.Writer) (Report, int, error) {
 		return infra(scenarioName, cr, fmt.Errorf("scenario declares neither checks nor expectations"))
 	}
 
-	if exitCode == 0 {
-		fmt.Fprintln(out, "VERDICT: conformant. exit 0")
+	if verdict == "conformant" {
+		fmt.Fprintln(out, "VERDICT: conformant")
 	} else {
-		fmt.Fprintln(out, "VERDICT: NON-COMPLIANT (expectations). exit 1")
+		fmt.Fprintln(out, "VERDICT: NON-COMPLIANT (expectations)")
 	}
-	return buildReport(scenarioName, cr, rep, verdict), exitCode, nil
+	return buildReport(scenarioName, cr, rep, verdict), nil
 }
 
-// infra builds the shared infra-error result (exit 2): a NON-COMPLIANT report
-// whose Note records that no verdict was computed.
-func infra(scenario string, cr checksReport, err error) (Report, int, error) {
+// infra builds the shared infra-error result: a NON-COMPLIANT report whose Note
+// records that no verdict was computed.
+func infra(scenario string, cr checksReport, err error) (Report, error) {
 	rep := buildReport(scenario, cr, nil, "NON-COMPLIANT")
 	rep.Note = "infra error (no verdict computed): " + err.Error()
-	return rep, 2, err
+	return rep, err
 }

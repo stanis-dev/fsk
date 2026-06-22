@@ -15,8 +15,7 @@ type checksReport struct {
 	Results []checkResult `json:"results"`
 }
 
-// Report is written to judge.json; the process exit code stays the
-// authoritative pass/fail signal.
+// Report is written to judge.json; Verdict is the authoritative pass/fail signal.
 type Report struct {
 	Scenario     string        `json:"scenario"`
 	Verdict      string        `json:"verdict"`

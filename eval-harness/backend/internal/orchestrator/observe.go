@@ -21,7 +21,7 @@ func runGoCmd(dir string, args ...string) stepResult {
 // given, writes the structured verdict there.
 func runJudge(scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) stepResult {
 	var buf bytes.Buffer
-	report, _, err := judge.Evaluate(judge.Options{
+	report, err := judge.Evaluate(judge.Options{
 		ScenarioPath:   scenarioJSON,
 		RunDir:         runDir,
 		IntegrationDir: sourceDir,

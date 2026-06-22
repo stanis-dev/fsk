@@ -37,7 +37,7 @@ questions such as:
 | --- | --- |
 | `research/` | Evidence base: SIGN IT research, persona, public feedback, API probes, specs, and eval-check analysis. |
 | `mcp/` | Go MCP server with embedded SIGN IT docs search/fetch tools and per-call telemetry. |
-| `eval-harness/backend/` | Go server (`cmd/eval-harness`) and judge (`cmd/judge`) for the eval workbench; the server runs scenarios through the Docker eval on request and writes dashboard artifacts for each. |
+| `eval-harness/backend/` | Go server (`cmd/eval-harness`) for the eval workbench; it runs scenarios through the Docker eval on request, applies the deterministic + LLM judge (`internal/judge`), and writes dashboard artifacts for each. |
 | `eval-harness/backend/scenarios/` | Ten agent coding exercises with fixtures, prompts, metadata, and answer keys. |
 | `eval-harness/backend/scenarios/seed/` | The canonical seed codebase (Go module `pos`) every scenario fixture is derived from. |
 | `eval-harness/backend/sandbox/` | Docker sandbox image (Dockerfile and entrypoint) the coder runs inside. |

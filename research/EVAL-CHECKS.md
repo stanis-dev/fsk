@@ -9,7 +9,7 @@ SIGN IT facts is `research/api-probes/NOTES.md`.
 | --- | --- | --- |
 | Runner | `eval-harness/backend/cmd/eval-harness` | Runs scenarios in Docker and serves the dashboard API. |
 | Orchestrator | `eval-harness/backend/internal/orchestrator` | Copies a fixture, commits a baseline, runs the agent container, captures diff/build/test/judge artifacts. |
-| Judge | `eval-harness/backend/cmd/judge` | Applies trajectory checks and, when requested, the expectation layer. |
+| Judge | `eval-harness/backend/internal/judge` | Applies trajectory checks and, when requested, the expectation layer; invoked in-process by the orchestrator. |
 | Artifacts | `eval-harness/backend/internal/artifacts` | Parses run directories for the dashboard. |
 | Jobs/API | `eval-harness/backend/internal/jobs`, `eval-harness/backend/internal/api` | Queues dashboard-triggered runs, cancels live containers, streams phase events. |
 | Docs MCP | `mcp/` | Serves `search_fiskaly_docs` and `fetch_fiskaly_doc`, with JSONL telemetry when enabled. |
