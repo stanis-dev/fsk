@@ -26,7 +26,7 @@ func buildRunsDir(t *testing.T, root string) string {
 		t.Fatal(err)
 	}
 
-	mustWrite(t, filepath.Join(runDir, "meta.json"), `{"scenario":"01-demo","effort":"low","harness":"local","coder":"test","model":"claude-test"}`)
+	mustWrite(t, filepath.Join(runDir, "meta.json"), `{"scenario":"01-demo","effort":"low","coder":"test","model":"claude-test"}`)
 	mustWrite(t, filepath.Join(runDir, "judge.txt"), "judge output line\n")
 	mustWrite(t, filepath.Join(runDir, "judge.json"), `{"scenario":"01-demo","verdict":"conformant","checks":{"passed":true,"results":[]},"note":"ok"}`)
 	mustWrite(t, filepath.Join(runDir, "build.txt"), "")

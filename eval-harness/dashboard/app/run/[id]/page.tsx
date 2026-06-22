@@ -104,11 +104,10 @@ export default function RunPage() {
       </Link>
       <h1 className="mt-3 font-mono text-2xl font-semibold tracking-tight">{s.id}</h1>
 
-      <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-border pt-6 sm:grid-cols-4 lg:grid-cols-7">
+      <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-border pt-6 sm:grid-cols-4 lg:grid-cols-6">
         <Meta label="scenario" value={s.scenario} />
         <Meta label="coder" value={s.coder} />
         <Meta label="model" value={s.model} mono />
-        <Meta label="harness" value={s.harness} />
         <Meta label="effort" value={s.effort} />
         <Meta label="turns" value={s.turns} mono />
         <Meta label="cost" value={s.cost} mono />

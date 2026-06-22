@@ -46,11 +46,11 @@ func TestWriteMeta_Shape(t *testing.T) {
 	if err := json.Unmarshal([]byte(readFileT(t, runPath, "meta.json")), &m); err != nil {
 		t.Fatal(err)
 	}
-	if len(m) != 5 {
-		t.Errorf("meta.json has %d keys, want exactly 5", len(m))
+	if len(m) != 4 {
+		t.Errorf("meta.json has %d keys, want exactly 4", len(m))
 	}
 	for k, want := range map[string]string{
-		"harness": "docker", "coder": "claude-code", "model": "m", "effort": "e", "scenario": "01-zero-to-receipt",
+		"coder": "claude-code", "model": "m", "effort": "e", "scenario": "01-zero-to-receipt",
 	} {
 		if m[k] != want {
 			t.Errorf("meta[%q] = %q, want %q", k, m[k], want)

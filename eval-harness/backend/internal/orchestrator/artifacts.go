@@ -60,7 +60,6 @@ func gitInitBaseline(work string) error {
 
 func writeMeta(runPath, scenario string, cfg runConfig) error {
 	meta := map[string]string{
-		"harness":  "docker",
 		"coder":    "claude-code",
 		"model":    cfg.model,
 		"effort":   cfg.effort,

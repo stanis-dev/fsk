@@ -73,15 +73,6 @@ func SummarizeRun(dir string) Summary {
 	} else {
 		s.Coder = cmp.Or(meta.coder, "?")
 	}
-	switch {
-	case log.cwd == "/work":
-		s.Harness = "docker"
-	case log.cwd != "":
-		s.Harness = "local"
-	default:
-		s.Harness = cmp.Or(meta.harness, "?")
-	}
-
 	if _, err := os.Stat(filepath.Join(dir, CancelledFile)); err == nil {
 		s.Status = "cancelled"
 		return s
@@ -174,7 +165,6 @@ func parseResult(file string) resultInfo {
 
 type logInfoResult struct {
 	model string
-	cwd   string
 	ccver string
 }
 
@@ -193,9 +183,6 @@ func logInfo(file string) logInfoResult {
 		if v, ok := m["model"]; ok {
 			_ = json.Unmarshal(v, &r.model)
 		}
-		if v, ok := m["cwd"]; ok {
-			_ = json.Unmarshal(v, &r.cwd)
-		}
 		if v, ok := m["claude_code_version"]; ok {
 			_ = json.Unmarshal(v, &r.ccver)
 		}
@@ -204,7 +191,6 @@ func logInfo(file string) logInfoResult {
 }
 
 type metaInfo struct {
-	harness  string
 	coder    string
 	model    string
 	effort   string
@@ -221,7 +207,6 @@ func readMeta(dir string) metaInfo {
 		return metaInfo{}
 	}
 	return metaInfo{
-		harness:  m["harness"],
 		coder:    m["coder"],
 		model:    m["model"],
 		effort:   m["effort"],

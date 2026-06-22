@@ -7,7 +7,6 @@ export interface Summary {
   status: RunStatus;
   scenario: string;
   coder: string;
-  harness: string;
   model: string;
   effort: string;
   build: Check;

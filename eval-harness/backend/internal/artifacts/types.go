@@ -8,7 +8,6 @@ type Summary struct {
 	Status     string `json:"status"`
 	Scenario   string `json:"scenario"`
 	Coder      string `json:"coder"`
-	Harness    string `json:"harness"`
 	Model      string `json:"model"`
 	Effort     string `json:"effort"`
 	Build      string `json:"build"`

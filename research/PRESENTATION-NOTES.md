@@ -170,8 +170,6 @@ and change any of them without silent regressions.
 
 ---
 
-## Facts at hand (quote exactly, don't paraphrase under questioning)
-
 **Regulatory / Italy**
 
 - Software fiscalization targets a **2027** start (separate roadmap; software a 4th option supplementing hardware). Provv.

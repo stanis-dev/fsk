@@ -24,7 +24,6 @@ export function RunTable({ runs }: { runs: Summary[] }) {
             <th className={HEAD}>scenario</th>
             <th className={HEAD}>when</th>
             <th className={HEAD}>coder</th>
-            <th className={HEAD}>harness</th>
             <th className={HEAD}>model</th>
             <th className={HEAD}>build</th>
             <th className={HEAD}>tests</th>
@@ -36,7 +35,7 @@ export function RunTable({ runs }: { runs: Summary[] }) {
         <tbody className="[&_tr:last-child]:border-0">
           {runs.length === 0 && (
             <tr className="border-b border-border">
-              <td colSpan={11} className="h-24 whitespace-nowrap px-3 py-2.5 text-center text-muted-foreground">
+              <td colSpan={10} className="h-24 whitespace-nowrap px-3 py-2.5 text-center text-muted-foreground">
                 no runs yet
               </td>
             </tr>
@@ -56,7 +55,6 @@ export function RunTable({ runs }: { runs: Summary[] }) {
                 {formatWhen(r.updatedIso)}
               </td>
               <td className={cn(CELL, "text-muted-foreground")}>{r.coder}</td>
-              <td className={cn(CELL, "text-muted-foreground")}>{r.harness}</td>
               <td className={cn(CELL, "font-mono text-xs text-muted-foreground")}>{r.model}</td>
               {r.status === "running" ? (
                 <td colSpan={5} className={CELL}>

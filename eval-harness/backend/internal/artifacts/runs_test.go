@@ -37,9 +37,6 @@ func TestSummarizeRunDoneFixture(t *testing.T) {
 	if s.Tests != "PASS" {
 		t.Errorf("tests = %q, want PASS", s.Tests)
 	}
-	if s.Harness != "docker" {
-		t.Errorf("harness = %q, want docker", s.Harness)
-	}
 	if s.Model != "claude-sonnet-4-6" {
 		t.Errorf("model = %q, want claude-sonnet-4-6", s.Model)
 	}
@@ -193,7 +190,7 @@ func TestListRunsErrorsOnMissingDir(t *testing.T) {
 
 func TestSummarizeRunCancelledPrecedence(t *testing.T) {
 	dir := t.TempDir()
-	must(t, os.WriteFile(filepath.Join(dir, MetaFile), []byte(`{"scenario":"01-demo","harness":"docker"}`), 0o644))
+	must(t, os.WriteFile(filepath.Join(dir, MetaFile), []byte(`{"scenario":"01-demo"}`), 0o644))
 	must(t, os.WriteFile(filepath.Join(dir, JudgeLogFile), []byte("VERDICT: conformant\n"), 0o644))
 	must(t, os.WriteFile(filepath.Join(dir, CancelledFile), []byte("2026-06-18T00:00:00Z\n"), 0o644))
 	s := SummarizeRun(dir)
@@ -206,7 +203,7 @@ func TestLoadRunEmptyDirNoNullSlices(t *testing.T) {
 	dir := t.TempDir()
 	runDir := filepath.Join(dir, "run.empty-test")
 	must(t, os.Mkdir(runDir, 0o755))
-	must(t, os.WriteFile(filepath.Join(runDir, MetaFile), []byte(`{"scenario":"01-demo","harness":"docker"}`), 0o644))
+	must(t, os.WriteFile(filepath.Join(runDir, MetaFile), []byte(`{"scenario":"01-demo"}`), 0o644))
 
 	rd, ok := LoadRun(dir, "run.empty-test")
 	if !ok || rd == nil {
