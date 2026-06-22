@@ -68,3 +68,17 @@ func TestResolveRunsDir_Default(t *testing.T) {
 		t.Errorf("runs dir = %q, want %q", got, want)
 	}
 }
+
+func TestResolveCORSOrigin_EnvOverride(t *testing.T) {
+	t.Setenv("CORS_ORIGIN", "http://localhost:8081")
+	if got := resolveCORSOrigin(); got != "http://localhost:8081" {
+		t.Errorf("cors origin = %q, want http://localhost:8081", got)
+	}
+}
+
+func TestResolveCORSOrigin_Default(t *testing.T) {
+	t.Setenv("CORS_ORIGIN", "")
+	if got := resolveCORSOrigin(); got != corsOrigin {
+		t.Errorf("cors origin = %q, want %q", got, corsOrigin)
+	}
+}

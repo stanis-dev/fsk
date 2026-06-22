@@ -65,7 +65,7 @@ func Load() (Config, error) {
 
 	return Config{
 		Addr:           addr,
-		CORSOrigin:     corsOrigin,
+		CORSOrigin:     resolveCORSOrigin(),
 		Workers:        workers,
 		Image:          image,
 		Model:          defaultModel,
@@ -140,4 +140,13 @@ func resolveDockerContext() string {
 		return c
 	}
 	return "desktop-linux"
+}
+
+// resolveCORSOrigin allows overriding the allowed browser origin, so local dev
+// can serve the dashboard on a non-default port without editing this file.
+func resolveCORSOrigin() string {
+	if o := os.Getenv("CORS_ORIGIN"); o != "" {
+		return o
+	}
+	return corsOrigin
 }

@@ -82,24 +82,34 @@ under `~/.cache/fiskaly-eval/run.*`. Needs Docker and a valid OAuth token in
 
 ## Run and inspect scenarios
 
+[Task](https://taskfile.dev) boots the backend (API + Docker runner) and the
+dashboard together, streams both logs prefixed, and stops both on Ctrl-C (needs
+Docker running and a token in `.env`):
+
 ```sh
-cd eval-harness/dashboard
-pnpm install
-pnpm dev
+brew install go-task   # once
+task install           # once: dashboard deps
+task dev
 ```
 
-Open `http://localhost:8080`. The dashboard reads the API at
-`http://localhost:8090` by default. Start it separately:
+Open the dashboard URL it prints (`http://localhost:8081` by default). It runs on
+8081 rather than 8080 so it coexists with anything already on 8080; override with
+`task dev DASHBOARD_PORT=<port>`. Run `task` with no arguments to list every task.
+
+To run the two processes by hand instead:
 
 ```sh
-cd eval-harness/backend
-go run ./cmd/eval-harness
+cd eval-harness/backend && go run ./cmd/eval-harness   # API on :8090
+cd eval-harness/dashboard && pnpm dev                  # dashboard on :8080
 ```
 
 Configuration:
 
 - `FISKALY_RUNS_DIR`: run artifact directory read by the backend.
 - `NEXT_PUBLIC_API_URL`: dashboard API URL; defaults to `http://localhost:8090`.
+- `CORS_ORIGIN`: browser origin the backend allows; defaults to
+  `http://localhost:8080`. `task dev` sets it to match the dashboard port.
+- `DASHBOARD_PORT`: dashboard dev port for `task dev`; defaults to 8081.
 
 ## Iterating
 

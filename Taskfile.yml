@@ -1,0 +1,51 @@
+# https://taskfile.dev
+version: '3'
+
+output: prefixed
+
+vars:
+  DASHBOARD_PORT: '{{.DASHBOARD_PORT | default "8081"}}'
+
+tasks:
+  default:
+    desc: List available tasks.
+    cmds: [task --list]
+    silent: true
+
+  dev:
+    desc: Boot the backend (API on :8090) and the dashboard together for local development.
+    deps: [backend, dashboard]
+
+  backend:
+    desc: Run the eval-harness API server (:8090) with the Docker scenario runner.
+    dir: eval-harness/backend
+    env:
+      CORS_ORIGIN: 'http://localhost:{{.DASHBOARD_PORT}}'
+    preconditions:
+      - sh: docker info >/dev/null 2>&1
+        msg: docker not reachable (the backend builds and runs scenario containers)
+      - sh: grep -q '^CLAUDE_CODE_OAUTH_TOKEN=' ../../.env
+        msg: CLAUDE_CODE_OAUTH_TOKEN missing from .env
+      - sh: '! lsof -iTCP:8090 -sTCP:LISTEN -P >/dev/null 2>&1'
+        msg: port 8090 (API) is already in use
+    cmds:
+      - go run ./cmd/eval-harness
+
+  dashboard:
+    desc: Run the Next.js dashboard dev server (DASHBOARD_PORT, default 8081).
+    dir: eval-harness/dashboard
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8090
+    preconditions:
+      - sh: test -d node_modules
+        msg: "dashboard deps missing — run: task install"
+      - sh: '! lsof -iTCP:{{.DASHBOARD_PORT}} -sTCP:LISTEN -P >/dev/null 2>&1'
+        msg: 'port {{.DASHBOARD_PORT}} (dashboard) is in use — override with: task dev DASHBOARD_PORT=<free port>'
+    cmds:
+      - pnpm exec next dev -p {{.DASHBOARD_PORT}}
+
+  install:
+    desc: Install dashboard dependencies.
+    dir: eval-harness/dashboard
+    cmds:
+      - pnpm install
