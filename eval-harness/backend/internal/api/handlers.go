@@ -68,10 +68,6 @@ func (cfg Config) putScenario(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg Config) postRun(w http.ResponseWriter, r *http.Request) {
-	if cfg.Service == nil {
-		writeError(w, http.StatusServiceUnavailable, "no job service")
-		return
-	}
 	var body struct {
 		ScenarioID string `json:"scenarioId"`
 	}
@@ -88,10 +84,6 @@ func (cfg Config) postRun(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg Config) cancelRun(w http.ResponseWriter, r *http.Request) {
-	if cfg.Service == nil {
-		writeError(w, http.StatusServiceUnavailable, "no job service")
-		return
-	}
 	ok, err := cfg.Service.Cancel(r.PathValue("id"))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())

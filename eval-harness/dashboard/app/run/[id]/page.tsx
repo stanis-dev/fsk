@@ -10,7 +10,7 @@ import { CheckBadge } from "@/components/CheckBadge";
 import { TranscriptView } from "@/components/TranscriptView";
 import { DiffView } from "@/components/DiffView";
 import { TelemetryView } from "@/components/TelemetryView";
-import { cn } from "@/lib/utils";
+import { cn, errMsg } from "@/lib/utils";
 import type { Check, CriterionVerdict, RunDetail } from "@/lib/types";
 
 const LABEL = "text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
@@ -65,7 +65,7 @@ export default function RunPage() {
   useEffect(() => {
     getRun(id)
       .then(setRun)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setError(errMsg(e)));
   }, [id]);
 
   if (error) {

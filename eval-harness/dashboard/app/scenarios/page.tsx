@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, HEAD, CELL, errMsg } from "@/lib/utils";
 import { listScenarios } from "@/lib/api";
 import type { ScenarioConfig } from "@/lib/types";
-
-const HEAD = "h-9 whitespace-nowrap px-3 text-left text-[0.7rem] font-medium uppercase tracking-[0.08em] text-muted-foreground";
-const CELL = "whitespace-nowrap px-3 py-2.5";
 
 export default function ScenariosPage() {
   const [scenarios, setScenarios] = useState<ScenarioConfig[]>([]);
@@ -16,7 +13,7 @@ export default function ScenariosPage() {
   useEffect(() => {
     listScenarios()
       .then(setScenarios)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setError(errMsg(e)));
   }, []);
 
   return (

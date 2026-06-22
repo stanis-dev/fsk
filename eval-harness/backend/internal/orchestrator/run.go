@@ -44,7 +44,7 @@ func runScenario(ctx context.Context, s scenarios.Scenario, runsBase string, ag 
 	core := outcome{
 		Build: runGoCmd(rd.work, "build", "./..."),
 		Test:  runGoCmd(rd.work, "test", "./..."),
-		Judge: runJudge(s.ScenarioJSON, rd.work, rd.path, true, filepath.Join(rd.path, artifacts.JudgeJSONFile)),
+		Judge: runJudge(s.ScenarioJSON, rd.work, rd.path, filepath.Join(rd.path, artifacts.JudgeJSONFile)),
 	}
 	diff, err := gitDiffStaged(rd.work)
 	if err != nil {

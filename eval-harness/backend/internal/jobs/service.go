@@ -23,10 +23,8 @@ type Runner interface {
 
 // ActiveRun is a snapshot of one live run.
 type ActiveRun struct {
-	ID         string
-	ScenarioID string
-	Container  string
-	Phase      string
+	ID    string
+	Phase string
 }
 
 // liveRun tracks a single in-flight or reattached run.
@@ -193,10 +191,8 @@ func (s *Service) Active() []ActiveRun {
 	out := make([]ActiveRun, 0, len(s.live))
 	for _, lr := range s.live {
 		out = append(out, ActiveRun{
-			ID:         lr.id,
-			ScenarioID: lr.scenarioID,
-			Container:  lr.container,
-			Phase:      lr.phase,
+			ID:    lr.id,
+			Phase: lr.phase,
 		})
 	}
 	return out

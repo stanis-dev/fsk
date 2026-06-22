@@ -39,13 +39,3 @@ func copyDir(src, dst string) error {
 		return os.WriteFile(target, data, info.Mode().Perm())
 	})
 }
-
-func isDir(p string) bool {
-	fi, err := os.Stat(p)
-	return err == nil && fi.IsDir()
-}
-
-func isFile(p string) bool {
-	fi, err := os.Stat(p)
-	return err == nil && !fi.IsDir()
-}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getScenario } from "@/lib/api";
 import { ScenarioEditor } from "@/components/ScenarioEditor";
+import { errMsg } from "@/lib/utils";
 import type { ScenarioDetail } from "@/lib/types";
 
 export default function ScenarioEditPage() {
@@ -16,7 +17,7 @@ export default function ScenarioEditPage() {
   useEffect(() => {
     getScenario(id)
       .then(setDetail)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e: unknown) => setError(errMsg(e)));
   }, [id]);
 
   return (

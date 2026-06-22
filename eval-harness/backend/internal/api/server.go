@@ -20,7 +20,7 @@ type Config struct {
 	RunsDir      string     // dir holding run.* directories (e.g. ~/.cache/fiskaly-eval)
 	ScenariosDir string     // dir holding NN-slug scenario directories
 	CORSOrigin   string     // exact allowed browser origin (e.g. http://localhost:8080)
-	Service      RunService // may be nil when running without a job worker pool
+	Service      RunService // worker pool backing run enqueue, cancel, and event streams
 }
 
 // Handler returns the API router with CORS applied.

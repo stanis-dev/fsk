@@ -339,12 +339,10 @@ func TestWorkers1Serializes(t *testing.T) {
 	svc := NewService(f, t.TempDir(), 1)
 	svc.Start()
 
-	id1, err := svc.Enqueue("known")
-	if err != nil {
+	if _, err := svc.Enqueue("known"); err != nil {
 		t.Fatalf("Enqueue 1: %v", err)
 	}
-	id2, err := svc.Enqueue("known2")
-	if err != nil {
+	if _, err := svc.Enqueue("known2"); err != nil {
 		t.Fatalf("Enqueue 2: %v", err)
 	}
 
@@ -365,18 +363,11 @@ func TestWorkers1Serializes(t *testing.T) {
 
 	f.blockRelease <- struct{}{}
 
-	// After first finishes, unblock the second.
-	// We need the second to start running before we can release it.
-	// Since f.block is still true, the second will block too.
-	// Wait for the second to be running.
 	waitActivePhase(t, svc, "running")
 
 	f.blockRelease <- struct{}{}
 
 	waitActiveEmpty(t, svc)
-
-	_ = id1
-	_ = id2
 }
 
 // nextEvent drains one Event from ch with a 5 s timeout.

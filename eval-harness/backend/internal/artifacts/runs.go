@@ -1,7 +1,6 @@
 package artifacts
 
 import (
-	"bufio"
 	"cmp"
 	"encoding/json"
 	"fmt"
@@ -152,20 +151,10 @@ type resultInfo struct {
 
 func parseResult(file string) resultInfo {
 	var ri resultInfo
-	sc := bufio.NewScanner(strings.NewReader(readFile(file)))
-	sc.Buffer(make([]byte, 16*1024*1024), 16*1024*1024)
-	for sc.Scan() {
-		s := strings.TrimSpace(sc.Text())
-		if s == "" {
-			continue
-		}
-		var m map[string]json.RawMessage
-		if err := json.Unmarshal([]byte(s), &m); err != nil {
-			continue
-		}
+	scanJSONL(readFile(file), func(m map[string]json.RawMessage) {
 		var typ string
 		if err := json.Unmarshal(m["type"], &typ); err != nil || typ != "result" {
-			continue
+			return
 		}
 		if raw, ok := m["num_turns"]; ok {
 			var n float64
@@ -179,7 +168,7 @@ func parseResult(file string) resultInfo {
 				ri.cost = fmt.Sprintf("$%.2f", c)
 			}
 		}
-	}
+	})
 	return ri
 }
 
@@ -190,22 +179,17 @@ type logInfoResult struct {
 }
 
 func logInfo(file string) logInfoResult {
-	sc := bufio.NewScanner(strings.NewReader(readFile(file)))
-	sc.Buffer(make([]byte, 16*1024*1024), 16*1024*1024)
-	for sc.Scan() {
-		s := strings.TrimSpace(sc.Text())
-		if s == "" {
-			continue
-		}
-		var m map[string]json.RawMessage
-		if err := json.Unmarshal([]byte(s), &m); err != nil {
-			continue
+	var r logInfoResult
+	found := false
+	scanJSONL(readFile(file), func(m map[string]json.RawMessage) {
+		if found {
+			return
 		}
 		var typ string
 		if err := json.Unmarshal(m["type"], &typ); err != nil || typ != "system" {
-			continue
+			return
 		}
-		var r logInfoResult
+		found = true
 		if v, ok := m["model"]; ok {
 			_ = json.Unmarshal(v, &r.model)
 		}
@@ -215,9 +199,8 @@ func logInfo(file string) logInfoResult {
 		if v, ok := m["claude_code_version"]; ok {
 			_ = json.Unmarshal(v, &r.ccver)
 		}
-		return r
-	}
-	return logInfoResult{}
+	})
+	return r
 }
 
 type metaInfo struct {

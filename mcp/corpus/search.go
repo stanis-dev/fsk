@@ -109,16 +109,15 @@ func tokenize(s string) []string {
 func snippet(text string, qterms []string) string {
 	runes := []rune(text)
 	lower := strings.ToLower(text)
-	// earliest byte offset in the lowercased text where any query term occurs
-	bytePos := -1
+	firstMatchByte := -1
 	for _, t := range qterms {
-		if i := strings.Index(lower, t); i >= 0 && (bytePos < 0 || i < bytePos) {
-			bytePos = i
+		if i := strings.Index(lower, t); i >= 0 && (firstMatchByte < 0 || i < firstMatchByte) {
+			firstMatchByte = i
 		}
 	}
 	start := 0
-	if bytePos > 0 {
-		start = min(utf8.RuneCountInString(lower[:bytePos]), len(runes))
+	if firstMatchByte > 0 {
+		start = min(utf8.RuneCountInString(lower[:firstMatchByte]), len(runes))
 	}
 	end := min(start+snippetLen, len(runes))
 	out := strings.TrimSpace(string(runes[start:end]))

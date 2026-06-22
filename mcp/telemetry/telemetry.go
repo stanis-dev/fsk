@@ -4,7 +4,6 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"os"
 	"strings"
 	"sync"
@@ -47,11 +46,7 @@ func NewFileRecorder(path string) (*FileRecorder, error) {
 func (r *FileRecorder) Record(e Event) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.enc.Encode(e); err != nil {
-		log.Printf("telemetry: write failed: %v", err)
-		return err
-	}
-	return nil
+	return r.enc.Encode(e)
 }
 
 func (r *FileRecorder) Close() error {
@@ -60,8 +55,7 @@ func (r *FileRecorder) Close() error {
 	return r.f.Close()
 }
 
-// Middleware records one Event per tools/call. Other methods pass through
-// untouched. The handlers themselves are never modified.
+// Middleware records one Event per tools/call.
 func Middleware(rec Recorder) mcp.Middleware {
 	return func(next mcp.MethodHandler) mcp.MethodHandler {
 		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {

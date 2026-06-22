@@ -1,7 +1,6 @@
 package artifacts
 
 import (
-	"bufio"
 	"encoding/json"
 	"strings"
 )
@@ -9,20 +8,10 @@ import (
 // ParseTranscript parses a JSONL transcript into typed display events.
 func ParseTranscript(jsonl string) []TranscriptEvent {
 	events := []TranscriptEvent{}
-	sc := bufio.NewScanner(strings.NewReader(jsonl))
-	sc.Buffer(make([]byte, 16*1024*1024), 16*1024*1024)
-	for sc.Scan() {
-		s := strings.TrimSpace(sc.Text())
-		if s == "" {
-			continue
-		}
-		var m map[string]json.RawMessage
-		if err := json.Unmarshal([]byte(s), &m); err != nil {
-			continue
-		}
+	scanJSONL(jsonl, func(m map[string]json.RawMessage) {
 		var typ string
 		if err := json.Unmarshal(m["type"], &typ); err != nil {
-			continue
+			return
 		}
 		switch typ {
 		case "assistant":
@@ -59,52 +48,38 @@ func ParseTranscript(jsonl string) []TranscriptEvent {
 				events = append(events, TranscriptEvent{Kind: "final", Text: result})
 			}
 		}
-	}
+	})
 	return events
 }
 
 type contentItem struct {
-	Type     string
-	Thinking string
-	Text     string
-	Name     string
-	Input    map[string]any
-	IsError  bool
-	Content  json.RawMessage
+	Type     string          `json:"type"`
+	Thinking string          `json:"thinking"`
+	Text     string          `json:"text"`
+	Name     string          `json:"name"`
+	Input    map[string]any  `json:"input"`
+	IsError  bool            `json:"is_error"`
+	Content  json.RawMessage `json:"content"`
 }
 
 func messageContent(m map[string]json.RawMessage) []contentItem {
+	raw, ok := m["message"]
+	if !ok {
+		return nil
+	}
 	var msg struct {
 		Content []json.RawMessage `json:"content"`
 	}
-	if raw, ok := m["message"]; !ok {
-		return nil
-	} else if err := json.Unmarshal(raw, &msg); err != nil {
+	if err := json.Unmarshal(raw, &msg); err != nil {
 		return nil
 	}
 	var out []contentItem
-	for _, raw := range msg.Content {
-		var c struct {
-			Type     string          `json:"type"`
-			Thinking string          `json:"thinking"`
-			Text     string          `json:"text"`
-			Name     string          `json:"name"`
-			Input    map[string]any  `json:"input"`
-			IsError  bool            `json:"is_error"`
-			Content  json.RawMessage `json:"content"`
-		}
-		if err := json.Unmarshal(raw, &c); err != nil {
+	for _, item := range msg.Content {
+		var c contentItem
+		if err := json.Unmarshal(item, &c); err != nil {
 			continue
 		}
-		out = append(out, contentItem{
-			Type:     c.Type,
-			Thinking: c.Thinking,
-			Text:     c.Text,
-			Name:     c.Name,
-			Input:    c.Input,
-			IsError:  c.IsError,
-			Content:  c.Content,
-		})
+		out = append(out, c)
 	}
 	return out
 }

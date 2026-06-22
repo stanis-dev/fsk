@@ -45,15 +45,15 @@ func runChecks(c judgeChecks, t trajectory) []checkResult {
 	}
 
 	for _, req := range c.ToolsCalled {
-		min := req.Min
-		if min < 1 {
-			min = 1
+		wantMin := req.Min
+		if wantMin < 1 {
+			wantMin = 1
 		}
 		got := countOccurrences(t.ToolUses, req.Name)
 		out = append(out, checkResult{
 			ID:     "toolsCalled:" + req.Name,
-			Pass:   got >= min,
-			Detail: fmt.Sprintf("called %dx (min %d)", got, min),
+			Pass:   got >= wantMin,
+			Detail: fmt.Sprintf("called %dx (min %d)", got, wantMin),
 		})
 	}
 

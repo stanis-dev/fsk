@@ -1,28 +1,15 @@
 package artifacts
 
 import (
-	"bufio"
 	"cmp"
 	"encoding/json"
 	"slices"
-	"strings"
 )
 
 // ParseTelemetry parses a JSONL telemetry file into typed events.
 func ParseTelemetry(jsonl string) []TelemetryEvent {
 	out := []TelemetryEvent{}
-	sc := bufio.NewScanner(strings.NewReader(jsonl))
-	sc.Buffer(make([]byte, 16*1024*1024), 16*1024*1024)
-	for sc.Scan() {
-		s := strings.TrimSpace(sc.Text())
-		if s == "" {
-			continue
-		}
-		var r map[string]json.RawMessage
-		if err := json.Unmarshal([]byte(s), &r); err != nil {
-			continue
-		}
-
+	scanJSONL(jsonl, func(r map[string]json.RawMessage) {
 		e := TelemetryEvent{Args: map[string]any{}}
 		if v, ok := r["ts"]; ok {
 			_ = json.Unmarshal(v, &e.Ts)
@@ -49,7 +36,7 @@ func ParseTelemetry(jsonl string) []TelemetryEvent {
 			_ = json.Unmarshal(v, &e.LatencyMs)
 		}
 		out = append(out, e)
-	}
+	})
 	return out
 }
 

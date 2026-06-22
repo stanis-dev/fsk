@@ -15,26 +15,22 @@ func runGoCmd(dir string, args ...string) stepResult {
 	return stepResult{Output: string(out)}
 }
 
-// runJudge evaluates sourceDir (the agent's work dir) with trajectory files read
-// from runDir. With expect set (and a scenario that declares judge.expectations),
-// the judge adds its LLM expectation layer behind the gate and, when jsonPath is
-// given, writes the structured verdict there.
-func runJudge(scenarioJSON, sourceDir, runDir string, expect bool, jsonPath string) stepResult {
+// runJudge evaluates sourceDir (the agent's work dir) using trajectory files from
+// runDir: it runs the deterministic gate, adds the LLM expectation layer for
+// scenarios that declare one, and writes the structured verdict to jsonPath.
+func runJudge(scenarioJSON, sourceDir, runDir, jsonPath string) stepResult {
 	var buf bytes.Buffer
 	report, err := judge.Evaluate(judge.Options{
 		ScenarioPath:   scenarioJSON,
 		RunDir:         runDir,
 		IntegrationDir: sourceDir,
-		Expect:         expect,
+		Expect:         true,
 	}, &buf)
 	if err != nil {
 		fmt.Fprintln(&buf, "judge:", err)
 	}
-	if jsonPath != "" {
-		if err := judge.WriteReport(jsonPath, report); err != nil {
-			fmt.Fprintln(&buf, "judge: writing report:", err)
-			return stepResult{Output: buf.String()}
-		}
+	if err := judge.WriteReport(jsonPath, report); err != nil {
+		fmt.Fprintln(&buf, "judge: writing report:", err)
 	}
 	return stepResult{Output: buf.String()}
 }
